@@ -29,7 +29,7 @@
   <img src="https://media.discordapp.net/attachments/846781793834106902/946415411396751370/Discord_1cL2ymcL79.png" width="550" border="10"><br>
   <br>
   <b>Pluralchum</b> is a plugin for BetterDiscord that utilizes PluralKit's web API to provide better integration for proxied messages.<br>
-  It brings features like coloured member names and system tags, optional text colouring, a special <code>PK</code> badge for proxied messages, <br>and much* more!<br>
+  It brings features like coloured member names and system tags, optional text colouring, a special <code>PK</code> badge for proxied messages, and much* more!<br>
   <br>
   <i>*not actually that much right now but i'm working on it okay</i><br>
   <br>
