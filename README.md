@@ -63,8 +63,9 @@
 </p>
   
 ---
+  ![THE REVIEWNS are INn...](https://media.discordapp.net/attachments/641904081320935435/946404709521047602/reviewns.jpg#gh-dark-mode-only")
+  ![THE REVIEWNS are INn...](https://media.discordapp.net/attachments/846781793834106902/946449572757114880/reviewns_WHYTE.jpg#gh-light-mode-only")
 <p align="center">
-  <img src="https://media.discordapp.net/attachments/641904081320935435/946404709521047602/reviewns.jpg?width=1440&height=118">
   <br><br><br>
   <b>"This is great!"</b> <br><i> - The Entire Cast of Homestuck Several Times Over</i><br><br><br>
  <b>"This is gr8!"</b> <br><i> - Oh, You Know</i><br><br><br>
