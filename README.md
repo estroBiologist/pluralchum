@@ -7,12 +7,12 @@
 <p align="center">
   <br><br>
   Hey! Is your head FULL OF PEOPLE? Are you an avid PLURALKIT USER?<br>Does seeing plain white usernames, broken profile popups and <code>BOT</code> tags all day make you want to BREAK THINGS?<br><br>Then <b>PLURALCHUM</b> is the plugin for you!
-  <br><br><br><br>
-  [ <a href="https://github.com/transdisaster/pluralchum/releases/latest">Download</a> - 
+  <br><br><br>
+  - [ <a href="https://github.com/transdisaster/pluralchum/releases/latest">Download</a> - 
   <a href="https://github.com/transdisaster/pluralchum/releases">Changelog</a> - 
-  <a href="https://www.twitter.com/estroBiologist">Twitter</a> ]<br><br><br>
+  <a href="https://www.twitter.com/estroBiologist">Twitter</a> ] - <br><br>
   <i>(requires <a href="https://rauenzi.github.io/BDPluginLibrary/">Zere's Plugin Library</a>)</i>
-  <br><br><br><br></p>
+  <br><br><br></p>
   
 ---
 <p align="center">
