@@ -1,5 +1,5 @@
 ![Pluralchum](https://media.discordapp.net/attachments/846781793834106902/946383020334661692/overkill_logo_final.png?width=1440&height=204)
-<p align="center"><b>(PluralKit integration for BetterDiscord)</b><br><br>- by <a href="https://estrobiologist.carrd.co/">ash taylor</a> -</p>
+<p align="center"><b>(PluralKit integration for BetterDiscord)</b><br>- by <a href="https://estrobiologist.carrd.co/">ash taylor</a> -</p>
 
 
 ---
