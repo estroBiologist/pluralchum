@@ -11,6 +11,23 @@
 const baseEndpoint = "https://api.pluralkit.me/v2";
 const React = BdApi.React;
 
+class PKBadge extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		var linkStyle = {
+			color: "#ffffff"
+		};
+		return(
+			<div>
+				<a style={linkStyle} onClick={() => this.props.onClick(this.props.pk_id)}>PK</a>
+			</div>
+	  )
+  }
+}
+
 module.exports = class Pluralchum {
 
 	profileMap = {}
@@ -163,50 +180,60 @@ module.exports = class Pluralchum {
 
 		if (!Array.isArray(tree)) 
 			return;
+
 		this.callbackIfMemberReady(props, function(member) {
 			
 			if (!(props.message.author.hasOwnProperty("username_real"))) {
-				let spanId = props.usernameSpanId;
 				props.message.author.username_real = props.message.author.username.slice();
 				props.message.author.username = member.name;
 			}
 			
 			tree.length = 0; //loser
 
-			let member_color = member.color;
 			let member_tag = member.tag;
 
-			if (!member.color)
-				member_color = "#ffffff";
-			if (typeof member_tag !== 'string')
+			let userProps = {
+				user: props.message.author,
+				className: "username-h_Y3Us",
+				type: "member_name",
+			}
+
+			let tagProps = {
+				user: props.message.author, 
+				className: "username-h_Y3Us",
+				type: "system_tag",
+			}
+
+			// lol
+			let pkBadge = <span className= "botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc">
+							<PKBadge pk_id={props.message.id} onClick={
+								(id) => this.updateMemberByMsg(id, this.getUserHash(props.message.author))
+							} className="botText-1fD6Qk" />
+						</span>;
+						
+
+			// Color testing and stuff
+			if (member.color) {
+				let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
+				
+				if (!this.doContrastTest || textContrast >= this.contrastThreshold)
+					userProps.style = { color: member.color };
+			}
+			
+			if (!member_tag || (typeof member_tag !== 'string'))
 				member_tag = ""
 			
-			tree.push(React.createElement("span",	{
-				user: props.message.author,
-				type: "member_name",
-				style: {
-					color: member_color,
-					fontWeight: "500"
-				}
-				}, member.name.toString()));
-			
-			if (member_tag) {
-				tree.push(React.createElement("span",	{
-					user: props.message.author, 
-					type: "system_tag",
-					style: {
-						color: "#ffffff",
-						fontWeight: "500"
-					}
-				}, " " + member_tag.toString()));
+			if (props.compact) {
+				tree.push(pkBadge);
+				tree.push(React.createElement("span", userProps, " " + member.name.toString()));
+				tree.push(React.createElement("span", tagProps, " " + member_tag.toString() + " "));
+			} else {
+				tree.push(React.createElement("span", userProps, member.name.toString()));
+				tree.push(React.createElement("span", tagProps, " " + member_tag.toString()));
+				tree.push(pkBadge);
 			}
-			// lol
-			tree.push(
-				<span className= "botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc">
-					<span className="botText-1fD6Qk">PK</span>
-				</span>
-				);
-			
+
+
 		}.bind(this));				
 		
 	}
