@@ -253,9 +253,16 @@ module.exports = class Pluralchum {
 			
 			if (!(props.message.author.hasOwnProperty("username_real"))) {
 				props.message.author.username_real = props.message.author.username.slice();
-				props.message.author.username = member.name;
+				
+				// most batshit string length function on earth
+				const count = (str) => {
+					const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
+					return ((str || '').match(regex) || []).length
+				}
+				
+				props.message.author.username = props.message.author.username_real.slice(0, 
+					count(props.message.author.username_real) - count(member.tag));
 			}
-			
 			tree.length = 0; //loser
 
 			let member_tag = member.tag;
@@ -335,11 +342,11 @@ module.exports = class Pluralchum {
 			
 			if (props.compact) {
 				tree.push(pkBadge);
-				tree.push(React.createElement("span", userProps, " " + member.name.toString()));
-				tree.push(React.createElement("span", tagProps, " " + member_tag.toString() + " "));
+				tree.push(React.createElement("span", userProps, " " + props.message.author.username.toString()));
+				tree.push(React.createElement("span", tagProps, member_tag.toString() + " "));
 			} else {
-				tree.push(React.createElement("span", userProps, member.name.toString()));
-				tree.push(React.createElement("span", tagProps, " " + member_tag.toString()));
+				tree.push(React.createElement("span", userProps, props.message.author.username.toString()));
+				tree.push(React.createElement("span", tagProps, member_tag.toString()));
 				tree.push(pkBadge);
 			}
 
