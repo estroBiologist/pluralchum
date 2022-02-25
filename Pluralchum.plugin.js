@@ -19,7 +19,32 @@ module.exports = class Pluralchum {
 	patches = []
 	eula = false // "eula" aka tell people what this shit does
 	textColour = true
-	
+	contrastTestColour = "#000000"
+	doContrastTest = true
+	contrastThreshold = 4.5
+
+	getSettingsPanel() {
+		const Settings = ZLibrary.Settings;
+		let settingsPanel = new Settings.SettingPanel();
+		
+		console.log(typeof this.contrastTestColour);
+		
+		// Contrast test settings
+		let accessibilityPanel = new Settings.SettingGroup("Accessibility");
+		accessibilityPanel.append(new Settings.Switch("Enable text contrast test", "Uses the theme's default color if the proxy's contrast is too low", this.doContrastTest, (val) => this.doContrastTest = val));
+
+		accessibilityPanel.append(new Settings.ColorPicker("Contrast test color", "The background color that proxy text will be tested against (black for dark themes, white for light themes)", this.contrastTestColour, 
+			(hex) => this.contrastTestColour = hex));
+
+		accessibilityPanel.append(new Settings.Slider("Contrast ratio threshold", "", 1, 21, this.contrastThreshold, 
+		(val) => this.contrastThreshold = val, {markers: [1, 3, 4.5, 7, 21]}));
+
+		settingsPanel.append(accessibilityPanel);
+		
+		return settingsPanel.getElement();
+	}
+
+
 	constructor() {
 		
 	}
@@ -100,15 +125,12 @@ module.exports = class Pluralchum {
 			
 			if (this.textColour) { this.callbackIfMemberReady(props, function(member) {
 				// Set message text colour
-				console.log("PROPS");
-				console.log(props);
-				console.log("RET");
-				console.log(ret);
+				if (member.color) {
+					let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
+					if (!this.doContrastTest || textContrast >= this.contrastThreshold)
+						ret.props.style = { color: member.color };
+				}
 
-				//lol
-				if (member.color)
-					ret.props.style = { color: member.color };
-				
 			}.bind(this));}
 
 		}.bind(this));
@@ -256,6 +278,13 @@ module.exports = class Pluralchum {
 		}.bind(this);
 	}	
 
+	getUserHash(author) {
+		let username = author.username;
+		if (author.hasOwnProperty("username_real"))
+			username = author.username_real
+
+		return this.hashCode(username + author.avatar);
+	}
 
 	callbackIfMemberReady(props, callback) {
 		if (!(props.hasOwnProperty("message"))) {
@@ -271,7 +300,7 @@ module.exports = class Pluralchum {
 		if (message.author.hasOwnProperty("username_real"))
 			username = message.author.username_real
 
-		let userHash = this.hashCode(username + message.author.avatar);
+		let userHash = this.getUserHash(message.author);
 
 		if (this.profileMap[userHash]) {
 			if (this.profileMap[userHash].status === "DONE") 
@@ -295,12 +324,6 @@ module.exports = class Pluralchum {
 	
 
 
-	getSettingsPanel() {
-		let settingsPanel = new ZLibrary.Settings.SettingPanel();
-
-		return settingsPanel.getElement();
-	}
-
 	getName() {
 		return "Pluralchum";
 	}
@@ -323,5 +346,39 @@ module.exports = class Pluralchum {
 		const asArray = Object.entries(this.profileMap);
 		const filtered = asArray.filter(([_, profile]) => profile.status === "DONE");
 		return Object.fromEntries(filtered);
+	}
+
+	luminance(r, g, b) {
+		var a = [r, g, b].map(function (v) {
+			v /= 255;
+			return v <= 0.03928
+				? v / 12.92
+				: Math.pow( (v + 0.055) / 1.055, 2.4 );
+		});
+		return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+	}
+
+	contrast(rgb1, rgb2) {
+		var lum1 = this.luminance(rgb1.r, rgb1.g, rgb1.b);
+		var lum2 = this.luminance(rgb2.r, rgb2.g, rgb2.b);
+		var brightest = Math.max(lum1, lum2);
+		var darkest = Math.min(lum1, lum2);
+		return (brightest + 0.05)
+			 / (darkest + 0.05);
+	}
+
+	hexToRgb(hex) {
+	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF"	)
+		var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+		  return r + r + g + g + b + b;
+		});
+	  
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+		  r: parseInt(result[1], 16),
+		  g: parseInt(result[2], 16),
+		  b: parseInt(result[3], 16)
+		} : null;
 	}
 }
