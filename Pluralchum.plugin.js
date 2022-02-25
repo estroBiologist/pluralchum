@@ -10,6 +10,7 @@
 
 const baseEndpoint = "https://api.pluralkit.me/v2";
 const React = BdApi.React;
+const MessageHeader = BdApi.findModule(m => m?.default?.toString().indexOf("showTimestampOnHover") > -1);
 
 class PKBadge extends React.Component {
 	constructor(props) {
@@ -35,28 +36,86 @@ module.exports = class Pluralchum {
 	currentRequests = 0
 	patches = []
 	eula = false // "eula" aka tell people what this shit does
-	textColour = true
+	doColourText = true
 	contrastTestColour = "#000000"
 	doContrastTest = true
-	contrastThreshold = 4.5
+	contrastThreshold = 3
+
+	memberColourPref = 0
+	tagColourPref = 1
 
 	getSettingsPanel() {
 		const Settings = ZLibrary.Settings;
 		let settingsPanel = new Settings.SettingPanel();
 		
-		console.log(typeof this.contrastTestColour);
+
+		// Logo
+		let logo = document.createElement("img");
 		
+		logo.src = "https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png"
+		logo.style = "max-width: 100%; height: auto;"
+		
+		let subtitle = document.createElement("p");
+
+		subtitle.innerHTML = "PluralKit integration for BetterDiscord<br>- by <b><span style=\"color: #ff002a;\">ash taylor</span></b> -";
+		subtitle.style = "text-align: center; color: var(--header-primary);"
+
+		settingsPanel.append(logo);
+		settingsPanel.append(subtitle);
+
+
+
+
+		// Preferences
+		let preferencesPanel = new Settings.SettingGroup("Preferences", {shown: false});
+
+		preferencesPanel.append(new Settings.Switch("Colored proxy text", "", this.doColourText, (val) => {this.doColourText = val; this.saveSettings();}))
+		
+		preferencesPanel.append(new Settings.Dropdown("Default member name color", "", this.memberColourPref, [
+			{label: "Member", value: 0},
+			{label: "System", value: 1},
+			{label: "Theme", value: 2},
+		], (val) => {this.memberColourPref = val; this.saveSettings();}))
+
+
+		preferencesPanel.append(new Settings.Dropdown("Default system tag color", "", this.tagColourPref, [
+			{label: "Member", value: 0},
+			{label: "System", value: 1},
+			{label: "Theme", value: 2},
+		], (val) => {this.saveSettings(); this.tagColourPref = val}))
+
+
+
 		// Contrast test settings
-		let accessibilityPanel = new Settings.SettingGroup("Accessibility");
-		accessibilityPanel.append(new Settings.Switch("Enable text contrast test", "Uses the theme's default color if the proxy's contrast is too low", this.doContrastTest, (val) => this.doContrastTest = val));
+		let accessibilityPanel = new Settings.SettingGroup("Accessibility", {shown: false});
+		
+		accessibilityPanel.append(new Settings.Switch("Enable text contrast test", "Uses the theme's default color if the proxy's contrast is too low", this.doContrastTest, (val) => {this.doContrastTest = val; this.saveSettings();}));
 
 		accessibilityPanel.append(new Settings.ColorPicker("Contrast test color", "The background color that proxy text will be tested against (black for dark themes, white for light themes)", this.contrastTestColour, 
-			(hex) => this.contrastTestColour = hex));
+			(hex) => {this.contrastTestColour = hex; this.saveSettings(); }));
 
-		accessibilityPanel.append(new Settings.Slider("Contrast ratio threshold", "", 1, 21, this.contrastThreshold, 
-		(val) => this.contrastThreshold = val, {markers: [1, 3, 4.5, 7, 21]}));
+		accessibilityPanel.append(new Settings.Slider("Contrast ratio threshold", "Minimum contrast ratio for proxy colors (default: 3)", 1, 21, this.contrastThreshold, 
+		(val) => {this.contrastThreshold = val; this.saveSettings();}, {markers: [1, 2, 3, 4.5, 7, 14, 21]}));
 
+
+
+		// Cache
+		let cachePanel = new Settings.SettingGroup("Cache", {shown: false});
+		let resetCacheBtn = document.createElement("button");
+		resetCacheBtn.className = "button-f2h6uQ lookFilled-yCfaCM colorBrand-I6CyqQ sizeSmall-wU2dO- grow-2sR_-F"
+		resetCacheBtn.innerHTML = "Delete Cache";
+		resetCacheBtn.onclick = () => {
+			this.profileMap = {}
+			this.idMap = {}
+			this.saveSettings();
+		}
+
+		cachePanel.append(resetCacheBtn).class
+
+
+		settingsPanel.append(preferencesPanel);
 		settingsPanel.append(accessibilityPanel);
+		settingsPanel.append(cachePanel);
 		
 		return settingsPanel.getElement();
 	}
@@ -71,7 +130,9 @@ module.exports = class Pluralchum {
 	}
 
 	stop() {
-		for (const unpatch of this.patches) unpatch();
+		for (let i = this.patches.length - 1; i >= 0; i--)
+			this.patches[i]();
+
 		this.purgeOldCachedContent();
 		ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());
 		
@@ -80,6 +141,8 @@ module.exports = class Pluralchum {
 	}
 
 	purgeOldCachedContent() {
+		if (!this.profileMap)
+			return;
 		const expirationTime = (1000 * 60 * 60 * 24 * 30);
 		let now = Date.now()
 		for (const id of Object.keys(this.profileMap)) {
@@ -101,6 +164,16 @@ module.exports = class Pluralchum {
 		console.log("[PLURALCHUM] Loaded settings:");
 		console.log(settings);
 		this.applySettings(settings);
+		
+		if (!this.profileMap) 
+			this.profileMap = {}
+		if (!this.idMap) 
+			this.idMap = {}
+
+		console.log("[PLURALCHUM] Loaded PK data:");
+		console.log(this.profileMap);
+		console.log("IDMAP:");
+		console.log(this.idMap);
 
 		if (!this.eula) { 
 			BdApi.showConfirmationModal('Heads up!',
@@ -109,38 +182,29 @@ module.exports = class Pluralchum {
 				 <br /><br /><b>You can clear this cache at any time in the plugin settings</b>, and unused cache data is automatically deleted after 30 days.</div>, {
                      confirmText: 'Gotcha',
                      cancelText: 'No thanks',
-                     onConfirm: function() {
+                     onConfirm: () => {
 						this.eula = true;
 						ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());
-                     }.bind(this)
+                     }
 				 });
 			if (!this.eula) {
 				BdApi.Plugins.disable(this.getName());
 				return;
 			}
 		}
-		
-		if (!this.profileMap) 
-			this.profileMap = {}
-		if (!this.idMap) 
-			this.idMap = {}
-		console.log("[PLURALCHUM] Loaded PK data:");
-		console.log(this.profileMap);
-		console.log("IDMAP:");
-		console.log(this.idMap);
 
 
-		const MessageHeader = BdApi.findModule(m => m?.default?.toString().indexOf("showTimestampOnHover") > -1);
+
 		const MessageContent = BdApi.findModule(m => m.type?.displayName === "MessageContent");
 
 		//Patch message content
-		BdApi.Patcher.after("Patcher", MessageContent, "type", function(_, [props], ret) { 
+		BdApi.Patcher.after(this.getName(), MessageContent, "type", function(_, [props], ret) { 
 			const channel = ZLibrary.DiscordModules.ChannelStore.getChannel(props.message.channel_id);
 
 			if (!channel || !channel.guild_id) 
 				return; //No webhooks here lol
 			
-			if (this.textColour) { this.callbackIfMemberReady(props, function(member) {
+			if (this.doColourText) { this.callbackIfMemberReady(props, function(member) {
 				// Set message text colour
 				if (member.color) {
 					let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
@@ -156,8 +220,13 @@ module.exports = class Pluralchum {
 		//Patch message header
 		BdApi.Patcher.after(this.getName(), MessageHeader, "default", this.messageHeaderUpdate.bind(this));
 
+		this.forceMessageRefresh();
+	}
 
+
+	forceMessageRefresh() {
 		// Force message update on channel changed??? somehow??????? idk i found this code online just accept it
+
 		const Modules = ZLibrary.WebpackModules.getModules(m => ~["ChannelMessage", "InboxMessage"].indexOf(m?.type?.displayName));
         for (const Module of Modules) {
             BdApi.Patcher.after(this.getName(), Module, "type", (_, __, ret) => {
@@ -171,7 +240,6 @@ module.exports = class Pluralchum {
 				}));
             });
         }
-
 	}
 
 
@@ -204,21 +272,63 @@ module.exports = class Pluralchum {
 				type: "system_tag",
 			}
 
+
 			// lol
 			let pkBadge = <span className= "botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc">
 							<PKBadge pk_id={props.message.id} onClick={
 								(id) => this.updateMemberByMsg(id, this.getUserHash(props.message.author))
 							} className="botText-1fD6Qk" />
 						</span>;
-						
+			// Preferences
+
+			// 0 - Member
+			// 1 - System
+			// 2 - Theme (do nothing)
+			let member_colour
+			let tag_colour
+			
+
+			if (this.memberColourPref === 0) {
+				member_colour = member.color
+				
+				if (!member_colour)
+					member_colour = member.system_color // Fallback
+
+			} else if (this.memberColourPref === 1) {
+				member_colour = member.system_color
+				
+				if (!member_colour)
+					member_colour = member.color // Fallback
+			}
+
+
+			if (this.tagColourPref === 0) {
+				tag_colour = member.color
+				
+				if (!tag_colour)
+					tag_colour = member.system_color // Fallback
+
+			} else if (this.tagColourPref === 1) {
+				tag_colour = member.system_color
+			}
+
 
 			// Color testing and stuff
-			if (member.color) {
-				let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
+			if (member_colour) {
+				let textContrast = this.contrast(this.hexToRgb(member_colour), this.hexToRgb(this.contrastTestColour));
 				
 				if (!this.doContrastTest || textContrast >= this.contrastThreshold)
-					userProps.style = { color: member.color };
+					userProps.style = { color: member_colour };
 			}
+
+			if (tag_colour) {
+				let textContrast = this.contrast(this.hexToRgb(tag_colour), this.hexToRgb(this.contrastTestColour));
+				
+				if (!this.doContrastTest || textContrast >= this.contrastThreshold)
+					tagProps.style = { color: tag_colour };
+			}
+
+
 			
 			if (!member_tag || (typeof member_tag !== 'string'))
 				member_tag = ""
@@ -269,7 +379,7 @@ module.exports = class Pluralchum {
 			if (status == 200) {
 				console.log("RESPONSE");
 				let data = JSON.parse(response);
-				console.log(data.member);
+				console.log(data);
 
 				// Map profile hash to member data...
 				this.profileMap[hash] = { 
@@ -279,15 +389,16 @@ module.exports = class Pluralchum {
 					id: data.member.id,
 					system: data.system.id,
 					status: "DONE",
+					system_color: "#" + data.system.color,
 				};
 
-				if (data.member.color === null) {
-					if (data.system.color !== null) {
-						this.profileMap[hash].color = data.system.color;
-					} else {
-						this.profileMap[hash].color = "";
-					}
-				}
+				if (data.member.color === null) 
+					this.profileMap[hash].color = "";
+					
+				if (data.system.color === null) 
+					this.profileMap[hash].system_color = "";
+					
+				
 
 				if (data.member.display_name) {
 					this.profileMap[hash].name = data.member.display_name;
@@ -295,15 +406,21 @@ module.exports = class Pluralchum {
 				
 				// ...and map member ID to hash
 				this.idMap[data.member.id] = hash;
+				this.forceMessageRefresh();
 				
 			} else if (status == 404) {
 				this.profileMap[hash] = {
 					status: "NOT_PK"
 				}
 			}
-			ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());
+			this.saveSettings();
 		}.bind(this);
-	}	
+	}
+
+	saveSettings() {
+		ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());	
+	}
+
 
 	getUserHash(author) {
 		let username = author.username;
@@ -356,17 +473,43 @@ module.exports = class Pluralchum {
 	}
 
 	getDefaultSettings() {
-		return {profileMap: {}, idMap: {}, eula: false};
+		return {
+			profileMap: {}, 
+			idMap: {}, 
+			eula: false,
+			doColourText: true,
+			contrastTestColour: "#000000",
+			doContrastTest: true,
+			contrastThreshold: 3,
+			memberColourPref: 0,
+			tagColourPref: 1,
+		};
 	}
 
 	getSettings() {
-		return {profileMap: this.getFilteredProfileMap(), idMap: this.idMap, eula: this.eula}
+		return {
+			profileMap: this.getFilteredProfileMap(), 
+			idMap: this.idMap, 
+			eula: this.eula,
+			doColourText: this.doColourText,
+			contrastTestColour: this.contrastTestColour,
+			doContrastTest: this.doContrastTest,
+			contrastThreshold: this.contrastThreshold,
+			memberColourPref: this.memberColourPref,
+			tagColourPref: this.tagColourPref,
+		}
 	}
 
 	applySettings(settings) {
 		this.profileMap = settings.profileMap;
 		this.idMap = settings.idMap;
 		this.eula = settings.eula;
+		this.doColourText = settings.doColourText;
+		this.contrastTestColour = settings.contrastTestColour;
+		this.doContrastTest = settings.doContrastTest;
+		this.contrastThreshold = settings.contrastThreshold;
+		this.memberColourPref = settings.memberColourPref;
+		this.tagColourPref = settings.tagColourPref;
 	}
 	
 	getFilteredProfileMap() {
