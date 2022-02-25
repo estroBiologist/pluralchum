@@ -350,7 +350,11 @@ module.exports = class Pluralchum {
 
 
 	updateMemberByMsg(msg, hash) {
-		this.profileMap[hash] = { status: "REQUESTING" };
+		if (this.profileMap.hasOwnProperty(hash))
+			this.profileMap[hash].status = "UPDATING";
+		else
+			this.profileMap[hash] = { status: "REQUESTING" };
+		
 		this.httpGetAsync("/messages/" + msg, this.createPKCallback(hash).bind(this));
 	}
 
@@ -447,7 +451,8 @@ module.exports = class Pluralchum {
 		let userHash = this.getUserHash(message.author);
 
 		if (this.profileMap[userHash]) {
-			if (this.profileMap[userHash].status === "DONE") 
+			if (this.profileMap[userHash].status === "DONE" ||
+				this.profileMap[userHash].status === "UPDATING") 
 				callback(this.profileMap[userHash]);
 			
 		} else { 
