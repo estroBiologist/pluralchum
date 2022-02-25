@@ -29,7 +29,7 @@
   <img src="https://media.discordapp.net/attachments/846781793834106902/946415411396751370/Discord_1cL2ymcL79.png" width="550" border="10"><br>
   <br>
   <b>Pluralchum</b> is a plugin for BetterDiscord that utilizes PluralKit's web API to provide better integration for proxied messages.<br>
-  It brings features like coloured member names and system tags, optional text colouring, a special <code>PK</code> badge for proxied messages, <br>and much* more!<br>
+  It brings features like coloured member names and system tags, optional text colouring, a special <code>PK</code> badge for proxied messages, and much* more!<br>
   <br>
   <i>*not actually that much right now but i'm working on it okay</i><br>
   <br>
@@ -52,7 +52,9 @@
   <br>
   <br>
   3. <b>Member colours aren't updated when changed.</b><br>
-  PC has no way of knowing when a member's colour changes. It only gets that information when it asks for an update from PK in the first place! As of right now, you can manually correct the colour in the config file (same folder as the plugin), but I want to fix it properly for the next update.<br>
+  PC has no way of knowing when a member's colour changes. It only gets that information when it asks for an update from PK in the first place!<br>
+  <br>
+  <i>As a workaround, you can click the PK badge next to a user to request a member info update manually.</i><br>
   <br>
   <br>
   4. <b>Member names aren't clickable.</b><br>
@@ -63,8 +65,9 @@
 </p>
   
 ---
+ 
 <p align="center">
-  <img src="https://media.discordapp.net/attachments/641904081320935435/946404709521047602/reviewns.jpg?width=1440&height=118">
+  <img src="https://cdn.discordapp.com/attachments/641904081320935435/946453833339523122/reviewns_WHYTE.png">
   <br><br><br>
   <b>"This is great!"</b> <br><i> - The Entire Cast of Homestuck Several Times Over</i><br><br><br>
  <b>"This is gr8!"</b> <br><i> - Oh, You Know</i><br><br><br>
@@ -78,4 +81,4 @@
 ---
 <p align="center">
 <i>disclaimer: i made all of these quotes up because i thought it would be mildly funny<br><br>except dirk's that one is real</i><br><br><br>
-- alchemized by <a href="https://www.twitter.com/estroBiologist">ash taylor</a> -</p>
+- by <a href="https://www.twitter.com/estroBiologist">ash taylor</a> -</p>
