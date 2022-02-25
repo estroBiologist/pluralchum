@@ -79,4 +79,4 @@
 ---
 <p align="center">
 <i>disclaimer: i made all of these quotes up because i thought it would be mildly funny<br><br>except dirk's that one is real</i><br><br><br>
-- alchemized by <a href="https://www.twitter.com/estroBiologist">ash taylor</a> -</p>
+- by <a href="https://www.twitter.com/estroBiologist">ash taylor</a> -</p>
