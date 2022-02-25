@@ -1,7 +1,7 @@
 /**
  * @name Pluralchum
  * @version 1.0.0
- * @description Plugin that provides better PluralKit integration, like name and text colours.
+ * @description PluralKit integration for BetterDiscord. Inexplicably Homestuck-themed.
  * @author Ash Taylor
  *  
 */
