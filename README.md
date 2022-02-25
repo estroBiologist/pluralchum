@@ -52,7 +52,9 @@
   <br>
   <br>
   3. <b>Member colours aren't updated when changed.</b><br>
-  PC has no way of knowing when a member's colour changes. It only gets that information when it asks for an update from PK in the first place! As of right now, you can manually correct the colour in the config file (same folder as the plugin), but I want to fix it properly for the next update.<br>
+  PC has no way of knowing when a member's colour changes. It only gets that information when it asks for an update from PK in the first place!<br>
+  <br>
+  <i>As a workaround, you can click the PK badge next to a user to request a member info update manually.</i><br>
   <br>
   <br>
   4. <b>Member names aren't clickable.</b><br>
