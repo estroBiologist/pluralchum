@@ -40,6 +40,7 @@ module.exports = class Pluralchum {
 	contrastTestColour = "#000000"
 	doContrastTest = true
 	contrastThreshold = 3
+	useServerNames = false
 
 	memberColourPref = 0
 	tagColourPref = 1
@@ -84,6 +85,7 @@ module.exports = class Pluralchum {
 			{label: "Theme", value: 2},
 		], (val) => {this.saveSettings(); this.tagColourPref = val}))
 
+		preferencesPanel.append(new Settings.Switch("Use servernames (experimental)", "", this.useServerNames, (val) => {this.useServerNames = val; this.saveSettings();}))
 
 
 		// Contrast test settings
@@ -257,16 +259,20 @@ module.exports = class Pluralchum {
 			if (!(props.message.author.hasOwnProperty("username_real"))) {
 				props.message.author.username_real = props.message.author.username.slice();
 				
-				// most batshit string length function on earth
-				const count = (str) => {
-					const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
-					return ((str || '').match(regex) || []).length
+				if (this.useServerNames) {
+					// most batshit string length function on earth
+					const count = (str) => {
+						const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
+						return ((str || '').match(regex) || []).length
+					}
+
+					let username_len = count(props.message.author.username_real);
+					let tag_len = count(member.tag);
+
+					props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
+				} else {
+					props.message.author.username = member.name + " ";
 				}
-
-				let username_len = count(props.message.author.username_real);
-				let tag_len = count(member.tag);
-
-				props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
 			}
 			tree.length = 0; //loser
 
@@ -500,6 +506,7 @@ module.exports = class Pluralchum {
 			contrastThreshold: 3,
 			memberColourPref: 0,
 			tagColourPref: 1,
+			useServerNames: false,
 		};
 	}
 
@@ -514,6 +521,7 @@ module.exports = class Pluralchum {
 			contrastThreshold: this.contrastThreshold,
 			memberColourPref: this.memberColourPref,
 			tagColourPref: this.tagColourPref,
+			useServerNames: this.useServerNames,
 		}
 	}
 
@@ -527,6 +535,7 @@ module.exports = class Pluralchum {
 		this.contrastThreshold = settings.contrastThreshold;
 		this.memberColourPref = settings.memberColourPref;
 		this.tagColourPref = settings.tagColourPref;
+		this.useServerNames = settings.useServerNames;
 	}
 	
 	getFilteredProfileMap() {
