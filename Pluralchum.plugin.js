@@ -1,6 +1,6 @@
 /**
  * @name Pluralchum
- * @version 1.0.0
+ * @version 1.0.1
  * @description PluralKit integration for BetterDiscord. Inexplicably Homestuck-themed.
  * @author Ash Taylor
  *  
@@ -192,8 +192,28 @@ module.exports = class Pluralchum {
 				return;
 			}
 		}
+		
+		let data = {
+			clientId: "947238976044023868",
+			disableGuildSelect: false,
+			permissions: 0n,
+			responseType: "code",
+			scopes: ["identify", "guilds"],
+		};
 
+		function callback(url) {
+			console.log("Raw: ", url);
+			console.log("Code:", url.split("?")[1].split("=")[1]);
+		}
 
+		const modals = BdApi.findModuleByProps("closeAllModals");
+		const OAuth2AuthorizeModal = BdApi.findModuleByProps("OAuth2AuthorizeModal").OAuth2AuthorizeModal;
+
+		modals.openModal((reactData) => {
+			const props = Object.assign.apply(this, [{}, reactData, data, { cancelCompletesFlow: true, callback }]);
+			return React.createElement(OAuth2AuthorizeModal, props);
+		});
+	
 
 		const MessageContent = BdApi.findModule(m => m.type?.displayName === "MessageContent");
 
@@ -210,6 +230,8 @@ module.exports = class Pluralchum {
 					let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
 					if (!this.doContrastTest || textContrast >= this.contrastThreshold)
 						ret.props.style = { color: member.color };
+					
+					this.forceMessageRefresh();
 				}
 
 			}.bind(this));}
@@ -235,9 +257,9 @@ module.exports = class Pluralchum {
 				
 				const originalType = tree.childrenHeader.type.type;
 				tree.childrenHeader.type.type = MessageHeader.default;
-				this.patches.push((() => {
+				//this.patches.push((() => {
 					tree.childrenHeader.type.type = originalType;
-				}));
+				//}));
             });
         }
 	}
@@ -259,9 +281,11 @@ module.exports = class Pluralchum {
 					const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
 					return ((str || '').match(regex) || []).length
 				}
-				
-				props.message.author.username = props.message.author.username_real.slice(0, 
-					count(props.message.author.username_real) - count(member.tag));
+
+				let username_len = count(props.message.author.username_real);
+				let tag_len = count(member.tag);
+
+				props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
 			}
 			tree.length = 0; //loser
 
