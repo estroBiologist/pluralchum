@@ -193,26 +193,7 @@ module.exports = class Pluralchum {
 			}
 		}
 		
-		let data = {
-			clientId: "947238976044023868",
-			disableGuildSelect: false,
-			permissions: 0n,
-			responseType: "code",
-			scopes: ["identify", "guilds"],
-		};
-
-		function callback(url) {
-			console.log("Raw: ", url);
-			console.log("Code:", url.split("?")[1].split("=")[1]);
-		}
-
-		const modals = BdApi.findModuleByProps("closeAllModals");
-		const OAuth2AuthorizeModal = BdApi.findModuleByProps("OAuth2AuthorizeModal").OAuth2AuthorizeModal;
-
-		modals.openModal((reactData) => {
-			const props = Object.assign.apply(this, [{}, reactData, data, { cancelCompletesFlow: true, callback }]);
-			return React.createElement(OAuth2AuthorizeModal, props);
-		});
+		
 	
 
 		const MessageContent = BdApi.findModule(m => m.type?.displayName === "MessageContent");
