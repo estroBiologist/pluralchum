@@ -1,6 +1,6 @@
 /**
  * @name Pluralchum
- * @version 1.0.1
+ * @version 1.1.0
  * @description PluralKit integration for BetterDiscord. Inexplicably Homestuck-themed.
  * @author Ash Taylor
  *  
@@ -10,7 +10,7 @@
 
 const baseEndpoint = "https://api.pluralkit.me/v2";
 const React = BdApi.React;
-const MessageHeader = BdApi.findModule(m => m?.default?.toString().indexOf("showTimestampOnHover") > -1);
+let MessageHeader = null;
 
 class PKBadge extends React.Component {
 	constructor(props) {
@@ -70,7 +70,7 @@ module.exports = class Pluralchum {
 		// Preferences
 		let preferencesPanel = new Settings.SettingGroup("Preferences", {shown: false});
 
-		preferencesPanel.append(new Settings.Switch("Colored proxy text", "", this.doColourText, (val) => {this.doColourText = val; this.saveSettings();}))
+		//preferencesPanel.append(new Settings.Switch("Colored proxy text", "", this.doColourText, (val) => {this.doColourText = val; this.saveSettings();}))
 		
 		preferencesPanel.append(new Settings.Dropdown("Default member name color", "", this.memberColourPref, [
 			{label: "Member", value: 0},
@@ -163,8 +163,9 @@ module.exports = class Pluralchum {
 		if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
 
 		let settings = ZLibrary.Utilities.loadSettings(this.getName(), this.getDefaultSettings());
-		console.log("[PLURALCHUM] Loaded settings:");
-		console.log(settings);
+
+		console.log("[PLURALCHUM] Loaded settings");
+
 		this.applySettings(settings);
 		
 		if (!this.profileMap) 
@@ -172,10 +173,7 @@ module.exports = class Pluralchum {
 		if (!this.idMap) 
 			this.idMap = {}
 
-		console.log("[PLURALCHUM] Loaded PK data:");
-		console.log(this.profileMap);
-		console.log("IDMAP:");
-		console.log(this.idMap);
+		console.log("[PLURALCHUM] Loaded PK data");
 
 		if (!this.eula) { 
 			BdApi.showConfirmationModal('Heads up!',
@@ -195,10 +193,11 @@ module.exports = class Pluralchum {
 			}
 		}
 		
-		
-	
+		const MessageContent = BdApi.Webpack.getModule(m => m.type?.displayName === "MessageContent");
 
-		const MessageContent = BdApi.findModule(m => m.type?.displayName === "MessageContent");
+		if (!MessageContent) {
+			console.log("WEH :(")
+		}
 
 		//Patch message content
 		BdApi.Patcher.after(this.getName(), MessageContent, "type", function(_, [props], ret) { 
@@ -213,46 +212,45 @@ module.exports = class Pluralchum {
 					let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
 					if (!this.doContrastTest || textContrast >= this.contrastThreshold)
 						ret.props.style = { color: member.color };
-					
-					this.forceMessageRefresh();
+
 				}
 
 			}.bind(this));}
 
 		}.bind(this));
 
+		// This could break with any Discord update but oh well
+		// We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
+		// So we look in the object for the key we *didn't* get, and just sort of assume that's the `default` fn we need
+		//
+		// i am sorry
+		//
+		const filter = BdApi.Webpack.Filters.byStrings("showTimestampOnHover");
+		const foundModule = BdApi.Webpack.getModule(filter, {defaultExport: false});
+		const [key] = Object.entries(foundModule).find(([, value]) => filter(value));
+		let other_key = null;
 
-		//Patch message header
-		BdApi.Patcher.after(this.getName(), MessageHeader, "default", this.messageHeaderUpdate.bind(this));
+		for (const member in foundModule) {
+			if (member !== key) {
+				other_key = member;
+			}
+		}
 
-		this.forceMessageRefresh();
-	}
+		if (!other_key) {
+			console.error("[PLURALCHUM] Failed to patch message header!");
+		}
 
-
-	forceMessageRefresh() {
-		// Force message update on channel changed??? somehow??????? idk i found this code online just accept it
-
-		const Modules = ZLibrary.WebpackModules.getModules(m => ~["ChannelMessage", "InboxMessage"].indexOf(m?.type?.displayName));
-        for (const Module of Modules) {
-            BdApi.Patcher.after(this.getName(), Module, "type", (_, __, ret) => {
-                const tree = ZLibrary.Utilities.findInReactTree(ret, m => m?.childrenHeader);
-				if (!tree) return;
-				
-				const originalType = tree.childrenHeader.type.type;
-				tree.childrenHeader.type.type = MessageHeader.default;
-				//this.patches.push((() => {
-					tree.childrenHeader.type.type = originalType;
-				//}));
-            });
-        }
+		MessageHeader = foundModule;
+		BdApi.Patcher.after(this.getName(), MessageHeader, other_key, this.messageHeaderUpdate.bind(this));
 	}
 
 
 	messageHeaderUpdate(_, [props], ret) {
 		const tree = ZLibrary.Utilities.getNestedProp(ret, "props.username.props.children");
 
-		if (!Array.isArray(tree)) 
+		if (!Array.isArray(tree)) {
 			return;
+		}
 
 		this.callbackIfMemberReady(props, function(member) {
 			
@@ -376,7 +374,6 @@ module.exports = class Pluralchum {
 		this.httpGetAsync("/messages/" + msg, this.createPKCallback(hash).bind(this));
 	}
 
-
 	httpGetAsync(theUrl, callback) {
 		var xmlHttp = new XMLHttpRequest();
 
@@ -428,7 +425,6 @@ module.exports = class Pluralchum {
 				
 				// ...and map member ID to hash
 				this.idMap[data.member.id] = hash;
-				this.forceMessageRefresh();
 				
 			} else if (status == 404) {
 				this.profileMap[hash] = {
