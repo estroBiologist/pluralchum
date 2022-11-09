@@ -221,27 +221,18 @@ module.exports = class Pluralchum {
 
 		// This could break with any Discord update but oh well
 		// We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
-		// So we look in the object for the key we *didn't* get, and just sort of assume that's the `default` fn we need
+		// So we just sort of patch all the member functions in the module and hope for the best
 		//
 		// i am sorry
 		//
 		const filter = BdApi.Webpack.Filters.byStrings("showTimestampOnHover");
 		const foundModule = BdApi.Webpack.getModule(filter, {defaultExport: false});
-		const [key] = Object.entries(foundModule).find(([, value]) => filter(value));
-		let other_key = null;
-
-		for (const member in foundModule) {
-			if (member !== key) {
-				other_key = member;
-			}
-		}
-
-		if (!other_key) {
-			console.error("[PLURALCHUM] Failed to patch message header!");
-		}
 
 		MessageHeader = foundModule;
-		BdApi.Patcher.after(this.getName(), MessageHeader, other_key, this.messageHeaderUpdate.bind(this));
+
+		for (const member in foundModule) {
+			BdApi.Patcher.after(this.getName(), MessageHeader, member, this.messageHeaderUpdate.bind(this));
+		}
 	}
 
 
