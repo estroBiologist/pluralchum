@@ -193,7 +193,7 @@ module.exports = class Pluralchum {
 			}
 		}
 		
-		const MessageContent = BdApi.Webpack.getModule(m => m.type?.displayName === "MessageContent");
+		const MessageContent = BdApi.Webpack.getModule(m => m?.type?.toString().includes("messageContent"));
 
 		if (!MessageContent) {
 			console.log("WEH :(")
