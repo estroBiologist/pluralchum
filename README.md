@@ -38,7 +38,7 @@
 
 ---
 <p align="center">
-  <img src="https://media.discordapp.net/attachments/846781793834106902/946431418739863633/limitations.png"><br><i>boowomp sound effect</i><br><br>
+  <img src="https://media.discordapp.net/attachments/846781793834106902/946431418739863633/limitations.png"><br><br>
   Yeah, it's not perfect. I tried my best, but I am categorically not a web developer. I'm always looking to make it better, and some of these will likely be fixed in due time, but, y'know, be aware of them.<br>
   <br>
   <br>
@@ -74,7 +74,7 @@
   <b>"this shitty plugin's crashed my discord like 5 times"</b> <br><i>- Satisfied Customer</i><br><br><br>
   <i><b>"I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT I HATE JAVASCRIPT"</b></i>
   <br><i>- <a href="https://www.twitter.com/estroBiologist">Unsatisfied Programmer</a></i><br><br><br>
-  <b>"this is just like <a href="https://chordioid.com/">chordioid</a>"</b> <br><i>- Unsubtle Plug</i><br><br><br>
+  <b>"this is just like chordioid"</b> <br><i>- Unsubtle Plug</i><br><br><br>
   <b>"I've embedded a virus in this code that will cause your computer to explode in thirty seconds. Run."</b><br><i>-Dirk Strider</i><br><br><br><br>
 </p>
 
