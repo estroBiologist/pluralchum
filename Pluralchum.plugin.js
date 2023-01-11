@@ -70,7 +70,7 @@ module.exports = class Pluralchum {
 		// Preferences
 		let preferencesPanel = new Settings.SettingGroup("Preferences", {shown: false});
 
-		//preferencesPanel.append(new Settings.Switch("Colored proxy text", "", this.doColourText, (val) => {this.doColourText = val; this.saveSettings();}))
+		preferencesPanel.append(new Settings.Switch("Colored proxy text", "", this.doColourText, (val) => {this.doColourText = val; this.saveSettings();}))
 		
 		preferencesPanel.append(new Settings.Dropdown("Default member name color", "", this.memberColourPref, [
 			{label: "Member", value: 0},
