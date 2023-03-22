@@ -233,6 +233,45 @@ module.exports = class Pluralchum {
 		for (const member in foundModule) {
 			BdApi.Patcher.after(this.getName(), MessageHeader, member, this.messageHeaderUpdate.bind(this));
 		}
+
+		// Add edit menu item to proxied messages.
+		const messageActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("receiveMessage", "editMessage"));
+
+    	BdApi.ContextMenu.patch("message", (res, props) => {
+      		const { message } = props;
+      		if (!message || !this.isProxiedMessage(message) || !Array.isArray(res?.props?.children)) {
+        		return res;
+      		}
+      		res.props.children[2].props.children.splice(
+        		4,
+        		0,
+        		BdApi.ContextMenu.buildMenuChildren([
+          		{
+            		id: "pk-edit",
+            		label: "Edit Proxied Message",
+            		action: () => {
+              			messageActions.startEditMessage(message.channel_id, message.id, message.content);
+            		}
+          		}
+       		])
+      	);
+
+		// Patch edit actions on proxied messages to send a pluralkit command.
+		const channelActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getChannel", "getDMFromUserId"));
+
+    	BdApi.Patcher.instead(this.getName(), messageActions, "editMessage", function (ctx, [channel_id, message_id, message], original) {
+			if (ZLibrary.DiscordModules.MessageStore.getMessage(channel_id, message_id).author.discriminator === "0000") {
+				let { content } = message; 
+				let channel = channelActions.getChannel(channel_id);
+				let guild_id = channel.guild_id;
+				let str = "pk;e https://discord.com/channels/" + guild_id + "/" + channel_id + "/" + message_id + " " + content;
+				ZLibrary.DiscordModules.MessageActions.sendMessage(channel_id, {'reaction': false, 'content': str});
+      		} else {
+        		return original(channel_id, message_id, message);
+      		}
+    	});
+    });
+
 	}
 
 
@@ -563,5 +602,9 @@ module.exports = class Pluralchum {
 		  g: parseInt(result[2], 16),
 		  b: parseInt(result[3], 16)
 		} : null;
+	}
+
+	isProxiedMessage(message) {
+		return message.author.discriminator === "0000"
 	}
 }
