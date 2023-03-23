@@ -259,17 +259,25 @@ module.exports = class Pluralchum {
 		// Patch edit actions on proxied messages to send a pluralkit command.
 		const channelActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getChannel", "getDMFromUserId"));
 
-    	BdApi.Patcher.instead(this.getName(), messageActions, "editMessage", function (ctx, [channel_id, message_id, message], original) {
-			if (ZLibrary.DiscordModules.MessageStore.getMessage(channel_id, message_id).author.discriminator === "0000") {
-				let { content } = message; 
-				let channel = channelActions.getChannel(channel_id);
-				let guild_id = channel.guild_id;
-				let str = "pk;e https://discord.com/channels/" + guild_id + "/" + channel_id + "/" + message_id + " " + content;
-				ZLibrary.DiscordModules.MessageActions.sendMessage(channel_id, {'reaction': false, 'content': str});
-      		} else {
-        		return original(channel_id, message_id, message);
-      		}
-    	});
+    	BdApi.Patcher.instead(
+			this.getName(),
+			messageActions,
+			"editMessage",
+			BdApi.Utils.debounce(
+				function (ctx, [channel_id, message_id, message], original) {
+					if (ZLibrary.DiscordModules.MessageStore.getMessage(channel_id, message_id).author.discriminator === "0000") {
+						let { content } = message; 
+						let channel = channelActions.getChannel(channel_id);
+						let guild_id = channel.guild_id;
+						let str = "pk;e https://discord.com/channels/" + guild_id + "/" + channel_id + "/" + message_id + " " + content;
+						ZLibrary.DiscordModules.MessageActions.sendMessage(channel_id, {'reaction': false, 'content': str});
+					} else {
+						return original(channel_id, message_id, message);
+					}
+				},
+				100
+			)
+		);
     });
 
 	}
