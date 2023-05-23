@@ -218,8 +218,11 @@ module.exports = class Pluralchum {
 						// So, we iterate over message elements that have their own props field, and add the color, item by item.
 						// But also plain text in a message *doesn't* have props, so we still have to set ret.props.style for that.
 						// Waugh.
+						// Making a list of the specific markup types that don't format correctly,
+						// Because if we just do this to all formatting, that overrides the URL color too.
+						const MarkupTypes = ["h1", "h2", "h3"];
 						for (const Element of MessageElements) {
-							if (Element.props) {
+							if (MarkupTypes.includes(Element.type)) {
 								Element.props.style = {
 									color: member.color
 								};
