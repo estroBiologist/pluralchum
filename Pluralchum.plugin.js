@@ -210,9 +210,25 @@ module.exports = class Pluralchum {
 				// Set message text colour
 				if (member.color) {
 					let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
-					if (!this.doContrastTest || textContrast >= this.contrastThreshold)
-						ret.props.style = { color: member.color };
-
+					if (!this.doContrastTest || textContrast >= this.contrastThreshold) {
+						const MessageElements = ret.props.children[0];
+						// se: Each formatted element gets a separate entry in the array ret.props.children[0].
+						// Some of the new elements (specifically headers) have a .markup-XXXXXX h<x> class defined.
+						// These classes have a set color, and this overrides the element style on the top level message content element.
+						// So, we iterate over message elements that have their own props field, and add the color, item by item.
+						// But also plain text in a message *doesn't* have props, so we still have to set ret.props.style for that.
+						// Waugh.
+						for (const Element of MessageElements) {
+							if (Element.props) {
+								Element.props.style = {
+									color: member.color
+								};
+							}
+						}
+						ret.props.style = {
+							color: member.color
+						};
+					}
 				}
 
 			}.bind(this));}
