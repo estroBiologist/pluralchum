@@ -4,10 +4,17 @@
   "repository": "https://github.com/estroBiologist/pluralchum.git",
   "author": "Ash Taylor",
   "license": "MIT",
+  "scripts": {
+    "build": "rollup -c",
+    "format": "prettier './**/*.js' --write",
+    "lint": "eslint './**/*.js'"
+  },
   "devDependencies": {
     "@babel/preset-react": "^7.22.5",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.1",
+    "eslint": "^8.43.0",
+    "eslint-plugin-react": "^7.32.2",
     "prettier": "2.8.8",
     "rollup": "^3.25.0"
   }
