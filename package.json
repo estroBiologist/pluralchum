@@ -5,7 +5,9 @@
   "author": "Ash Taylor",
   "license": "MIT",
   "devDependencies": {
+    "@babel/preset-react": "^7.22.5",
     "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^25.0.1",
     "prettier": "2.8.8",
     "rollup": "^3.25.0"
   }

@@ -1,6 +1,10 @@
 const baseEndpoint = "https://api.pluralkit.me/v2";
 const React = BdApi.React;
+const { initializeSettings } = require("./settings");
+
 let MessageHeader = null;
+
+//const SettingsPanel = require("./settings");
 
 class PKBadge extends React.Component {
   constructor(props) {
@@ -42,8 +46,6 @@ module.exports = class Pluralchum {
   getSettingsPanel() {
     const Settings = ZLibrary.Settings;
     let settingsPanel = new Settings.SettingPanel();
-
-    // Logo
     let logo = document.createElement("img");
 
     logo.src =
@@ -222,6 +224,8 @@ module.exports = class Pluralchum {
         "Library Missing",
         `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`
       );
+
+    this.settings = initializeSettings(this.getName());
 
     let settings = ZLibrary.Utilities.loadSettings(
       this.getName(),

@@ -1,4 +1,5 @@
 const babel = require("@rollup/plugin-babel");
+const commonjs = require("@rollup/plugin-commonjs");
 const fs = require("fs/promises");
 
 module.exports = {
@@ -8,5 +9,5 @@ module.exports = {
     format: "cjs",
     banner: fs.readFile("src/header.js"),
   },
-  plugins: [babel({ babelHelpers: "bundled" })],
+  plugins: [babel({ babelHelpers: "bundled" }), commonjs()],
 };
