@@ -22,6 +22,7 @@ module.exports = {
   plugins: ['react'],
   rules: {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+    'react/prop-types': ['off'],
   },
   globals: {
     BdApi: 'readonly',

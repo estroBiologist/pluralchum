@@ -194,7 +194,7 @@ module.exports = class Pluralchum {
     const expirationTime = 1000 * 60 * 60 * 24 * 30;
     let now = Date.now();
     for (const id of Object.keys(this.profileMap)) {
-      if (this.profileMap[id].hasOwnProperty('lastUsed')) {
+      if (Object.hasOwn(this.profileMap[id], 'lastUsed')) {
         let lastUsed = this.profileMap[id].lastUsed;
 
         if (now - lastUsed > expirationTime) delete this.profileMap[id];
@@ -333,7 +333,7 @@ module.exports = class Pluralchum {
     this.callbackIfMemberReady(
       props,
       function (member) {
-        if (!props.message.author.hasOwnProperty('username_real')) {
+        if (!Object.hasOwn(props.message.author, 'username_real')) {
           props.message.author.username_real = props.message.author.username.slice();
 
           if (this.useServerNames) {
@@ -433,7 +433,7 @@ module.exports = class Pluralchum {
   }
 
   updateMemberByMsg(msg, hash) {
-    if (this.profileMap.hasOwnProperty(hash)) this.profileMap[hash].status = 'UPDATING';
+    if (Object.hasOwn(this.profileMap, hash)) this.profileMap[hash].status = 'UPDATING';
     else this.profileMap[hash] = { status: 'REQUESTING' };
 
     this.httpGetAsync('/messages/' + msg, this.createPKCallback(hash).bind(this));
@@ -503,13 +503,13 @@ module.exports = class Pluralchum {
 
   getUserHash(author) {
     let username = author.username;
-    if (author.hasOwnProperty('username_real')) username = author.username_real;
+    if (Object.hasOwn(author,'username_real')) username = author.username_real;
 
     return this.hashCode(username + author.avatar);
   }
 
   callbackIfMemberReady(props, callback) {
-    if (!props.hasOwnProperty('message')) {
+    if (!Object.hasOwn(props, 'message')) {
       return;
     }
 
@@ -518,7 +518,7 @@ module.exports = class Pluralchum {
     let message = props.message;
 
     let username = message.author.username;
-    if (message.author.hasOwnProperty('username_real')) username = message.author.username_real;
+    if (Object.hasOwn(message.author, 'username_real')) username = message.author.username_real;
 
     let userHash = this.getUserHash(message.author);
 
