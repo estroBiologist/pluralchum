@@ -12,10 +12,11 @@ class ValueCell {
 
   update(f) {
     let old = this.#val;
-    this.#val = f(old);
-    if (old !== this.#val) {
+    let current = f(old);
+    this.#val = current;
+    if (old !== current) {
       this.#listeners.forEach(function (listener) {
-        listener(this.#val);
+        listener(current);
       });
     }
   }

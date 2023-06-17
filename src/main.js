@@ -1,6 +1,6 @@
 const baseEndpoint = "https://api.pluralkit.me/v2";
 const React = BdApi.React;
-const { initializeSettings } = require("./settings");
+const { initializeSettings, requireEula } = require("./settings");
 
 let MessageHeader = null;
 
@@ -241,35 +241,7 @@ module.exports = class Pluralchum {
 
     console.log("[PLURALCHUM] Loaded PK data");
 
-    if (!this.eula) {
-      BdApi.showConfirmationModal(
-        "Heads up!",
-        <div align="center" style={{ color: "#eeeeee" }}>
-          This plugin uses the PluralKit API to fetch system and member data.{" "}
-          <br />
-          <br />
-          Because of technical limitations, this data is cached on your computer
-          between sessions. None of this data is ever shared, collected or
-          uploaded, but you still ought to know.
-          <br />
-          <br />
-          <b>You can clear this cache at any time in the plugin settings</b>,
-          and unused cache data is automatically deleted after 30 days.
-        </div>,
-        {
-          confirmText: "Gotcha",
-          cancelText: "No thanks",
-          onConfirm: () => {
-            this.eula = true;
-            ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());
-          },
-        }
-      );
-      if (!this.eula) {
-        BdApi.Plugins.disable(this.getName());
-        return;
-      }
-    }
+    requireEula(this.settings, this.getName());
 
     const MessageContent = BdApi.Webpack.getModule((m) =>
       m?.type?.toString().includes("messageContent")
