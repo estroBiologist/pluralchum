@@ -1,6 +1,7 @@
-const baseEndpoint = "https://api.pluralkit.me/v2";
+const baseEndpoint = 'https://api.pluralkit.me/v2';
 const React = BdApi.React;
-const { initializeSettings, requireEula } = require("./settings");
+const { initializeSettings } = require('./settings');
+const { requireEula } = require('./eula');
 
 let MessageHeader = null;
 
@@ -13,14 +14,11 @@ class PKBadge extends React.Component {
 
   render() {
     var linkStyle = {
-      color: "#ffffff",
+      color: '#ffffff',
     };
     return (
       <div>
-        <a
-          style={linkStyle}
-          onClick={() => this.props.onClick(this.props.pk_id)}
-        >
+        <a style={linkStyle} onClick={() => this.props.onClick(this.props.pk_id)}>
           PK
         </a>
       </div>
@@ -35,7 +33,7 @@ module.exports = class Pluralchum {
   patches = [];
   eula = false; // "eula" aka tell people what this shit does
   doColourText = true;
-  contrastTestColour = "#000000";
+  contrastTestColour = '#000000';
   doContrastTest = true;
   contrastThreshold = 3;
   useServerNames = false;
@@ -46,134 +44,122 @@ module.exports = class Pluralchum {
   getSettingsPanel() {
     const Settings = ZLibrary.Settings;
     let settingsPanel = new Settings.SettingPanel();
-    let logo = document.createElement("img");
+    let logo = document.createElement('img');
 
-    logo.src =
-      "https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png";
-    logo.style = "max-width: 100%; height: auto;";
+    logo.src = 'https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png';
+    logo.style = 'max-width: 100%; height: auto;';
 
-    let subtitle = document.createElement("p");
+    let subtitle = document.createElement('p');
 
     subtitle.innerHTML =
       'PluralKit integration for BetterDiscord<br>- by <b><span style="color: #ff002a;">ash taylor</span></b> -';
-    subtitle.style = "text-align: center; color: var(--header-primary);";
+    subtitle.style = 'text-align: center; color: var(--header-primary);';
 
     settingsPanel.append(logo);
     settingsPanel.append(subtitle);
 
     // Preferences
-    let preferencesPanel = new Settings.SettingGroup("Preferences", {
+    let preferencesPanel = new Settings.SettingGroup('Preferences', {
       shown: false,
     });
 
     preferencesPanel.append(
-      new Settings.Switch(
-        "Colored proxy text",
-        "",
-        this.doColourText,
-        (val) => {
-          this.doColourText = val;
-          this.saveSettings();
-        }
-      )
+      new Settings.Switch('Colored proxy text', '', this.doColourText, val => {
+        this.doColourText = val;
+        this.saveSettings();
+      }),
     );
 
     preferencesPanel.append(
       new Settings.Dropdown(
-        "Default member name color",
-        "",
+        'Default member name color',
+        '',
         this.memberColourPref,
         [
-          { label: "Member", value: 0 },
-          { label: "System", value: 1 },
-          { label: "Theme", value: 2 },
+          { label: 'Member', value: 0 },
+          { label: 'System', value: 1 },
+          { label: 'Theme', value: 2 },
         ],
-        (val) => {
+        val => {
           this.memberColourPref = val;
           this.saveSettings();
-        }
-      )
+        },
+      ),
     );
 
     preferencesPanel.append(
       new Settings.Dropdown(
-        "Default system tag color",
-        "",
+        'Default system tag color',
+        '',
         this.tagColourPref,
         [
-          { label: "Member", value: 0 },
-          { label: "System", value: 1 },
-          { label: "Theme", value: 2 },
+          { label: 'Member', value: 0 },
+          { label: 'System', value: 1 },
+          { label: 'Theme', value: 2 },
         ],
-        (val) => {
+        val => {
           this.saveSettings();
           this.tagColourPref = val;
-        }
-      )
+        },
+      ),
     );
 
     preferencesPanel.append(
-      new Settings.Switch(
-        "Use servernames (experimental)",
-        "",
-        this.useServerNames,
-        (val) => {
-          this.useServerNames = val;
-          this.saveSettings();
-        }
-      )
+      new Settings.Switch('Use servernames (experimental)', '', this.useServerNames, val => {
+        this.useServerNames = val;
+        this.saveSettings();
+      }),
     );
 
     // Contrast test settings
-    let accessibilityPanel = new Settings.SettingGroup("Accessibility", {
+    let accessibilityPanel = new Settings.SettingGroup('Accessibility', {
       shown: false,
     });
 
     accessibilityPanel.append(
       new Settings.Switch(
-        "Enable text contrast test",
+        'Enable text contrast test',
         "Uses the theme's default color if the proxy's contrast is too low",
         this.doContrastTest,
-        (val) => {
+        val => {
           this.doContrastTest = val;
           this.saveSettings();
-        }
-      )
+        },
+      ),
     );
 
     accessibilityPanel.append(
       new Settings.ColorPicker(
-        "Contrast test color",
-        "The background color that proxy text will be tested against (black for dark themes, white for light themes)",
+        'Contrast test color',
+        'The background color that proxy text will be tested against (black for dark themes, white for light themes)',
         this.contrastTestColour,
-        (hex) => {
+        hex => {
           this.contrastTestColour = hex;
           this.saveSettings();
-        }
-      )
+        },
+      ),
     );
 
     accessibilityPanel.append(
       new Settings.Slider(
-        "Contrast ratio threshold",
-        "Minimum contrast ratio for proxy colors (default: 3)",
+        'Contrast ratio threshold',
+        'Minimum contrast ratio for proxy colors (default: 3)',
         1,
         21,
         this.contrastThreshold,
-        (val) => {
+        val => {
           this.contrastThreshold = val;
           this.saveSettings();
         },
-        { markers: [1, 2, 3, 4.5, 7, 14, 21] }
-      )
+        { markers: [1, 2, 3, 4.5, 7, 14, 21] },
+      ),
     );
 
     // Cache
-    let cachePanel = new Settings.SettingGroup("Cache", { shown: false });
-    let resetCacheBtn = document.createElement("button");
-    resetCacheBtn.className =
-      "button-f2h6uQ lookFilled-yCfaCM colorBrand-I6CyqQ sizeSmall-wU2dO- grow-2sR_-F";
-    resetCacheBtn.innerHTML = "Delete Cache";
+    let cachePanel = new Settings.SettingGroup('Cache', { shown: false });
+    let resetCacheBtn = document.createElement('button');
+    resetCacheBtn.className = 'button-f2h6uQ lookFilled-yCfaCM colorBrand-I6CyqQ sizeSmall-wU2dO- grow-2sR_-F';
+    resetCacheBtn.innerHTML = 'Delete Cache';
     resetCacheBtn.onclick = () => {
       this.profileMap = {};
       this.idMap = {};
@@ -208,7 +194,7 @@ module.exports = class Pluralchum {
     const expirationTime = 1000 * 60 * 60 * 24 * 30;
     let now = Date.now();
     for (const id of Object.keys(this.profileMap)) {
-      if (this.profileMap[id].hasOwnProperty("lastUsed")) {
+      if (this.profileMap[id].hasOwnProperty('lastUsed')) {
         let lastUsed = this.profileMap[id].lastUsed;
 
         if (now - lastUsed > expirationTime) delete this.profileMap[id];
@@ -221,45 +207,38 @@ module.exports = class Pluralchum {
   start() {
     if (!global.ZeresPluginLibrary)
       return window.BdApi.alert(
-        "Library Missing",
-        `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`
+        'Library Missing',
+        `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`,
       );
 
     this.settings = initializeSettings(this.getName());
 
-    let settings = ZLibrary.Utilities.loadSettings(
-      this.getName(),
-      this.getDefaultSettings()
-    );
+    let settings = ZLibrary.Utilities.loadSettings(this.getName(), this.getDefaultSettings());
 
-    console.log("[PLURALCHUM] Loaded settings");
+    console.log('[PLURALCHUM] Loaded settings');
 
     this.applySettings(settings);
 
     if (!this.profileMap) this.profileMap = {};
     if (!this.idMap) this.idMap = {};
 
-    console.log("[PLURALCHUM] Loaded PK data");
+    console.log('[PLURALCHUM] Loaded PK data');
 
     requireEula(this.settings, this.getName());
 
-    const MessageContent = BdApi.Webpack.getModule((m) =>
-      m?.type?.toString().includes("messageContent")
-    );
+    const MessageContent = BdApi.Webpack.getModule(m => m?.type?.toString().includes('messageContent'));
 
     if (!MessageContent) {
-      console.log("WEH :(");
+      console.log('WEH :(');
     }
 
     //Patch message content
     BdApi.Patcher.after(
       this.getName(),
       MessageContent,
-      "type",
+      'type',
       function (_, [props], ret) {
-        const channel = ZLibrary.DiscordModules.ChannelStore.getChannel(
-          props.message.channel_id
-        );
+        const channel = ZLibrary.DiscordModules.ChannelStore.getChannel(props.message.channel_id);
 
         if (!channel || !channel.guild_id) return; //No webhooks here lol
 
@@ -269,20 +248,14 @@ module.exports = class Pluralchum {
             function (member) {
               // Set message text colour
               if (member.color) {
-                let textContrast = this.contrast(
-                  this.hexToRgb(member.color),
-                  this.hexToRgb(this.contrastTestColour)
-                );
-                if (
-                  !this.doContrastTest ||
-                  textContrast >= this.contrastThreshold
-                )
+                let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
+                if (!this.doContrastTest || textContrast >= this.contrastThreshold)
                   ret.props.style = { color: member.color };
               }
-            }.bind(this)
+            }.bind(this),
           );
         }
-      }.bind(this)
+      }.bind(this),
     );
 
     // This could break with any Discord update but oh well
@@ -291,7 +264,7 @@ module.exports = class Pluralchum {
     //
     // i am sorry
     //
-    const filter = BdApi.Webpack.Filters.byStrings("showTimestampOnHover");
+    const filter = BdApi.Webpack.Filters.byStrings('showTimestampOnHover');
     const foundModule = BdApi.Webpack.getModule(filter, {
       defaultExport: false,
     });
@@ -299,26 +272,15 @@ module.exports = class Pluralchum {
     MessageHeader = foundModule;
 
     for (const member in foundModule) {
-      BdApi.Patcher.after(
-        this.getName(),
-        MessageHeader,
-        member,
-        this.messageHeaderUpdate.bind(this)
-      );
+      BdApi.Patcher.after(this.getName(), MessageHeader, member, this.messageHeaderUpdate.bind(this));
     }
 
     // Add edit menu item to proxied messages.
-    const messageActions = BdApi.Webpack.getModule(
-      BdApi.Webpack.Filters.byProps("receiveMessage", "editMessage")
-    );
+    const messageActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('receiveMessage', 'editMessage'));
 
-    BdApi.ContextMenu.patch("message", (res, props) => {
+    BdApi.ContextMenu.patch('message', (res, props) => {
       const { message } = props;
-      if (
-        !message ||
-        !this.isProxiedMessage(message) ||
-        !Array.isArray(res?.props?.children)
-      ) {
+      if (!message || !this.isProxiedMessage(message) || !Array.isArray(res?.props?.children)) {
         return res;
       }
       res.props.children[2].props.children.splice(
@@ -326,51 +288,29 @@ module.exports = class Pluralchum {
         0,
         BdApi.ContextMenu.buildMenuChildren([
           {
-            id: "pk-edit",
-            label: "Edit Proxied Message",
+            id: 'pk-edit',
+            label: 'Edit Proxied Message',
             action: () => {
-              messageActions.startEditMessage(
-                message.channel_id,
-                message.id,
-                message.content
-              );
+              messageActions.startEditMessage(message.channel_id, message.id, message.content);
             },
           },
-        ])
+        ]),
       );
 
       // Patch edit actions on proxied messages to send a pluralkit command.
-      const channelActions = BdApi.Webpack.getModule(
-        BdApi.Webpack.Filters.byProps("getChannel", "getDMFromUserId")
-      );
+      const channelActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('getChannel', 'getDMFromUserId'));
 
       BdApi.Patcher.instead(
         this.getName(),
         messageActions,
-        "editMessage",
-        BdApi.Utils.debounce(function (
-          ctx,
-          [channel_id, message_id, message],
-          original
-        ) {
-          if (
-            ZLibrary.DiscordModules.MessageStore.getMessage(
-              channel_id,
-              message_id
-            ).author.discriminator === "0000"
-          ) {
+        'editMessage',
+        BdApi.Utils.debounce(function (ctx, [channel_id, message_id, message], original) {
+          if (ZLibrary.DiscordModules.MessageStore.getMessage(channel_id, message_id).author.discriminator === '0000') {
             let { content } = message;
             let channel = channelActions.getChannel(channel_id);
             let guild_id = channel.guild_id;
             let str =
-              "pk;e https://discord.com/channels/" +
-              guild_id +
-              "/" +
-              channel_id +
-              "/" +
-              message_id +
-              " " +
-              content;
+              'pk;e https://discord.com/channels/' + guild_id + '/' + channel_id + '/' + message_id + ' ' + content;
             ZLibrary.DiscordModules.MessageActions.sendMessage(channel_id, {
               reaction: false,
               content: str,
@@ -378,17 +318,13 @@ module.exports = class Pluralchum {
           } else {
             return original(channel_id, message_id, message);
           }
-        },
-        100)
+        }, 100),
       );
     });
   }
 
   messageHeaderUpdate(_, [props], ret) {
-    const tree = ZLibrary.Utilities.getNestedProp(
-      ret,
-      "props.username.props.children"
-    );
+    const tree = ZLibrary.Utilities.getNestedProp(ret, 'props.username.props.children');
 
     if (!Array.isArray(tree)) {
       return;
@@ -397,28 +333,22 @@ module.exports = class Pluralchum {
     this.callbackIfMemberReady(
       props,
       function (member) {
-        if (!props.message.author.hasOwnProperty("username_real")) {
-          props.message.author.username_real =
-            props.message.author.username.slice();
+        if (!props.message.author.hasOwnProperty('username_real')) {
+          props.message.author.username_real = props.message.author.username.slice();
 
           if (this.useServerNames) {
             // most batshit string length function on earth
-            const count = (str) => {
-              const regex =
-                /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
-              return ((str || "").match(regex) || []).length;
+            const count = str => {
+              const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
+              return ((str || '').match(regex) || []).length;
             };
 
             let username_len = count(props.message.author.username_real);
             let tag_len = count(member.tag);
 
-            props.message.author.username =
-              props.message.author.username_real.slice(
-                0,
-                username_len - tag_len
-              );
+            props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
           } else {
-            props.message.author.username = member.name + " ";
+            props.message.author.username = member.name + ' ';
           }
         }
         tree.length = 0; //loser
@@ -427,28 +357,23 @@ module.exports = class Pluralchum {
 
         let userProps = {
           user: props.message.author,
-          className: "username-h_Y3Us",
-          type: "member_name",
+          className: 'username-h_Y3Us',
+          type: 'member_name',
         };
 
         let tagProps = {
           user: props.message.author,
-          className: "username-h_Y3Us",
-          type: "system_tag",
+          className: 'username-h_Y3Us',
+          type: 'system_tag',
         };
 
         // lol
         let pkBadge = (
-          <span className="botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc">
+          <span className='botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc'>
             <PKBadge
               pk_id={props.message.id}
-              onClick={(id) =>
-                this.updateMemberByMsg(
-                  id,
-                  this.getUserHash(props.message.author)
-                )
-              }
-              className="botText-1fD6Qk"
+              onClick={id => this.updateMemberByMsg(id, this.getUserHash(props.message.author))}
+              className='botText-1fD6Qk'
             />
           </span>
         );
@@ -480,65 +405,38 @@ module.exports = class Pluralchum {
 
         // Color testing and stuff
         if (member_colour) {
-          let textContrast = this.contrast(
-            this.hexToRgb(member_colour),
-            this.hexToRgb(this.contrastTestColour)
-          );
+          let textContrast = this.contrast(this.hexToRgb(member_colour), this.hexToRgb(this.contrastTestColour));
 
           if (!this.doContrastTest || textContrast >= this.contrastThreshold)
             userProps.style = { color: member_colour };
         }
 
         if (tag_colour) {
-          let textContrast = this.contrast(
-            this.hexToRgb(tag_colour),
-            this.hexToRgb(this.contrastTestColour)
-          );
+          let textContrast = this.contrast(this.hexToRgb(tag_colour), this.hexToRgb(this.contrastTestColour));
 
-          if (!this.doContrastTest || textContrast >= this.contrastThreshold)
-            tagProps.style = { color: tag_colour };
+          if (!this.doContrastTest || textContrast >= this.contrastThreshold) tagProps.style = { color: tag_colour };
         }
 
-        if (!member_tag || typeof member_tag !== "string") member_tag = "";
+        if (!member_tag || typeof member_tag !== 'string') member_tag = '';
 
         if (props.compact) {
           tree.push(pkBadge);
-          tree.push(
-            React.createElement(
-              "span",
-              userProps,
-              " " + props.message.author.username.toString()
-            )
-          );
-          tree.push(
-            React.createElement("span", tagProps, member_tag.toString() + " ")
-          );
+          tree.push(React.createElement('span', userProps, ' ' + props.message.author.username.toString()));
+          tree.push(React.createElement('span', tagProps, member_tag.toString() + ' '));
         } else {
-          tree.push(
-            React.createElement(
-              "span",
-              userProps,
-              props.message.author.username.toString()
-            )
-          );
-          tree.push(
-            React.createElement("span", tagProps, member_tag.toString())
-          );
+          tree.push(React.createElement('span', userProps, props.message.author.username.toString()));
+          tree.push(React.createElement('span', tagProps, member_tag.toString()));
           tree.push(pkBadge);
         }
-      }.bind(this)
+      }.bind(this),
     );
   }
 
   updateMemberByMsg(msg, hash) {
-    if (this.profileMap.hasOwnProperty(hash))
-      this.profileMap[hash].status = "UPDATING";
-    else this.profileMap[hash] = { status: "REQUESTING" };
+    if (this.profileMap.hasOwnProperty(hash)) this.profileMap[hash].status = 'UPDATING';
+    else this.profileMap[hash] = { status: 'REQUESTING' };
 
-    this.httpGetAsync(
-      "/messages/" + msg,
-      this.createPKCallback(hash).bind(this)
-    );
+    this.httpGetAsync('/messages/' + msg, this.createPKCallback(hash).bind(this));
   }
 
   httpGetAsync(theUrl, callback) {
@@ -552,37 +450,37 @@ module.exports = class Pluralchum {
     }.bind(this);
 
     this.currentRequests += 1;
-    console.log("Sending request with delay ", this.currentRequests * 600);
+    console.log('Sending request with delay ', this.currentRequests * 600);
     setTimeout(
       function () {
-        xmlHttp.open("GET", baseEndpoint + theUrl, true); // true for asynchronous
+        xmlHttp.open('GET', baseEndpoint + theUrl, true); // true for asynchronous
         xmlHttp.send(null);
       }.bind(this),
-      this.currentRequests * 600
+      this.currentRequests * 600,
     );
   }
 
   createPKCallback(hash) {
     return function (response, status) {
       if (status == 200) {
-        console.log("RESPONSE");
+        console.log('RESPONSE');
         let data = JSON.parse(response);
         console.log(data);
 
         // Map profile hash to member data...
         this.profileMap[hash] = {
           name: data.member.name,
-          color: "#" + data.member.color,
+          color: '#' + data.member.color,
           tag: data.system.tag,
           id: data.member.id,
           system: data.system.id,
-          status: "DONE",
-          system_color: "#" + data.system.color,
+          status: 'DONE',
+          system_color: '#' + data.system.color,
         };
 
-        if (data.member.color === null) this.profileMap[hash].color = "";
+        if (data.member.color === null) this.profileMap[hash].color = '';
 
-        if (data.system.color === null) this.profileMap[hash].system_color = "";
+        if (data.system.color === null) this.profileMap[hash].system_color = '';
 
         if (data.member.display_name) {
           this.profileMap[hash].name = data.member.display_name;
@@ -592,7 +490,7 @@ module.exports = class Pluralchum {
         this.idMap[data.member.id] = hash;
       } else if (status == 404) {
         this.profileMap[hash] = {
-          status: "NOT_PK",
+          status: 'NOT_PK',
         };
       }
       this.saveSettings();
@@ -605,36 +503,30 @@ module.exports = class Pluralchum {
 
   getUserHash(author) {
     let username = author.username;
-    if (author.hasOwnProperty("username_real")) username = author.username_real;
+    if (author.hasOwnProperty('username_real')) username = author.username_real;
 
     return this.hashCode(username + author.avatar);
   }
 
   callbackIfMemberReady(props, callback) {
-    if (!props.hasOwnProperty("message")) {
+    if (!props.hasOwnProperty('message')) {
       return;
     }
 
-    if (props.message.author.discriminator !== "0000") return;
+    if (props.message.author.discriminator !== '0000') return;
 
     let message = props.message;
 
     let username = message.author.username;
-    if (message.author.hasOwnProperty("username_real"))
-      username = message.author.username_real;
+    if (message.author.hasOwnProperty('username_real')) username = message.author.username_real;
 
     let userHash = this.getUserHash(message.author);
 
     if (this.profileMap[userHash]) {
-      if (
-        this.profileMap[userHash].status === "DONE" ||
-        this.profileMap[userHash].status === "UPDATING"
-      )
+      if (this.profileMap[userHash].status === 'DONE' || this.profileMap[userHash].status === 'UPDATING')
         callback(this.profileMap[userHash]);
     } else {
-      console.log(
-        "Requesting data for member " + username + " (" + userHash + ")"
-      );
+      console.log('Requesting data for member ' + username + ' (' + userHash + ')');
       this.updateMemberByMsg(message.id, userHash);
     }
   }
@@ -650,7 +542,7 @@ module.exports = class Pluralchum {
   }
 
   getName() {
-    return "Pluralchum";
+    return 'Pluralchum';
   }
 
   getDefaultSettings() {
@@ -659,7 +551,7 @@ module.exports = class Pluralchum {
       idMap: {},
       eula: false,
       doColourText: true,
-      contrastTestColour: "#000000",
+      contrastTestColour: '#000000',
       doContrastTest: true,
       contrastThreshold: 3,
       memberColourPref: 0,
@@ -698,9 +590,7 @@ module.exports = class Pluralchum {
 
   getFilteredProfileMap() {
     const asArray = Object.entries(this.profileMap);
-    const filtered = asArray.filter(
-      ([_, profile]) => profile.status === "DONE"
-    );
+    const filtered = asArray.filter(([_, profile]) => profile.status === 'DONE');
     return Object.fromEntries(filtered);
   }
 
@@ -738,6 +628,6 @@ module.exports = class Pluralchum {
   }
 
   isProxiedMessage(message) {
-    return message.author.discriminator === "0000";
+    return message.author.discriminator === '0000';
   }
 };
