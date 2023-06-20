@@ -1,9 +1,12 @@
 const { initializeSettings, initializeProfileMap, purgeOldProfiles } = require('./data');
 const { requireEula } = require('./eula');
 const { patchMessageContent, patchMessageHeader } = require('./messages');
+const { patchEditMenuItem, patchEditAction } = require('./edit');
 const { settingsPanel } = require('./settingsPanel');
 
 module.exports = class Pluralchum {
+  patches = [];
+
   start() {
     if (!global.ZeresPluginLibrary)
       return window.BdApi.alert(
@@ -23,6 +26,8 @@ module.exports = class Pluralchum {
 
     patchMessageContent(this.getName(), this.settings, this.profileMap);
     patchMessageHeader(this.getName(), this.settings, this.profileMap);
+    this.patches.push(patchEditMenuItem());
+    patchEditAction(this.getName());
   }
 
   stop() {

@@ -76,7 +76,12 @@ class MapCell {
   }
 }
 
+function isProxiedMessage(message) {
+  return message.author.discriminator === '0000';
+}
+
 module.exports = {
   ValueCell,
   MapCell,
+  isProxiedMessage,
 };
