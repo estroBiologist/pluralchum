@@ -8,7 +8,7 @@ module.exports = class Pluralchum {
     if (!global.ZeresPluginLibrary)
       return window.BdApi.alert(
         'Library Missing',
-        `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`,
+        `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.app/plugin/ZeresPluginLibrary" target="_blank">Click here to download the library!</a>`,
       );
 
     this.settings = initializeSettings(this.getName());
