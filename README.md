@@ -1,6 +1,5 @@
 <p align="center"><img src="https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png"><br><b>(PluralKit integration for BetterDiscord)</b><br><br>- by <a href="https://estrobiologist.carrd.co/">ash taylor</a> -</p>
 
-
 ---
 
 <p align="center">
@@ -37,6 +36,7 @@
 </p>
 
 ---
+
 <p align="center">
   <img src="https://media.discordapp.net/attachments/846781793834106902/946431418739863633/limitations.png"><br><br>
   Yeah, it's not perfect. I tried my best, but I am categorically not a web developer. I'm always looking to make it better, and some of these will likely be fixed in due time, but, y'know, be aware of them.<br>
@@ -79,6 +79,7 @@
 </p>
 
 ---
+
 <p align="center">
 <i>disclaimer: i made all of these quotes up because i thought it would be mildly funny<br><br>except dirk's that one is real</i><br><br><br>
 - by <a href="https://www.twitter.com/estroBiologist">ash taylor</a> -</p>

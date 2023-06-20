@@ -1,6 +1,0 @@
-If you're thinking of downloading the Pluralchum.plugin.js file straight from the GitHub repository, don't!
-It has JSX in it and needs to be parsed with a special toolchain for BetterDiscord to understand it properly.
-
-I've already done that for you, though! Just head over to the releases section:
-
-https://github.com/transdisaster/pluralchum/releases
