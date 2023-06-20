@@ -243,7 +243,7 @@ function handleMessageHeader(props, component, settings, profileMap) {
       <span className='botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc'>
         <PKBadge
           pk_id={props.message.id}
-          onClick={id => updateMemberByMsg(id, getUserHash(props.message.author))}
+          onClick={id => updateMemberByMsg(id, getUserHash(props.message.author), profileMap)}
           className='botText-1fD6Qk'
         />
       </span>
