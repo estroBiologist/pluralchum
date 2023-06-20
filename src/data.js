@@ -2,8 +2,6 @@ const { ValueCell, MapCell } = require('./utility');
 
 function defaultSettings() {
   return {
-    profileMap: {}, // deprecated
-    idMap: {}, // depreacted
     eula: false,
     doColourText: true,
     contrastTestColour: '#000000',
@@ -15,8 +13,19 @@ function defaultSettings() {
   };
 }
 
+function loadSettings(pluginName) {
+  let settings = ZLibrary.Utilities.loadSettings(pluginName, defaultSettings());
+  
+  // Clear out old cache from previous versions
+  delete settings.profileMap;
+  delete settings.idMap;
+  ZLibrary.Utilities.saveSettings(pluginName, settings);
+
+  return settings;
+}
+
 function initializeSettings(pluginName) {
-  let settings = new ValueCell(ZLibrary.Utilities.loadSettings(pluginName, defaultSettings()));
+  let settings = new ValueCell(loadSettings(pluginName));
   settings.addListener(function (s) {
     ZLibrary.Utilities.saveSettings(pluginName, s);
   });
