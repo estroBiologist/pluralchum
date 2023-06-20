@@ -1,34 +1,9 @@
-const baseEndpoint = 'https://api.pluralkit.me/v2';
-const React = BdApi.React;
-const { initializeSettings } = require('./settings');
+const { initializeSettings, initializeProfileMap } = require('./data');
 const { requireEula } = require('./eula');
-
-let MessageHeader = null;
-
-//const SettingsPanel = require("./settings");
-
-class PKBadge extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    var linkStyle = {
-      color: '#ffffff',
-    };
-    return (
-      <div>
-        <a style={linkStyle} onClick={() => this.props.onClick(this.props.pk_id)}>
-          PK
-        </a>
-      </div>
-    );
-  }
-}
+const { patchMessageContent, patchMessageHeader } = require('./messages');
 
 module.exports = class Pluralchum {
   profileMap = {};
-  idMap = {};
   currentRequests = 0;
   patches = [];
   eula = false; // "eula" aka tell people what this shit does
@@ -162,7 +137,6 @@ module.exports = class Pluralchum {
     resetCacheBtn.innerHTML = 'Delete Cache';
     resetCacheBtn.onclick = () => {
       this.profileMap = {};
-      this.idMap = {};
       this.saveSettings();
     };
 
@@ -212,68 +186,18 @@ module.exports = class Pluralchum {
       );
 
     this.settings = initializeSettings(this.getName());
-
-    let settings = ZLibrary.Utilities.loadSettings(this.getName(), this.getDefaultSettings());
+    let profileMap = initializeProfileMap(this.getName());
 
     console.log('[PLURALCHUM] Loaded settings');
 
-    this.applySettings(settings);
-
     if (!this.profileMap) this.profileMap = {};
-    if (!this.idMap) this.idMap = {};
 
     console.log('[PLURALCHUM] Loaded PK data');
 
     requireEula(this.settings, this.getName());
 
-    const MessageContent = BdApi.Webpack.getModule(m => m?.type?.toString().includes('messageContent'));
-
-    if (!MessageContent) {
-      console.log('WEH :(');
-    }
-
-    //Patch message content
-    BdApi.Patcher.after(
-      this.getName(),
-      MessageContent,
-      'type',
-      function (_, [props], ret) {
-        const channel = ZLibrary.DiscordModules.ChannelStore.getChannel(props.message.channel_id);
-
-        if (!channel || !channel.guild_id) return; //No webhooks here lol
-
-        if (this.doColourText) {
-          this.callbackIfMemberReady(
-            props,
-            function (member) {
-              // Set message text colour
-              if (member.color) {
-                let textContrast = this.contrast(this.hexToRgb(member.color), this.hexToRgb(this.contrastTestColour));
-                if (!this.doContrastTest || textContrast >= this.contrastThreshold)
-                  ret.props.style = { color: member.color };
-              }
-            }.bind(this),
-          );
-        }
-      }.bind(this),
-    );
-
-    // This could break with any Discord update but oh well
-    // We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
-    // So we just sort of patch all the member functions in the module and hope for the best
-    //
-    // i am sorry
-    //
-    const filter = BdApi.Webpack.Filters.byStrings('showTimestampOnHover');
-    const foundModule = BdApi.Webpack.getModule(filter, {
-      defaultExport: false,
-    });
-
-    MessageHeader = foundModule;
-
-    for (const member in foundModule) {
-      BdApi.Patcher.after(this.getName(), MessageHeader, member, this.messageHeaderUpdate.bind(this));
-    }
+    patchMessageContent(this.getName(), this.settings, profileMap);
+    patchMessageHeader(this.getName(), this.settings, profileMap);
 
     // Add edit menu item to proxied messages.
     const messageActions = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('receiveMessage', 'editMessage'));
@@ -323,222 +247,8 @@ module.exports = class Pluralchum {
     });
   }
 
-  messageHeaderUpdate(_, [props], ret) {
-    const tree = ZLibrary.Utilities.getNestedProp(ret, 'props.username.props.children');
-
-    if (!Array.isArray(tree)) {
-      return;
-    }
-
-    this.callbackIfMemberReady(
-      props,
-      function (member) {
-        if (!Object.hasOwn(props.message.author, 'username_real')) {
-          props.message.author.username_real = props.message.author.username.slice();
-
-          if (this.useServerNames) {
-            // most batshit string length function on earth
-            const count = str => {
-              const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
-              return ((str || '').match(regex) || []).length;
-            };
-
-            let username_len = count(props.message.author.username_real);
-            let tag_len = count(member.tag);
-
-            props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
-          } else {
-            props.message.author.username = member.name + ' ';
-          }
-        }
-        tree.length = 0; //loser
-
-        let member_tag = member.tag;
-
-        let userProps = {
-          user: props.message.author,
-          className: 'username-h_Y3Us',
-          type: 'member_name',
-        };
-
-        let tagProps = {
-          user: props.message.author,
-          className: 'username-h_Y3Us',
-          type: 'system_tag',
-        };
-
-        // lol
-        let pkBadge = (
-          <span className='botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc'>
-            <PKBadge
-              pk_id={props.message.id}
-              onClick={id => this.updateMemberByMsg(id, this.getUserHash(props.message.author))}
-              className='botText-1fD6Qk'
-            />
-          </span>
-        );
-        // Preferences
-
-        // 0 - Member
-        // 1 - System
-        // 2 - Theme (do nothing)
-        let member_colour;
-        let tag_colour;
-
-        if (this.memberColourPref === 0) {
-          member_colour = member.color;
-
-          if (!member_colour) member_colour = member.system_color; // Fallback
-        } else if (this.memberColourPref === 1) {
-          member_colour = member.system_color;
-
-          if (!member_colour) member_colour = member.color; // Fallback
-        }
-
-        if (this.tagColourPref === 0) {
-          tag_colour = member.color;
-
-          if (!tag_colour) tag_colour = member.system_color; // Fallback
-        } else if (this.tagColourPref === 1) {
-          tag_colour = member.system_color;
-        }
-
-        // Color testing and stuff
-        if (member_colour) {
-          let textContrast = this.contrast(this.hexToRgb(member_colour), this.hexToRgb(this.contrastTestColour));
-
-          if (!this.doContrastTest || textContrast >= this.contrastThreshold)
-            userProps.style = { color: member_colour };
-        }
-
-        if (tag_colour) {
-          let textContrast = this.contrast(this.hexToRgb(tag_colour), this.hexToRgb(this.contrastTestColour));
-
-          if (!this.doContrastTest || textContrast >= this.contrastThreshold) tagProps.style = { color: tag_colour };
-        }
-
-        if (!member_tag || typeof member_tag !== 'string') member_tag = '';
-
-        if (props.compact) {
-          tree.push(pkBadge);
-          tree.push(React.createElement('span', userProps, ' ' + props.message.author.username.toString()));
-          tree.push(React.createElement('span', tagProps, member_tag.toString() + ' '));
-        } else {
-          tree.push(React.createElement('span', userProps, props.message.author.username.toString()));
-          tree.push(React.createElement('span', tagProps, member_tag.toString()));
-          tree.push(pkBadge);
-        }
-      }.bind(this),
-    );
-  }
-
-  updateMemberByMsg(msg, hash) {
-    if (Object.hasOwn(this.profileMap, hash)) this.profileMap[hash].status = 'UPDATING';
-    else this.profileMap[hash] = { status: 'REQUESTING' };
-
-    this.httpGetAsync('/messages/' + msg, this.createPKCallback(hash).bind(this));
-  }
-
-  httpGetAsync(theUrl, callback) {
-    var xmlHttp = new XMLHttpRequest();
-
-    xmlHttp.onreadystatechange = function () {
-      if (xmlHttp.readyState == 4) {
-        callback(xmlHttp.responseText, xmlHttp.status);
-        this.currentRequests -= 1;
-      }
-    }.bind(this);
-
-    this.currentRequests += 1;
-    console.log('Sending request with delay ', this.currentRequests * 600);
-    setTimeout(
-      function () {
-        xmlHttp.open('GET', baseEndpoint + theUrl, true); // true for asynchronous
-        xmlHttp.send(null);
-      }.bind(this),
-      this.currentRequests * 600,
-    );
-  }
-
-  createPKCallback(hash) {
-    return function (response, status) {
-      if (status == 200) {
-        console.log('RESPONSE');
-        let data = JSON.parse(response);
-        console.log(data);
-
-        // Map profile hash to member data...
-        this.profileMap[hash] = {
-          name: data.member.name,
-          color: '#' + data.member.color,
-          tag: data.system.tag,
-          id: data.member.id,
-          system: data.system.id,
-          status: 'DONE',
-          system_color: '#' + data.system.color,
-        };
-
-        if (data.member.color === null) this.profileMap[hash].color = '';
-
-        if (data.system.color === null) this.profileMap[hash].system_color = '';
-
-        if (data.member.display_name) {
-          this.profileMap[hash].name = data.member.display_name;
-        }
-
-        // ...and map member ID to hash
-        this.idMap[data.member.id] = hash;
-      } else if (status == 404) {
-        this.profileMap[hash] = {
-          status: 'NOT_PK',
-        };
-      }
-      this.saveSettings();
-    }.bind(this);
-  }
-
   saveSettings() {
     ZLibrary.Utilities.saveSettings(this.getName(), this.getSettings());
-  }
-
-  getUserHash(author) {
-    let username = author.username;
-    if (Object.hasOwn(author,'username_real')) username = author.username_real;
-
-    return this.hashCode(username + author.avatar);
-  }
-
-  callbackIfMemberReady(props, callback) {
-    if (!Object.hasOwn(props, 'message')) {
-      return;
-    }
-
-    if (props.message.author.discriminator !== '0000') return;
-
-    let message = props.message;
-
-    let username = message.author.username;
-    if (Object.hasOwn(message.author, 'username_real')) username = message.author.username_real;
-
-    let userHash = this.getUserHash(message.author);
-
-    if (this.profileMap[userHash]) {
-      if (this.profileMap[userHash].status === 'DONE' || this.profileMap[userHash].status === 'UPDATING')
-        callback(this.profileMap[userHash]);
-    } else {
-      console.log('Requesting data for member ' + username + ' (' + userHash + ')');
-      this.updateMemberByMsg(message.id, userHash);
-    }
-  }
-
-  hashCode(text) {
-    var hash = 0;
-    for (var i = 0; i < text.length; i++) {
-      var char = text.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
   }
 
   getName() {
@@ -548,7 +258,6 @@ module.exports = class Pluralchum {
   getDefaultSettings() {
     return {
       profileMap: {},
-      idMap: {},
       eula: false,
       doColourText: true,
       contrastTestColour: '#000000',
@@ -563,7 +272,6 @@ module.exports = class Pluralchum {
   getSettings() {
     return {
       profileMap: this.getFilteredProfileMap(),
-      idMap: this.idMap,
       eula: this.eula,
       doColourText: this.doColourText,
       contrastTestColour: this.contrastTestColour,
@@ -577,7 +285,6 @@ module.exports = class Pluralchum {
 
   applySettings(settings) {
     this.profileMap = settings.profileMap;
-    this.idMap = settings.idMap;
     this.eula = settings.eula;
     this.doColourText = settings.doColourText;
     this.contrastTestColour = settings.contrastTestColour;
@@ -592,39 +299,6 @@ module.exports = class Pluralchum {
     const asArray = Object.entries(this.profileMap);
     const filtered = asArray.filter(([_, profile]) => profile.status === 'DONE');
     return Object.fromEntries(filtered);
-  }
-
-  luminance(r, g, b) {
-    var a = [r, g, b].map(function (v) {
-      v /= 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
-    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-  }
-
-  contrast(rgb1, rgb2) {
-    var lum1 = this.luminance(rgb1.r, rgb1.g, rgb1.b);
-    var lum2 = this.luminance(rgb2.r, rgb2.g, rgb2.b);
-    var brightest = Math.max(lum1, lum2);
-    var darkest = Math.min(lum1, lum2);
-    return (brightest + 0.05) / (darkest + 0.05);
-  }
-
-  hexToRgb(hex) {
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF"	)
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-      return r + r + g + g + b + b;
-    });
-
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
   }
 
   isProxiedMessage(message) {
