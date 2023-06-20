@@ -5,6 +5,7 @@ const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('s
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
 const React = BdApi.React;
 const PKBadge = require('./components/PKBadge');
+const { isProxiedMessage } = require('./utility');
 
 const baseEndpoint = 'https://api.pluralkit.me/v2';
 
@@ -98,10 +99,6 @@ function getUserHash(author) {
   if (Object.hasOwn(author, 'username_real')) username = author.username_real;
 
   return hashCode(username + author.avatar);
-}
-
-function isProxiedMessage(message) {
-  return message.author.discriminator === '0000';
 }
 
 function callbackIfMemberReady(props, profileMap, callback) {

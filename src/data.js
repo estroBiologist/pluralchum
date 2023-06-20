@@ -15,7 +15,7 @@ function defaultSettings() {
 
 function loadSettings(pluginName) {
   let settings = ZLibrary.Utilities.loadSettings(pluginName, defaultSettings());
-  
+
   // Clear out old cache from previous versions
   delete settings.profileMap;
   delete settings.idMap;
