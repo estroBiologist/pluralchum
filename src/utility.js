@@ -60,6 +60,20 @@ class MapCell {
   addListener(f) {
     this.#listeners.push(f);
   }
+
+  delete(key) {
+    delete this.#map[key];
+    this.#listeners.forEach(function (listener) {
+      listener(key, structuredClone(null));
+    });
+  }
+
+  clear() {
+    this.#map = {};
+    this.#listeners.forEach(function (listener) {
+      listener(null, structuredClone(null));
+    });
+  }
 }
 
 module.exports = {

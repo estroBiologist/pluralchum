@@ -37,4 +37,25 @@ function initializeProfileMap(pluginName) {
   return map;
 }
 
-module.exports = { initializeSettings, initializeProfileMap };
+function tooOld(lastUsed) {
+  const expirationTime = 1000 * 60 * 60 * 24 * 30;
+  return Date.now() - lastUsed > expirationTime;
+}
+
+function purgeOldProfiles(profileMap) {
+  if (!profileMap) return;
+
+  for (const [id, profile] of profileMap.entries()) {
+    if (Object.hasOwn(profile, 'lastUsed')) {
+      if (tooOld(profile.lastUsed)) {
+        profileMap.delete(id);
+      }
+    } else {
+      profileMap.update(id, function () {
+        return { ...profile, lastUsed: Date.now() };
+      });
+    }
+  }
+}
+
+module.exports = { initializeSettings, initializeProfileMap, purgeOldProfiles };
