@@ -77,7 +77,7 @@ class MapCell {
 }
 
 function isProxiedMessage(message) {
-  return message.author.discriminator === '0000';
+  return message.webhook_id !== null;
 }
 
 module.exports = {
