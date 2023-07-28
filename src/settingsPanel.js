@@ -1,4 +1,5 @@
 const Settings = ZLibrary.Settings;
+const { ColourPreference } = require('./data');
 
 function logo() {
   let logo = document.createElement('img');
@@ -33,13 +34,13 @@ function memberColorPref(settings) {
     '',
     settings.get().memberColourPref,
     [
-      { label: 'Member', value: 0 },
-      { label: 'System', value: 1 },
-      { label: 'Theme', value: 2 },
+      { label: 'Member', value: ColourPreference.Member },
+      { label: 'System', value: ColourPreference.System },
+      { label: 'Theme', value: ColourPreference.Theme },
     ],
     val => {
       settings.update(function (s) {
-        return { ...s, memberColorPref: val };
+        return { ...s, memberColourPref: val };
       });
     },
   );
@@ -51,9 +52,9 @@ function tagColourPref(settings) {
     '',
     settings.get().tagColourPref,
     [
-      { label: 'Member', value: 0 },
-      { label: 'System', value: 1 },
-      { label: 'Theme', value: 2 },
+      { label: 'Member', value: ColourPreference.Member },
+      { label: 'System', value: ColourPreference.System },
+      { label: 'Theme', value: ColourPreference.Theme },
     ],
     val => {
       settings.update(function (s) {
