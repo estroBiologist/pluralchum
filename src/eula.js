@@ -3,7 +3,7 @@ const React = BdApi.React;
 function headsUp(onConfirm, onCancel) {
   BdApi.UI.showConfirmationModal(
     'Heads up!',
-    <div style={{ color: '#eeeeee', 'text-align': 'center' }}>
+    <div style={{ color: 'var(--text-normal)', 'text-align': 'center' }}>
       This plugin uses the PluralKit API to fetch system and member data. <br />
       <br />
       Because of technical limitations, this data is cached on your computer between sessions. None of this data is ever
