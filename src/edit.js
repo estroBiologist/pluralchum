@@ -34,7 +34,7 @@ function patchEditAction(pluginName) {
     'editMessage',
     BdApi.Utils.debounce(function (ctx, [channel_id, message_id, message], original) {
       console.log("call")
-      if (MessageStore.getMessage(channel_id, message_id).author.discriminator === '0000') {
+      if (isProxiedMessage(MessageStore.getMessage(channel_id, message_id))) {
         let { content } = message;
         let channel = ChannelStore.getChannel(channel_id);
         let guild_id = channel.guild_id;
