@@ -10,12 +10,18 @@
     "lint": "eslint './**/*.js'"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.5",
     "@babel/preset-react": "^7.22.5",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-replace": "^5.0.2",
     "eslint": "^8.43.0",
     "eslint-plugin-react": "^7.32.2",
     "prettier": "2.8.8",
     "rollup": "^3.25.0"
+  },
+  "dependencies": {
+    "svg-loaders-react": "^2.2.1"
   }
 }

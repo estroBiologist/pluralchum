@@ -5,6 +5,7 @@ const ColourPreference = {
   Member: 0,
   System: 1,
   Theme: 2, // (do nothing)
+  Role: 3,
 };
 
 function defaultSettings() {

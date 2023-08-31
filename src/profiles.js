@@ -1,3 +1,4 @@
+const { GuildMemberStore } = ZLibrary.DiscordModules;
 const { sleep, isProxiedMessage } = require('./utility');
 
 const ProfileStatus = {
@@ -5,7 +6,7 @@ const ProfileStatus = {
   Updating: 'UPDATING',
   Requesting: 'REQUESTING',
   NotPK: 'NOT_PK',
-  Reset: 'RESET',
+  Stale: 'STALE',
 };
 
 const baseEndpoint = 'https://api.pluralkit.me/v2';
@@ -22,6 +23,11 @@ async function httpGetAsync(url) {
   return response;
 }
 
+function pkDataToServerSetting(data) {
+  let roleColour = GuildMemberStore.getMember(data.guild, data.sender)?.colorString;
+  return { role_color: roleColour };
+}
+
 function pkDataToProfile(data) {
   let profile = {
     name: data.member.name,
@@ -31,6 +37,7 @@ function pkDataToProfile(data) {
     system: data.system.id,
     status: ProfileStatus.Done,
     system_color: '#' + data.system.color,
+    server_settings: {},
   };
 
   if (data.member.color === null) profile.color = '';
@@ -41,6 +48,10 @@ function pkDataToProfile(data) {
     profile.name = data.member.display_name;
   }
 
+  if (data.guild) {
+    profile.server_settings[data.guild] = pkDataToServerSetting(data);
+  }
+
   return profile;
 }
 
@@ -49,16 +60,20 @@ async function pkResponseToProfile(response) {
     console.log('RESPONSE');
     let data = await response.json();
     console.log(data);
-
     return pkDataToProfile(data);
   } else if (response.status == 404) {
     return { status: ProfileStatus.NotPK };
   }
 }
 
-async function updateMemberByMessage(message, hash, profileMap) {
+async function getFreshProfile(message) {
+  let profileResponse = await httpGetAsync(`${baseEndpoint}/messages/${message.id}`);
+  return await pkResponseToProfile(profileResponse);
+}
+
+async function updateFreshProfile(message, hash, profileMap) {
   profileMap.update(hash, function (profile) {
-    if (profile !== null && profile.status !== ProfileStatus.Reset) {
+    if (profile !== null) {
       profile.status = ProfileStatus.Updating;
       return profile;
     } else {
@@ -66,12 +81,31 @@ async function updateMemberByMessage(message, hash, profileMap) {
     }
   });
 
-  let profileResponse = await httpGetAsync(`${baseEndpoint}/messages/${message.id}`);
-  let profile = await pkResponseToProfile(profileResponse);
+  let profile = await getFreshProfile(message);
 
   profileMap.set(hash, profile);
+}
+
+async function getProfileWithUpdatedServerSettings(message, oldProfile) {
+  let profile = await getFreshProfile(message);
+
+  profile.server_settings = { ...oldProfile.server_settings, ...profile.server_settings };
 
   return profile;
+}
+
+async function updateServerSettings(message, hash, profileMap) {
+  let oldProfile;
+
+  profileMap.update(hash, function (profile) {
+    oldProfile = profile;
+    profile.status = ProfileStatus.Updating;
+    return profile;
+  });
+
+  let profile = await getProfileWithUpdatedServerSettings(message, oldProfile);
+
+  profileMap.set(hash, profile);
 }
 
 function hashCode(text) {
@@ -92,10 +126,14 @@ function getUserHash(author) {
 }
 
 function shouldUpdate(profile) {
-  return !profile || profile.status === ProfileStatus.Reset;
+  return !profile || profile.status === ProfileStatus.Stale;
 }
 
-async function updateProfile(message, profileMap) {
+function shouldUpdateServerSetting(profile, guildId) {
+  return profile.status === ProfileStatus.Done && !profile.server_settings?.[guildId];
+}
+
+async function updateProfile(message, profileMap, guildId) {
   if (!isProxiedMessage(message)) return null;
 
   let username = message.author.username;
@@ -107,9 +145,10 @@ async function updateProfile(message, profileMap) {
 
   if (shouldUpdate(profile)) {
     console.log('Requesting data for member ' + username + ' (' + userHash + ')');
-    return await updateMemberByMessage(message, userHash, profileMap);
-  } else {
-    return profile;
+    await updateFreshProfile(message, userHash, profileMap);
+  } else if (shouldUpdateServerSetting(profile, guildId)) {
+    console.log('Requesting data for member ' + username + ' (' + userHash + ')');
+    await updateServerSettings(message, userHash, profileMap);
   }
 }
 

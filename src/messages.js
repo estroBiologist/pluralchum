@@ -160,16 +160,17 @@ function getUsername(settings, username, servername) {
   }
 }
 
-function createPKBadge(profileMap, userHash) {
+function createPKBadge(profileMap, userHash, profile) {
   // lol
   let onClick = function () {
-    profileMap.set(userHash, { status: ProfileStatus.Reset });
+    profileMap.update(userHash, function (profile) {
+      profile.status = ProfileStatus.Stale;
+      return profile;
+    });
   };
 
   return (
-    <span className='botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc'>
-      <PKBadge onClick={onClick} className='botText-1fD6Qk' />
-    </span>
+    <PKBadge status={profile.status} onClick={onClick} />
   );
 }
 
@@ -189,23 +190,27 @@ function nameProps(author, type, settings, colour) {
   return props;
 }
 
-function memberColour(colourPref, member) {
+function memberColour(colourPref, member, guildId) {
   switch (colourPref) {
     case ColourPreference.Member:
       return member.color ?? member.system_color;
     case ColourPreference.System:
       return member.system_color ?? member.color;
+    case ColourPreference.Role:
+      return member.server_settings?.[guildId]?.role_color;
     default:
       return null;
   }
 }
 
-function tagColour(colourPref, member) {
+function tagColour(colourPref, member, guildId) {
   switch (colourPref) {
     case ColourPreference.Member:
       return member.color ?? member.system_color;
     case ColourPreference.System:
       return member.system_color;
+    case ColourPreference.Role:
+      return member.server_settings?.[guildId]?.role_color;
     default:
       return null;
   }
@@ -219,12 +224,12 @@ function createHeaderChildren(props, settings, profileMap, profile, userHash) {
 
   let tree = [];
 
-  let pkBadge = createPKBadge(profileMap, userHash);
+  let pkBadge = createPKBadge(profileMap, userHash, profile);
 
-  let member_colour = memberColour(memberColourPref, profile);
+  let member_colour = memberColour(memberColourPref, profile, props.guildId);
   let userProps = nameProps(props.message.author, 'member_name', settings, member_colour);
 
-  let tag_colour = tagColour(tagColourPref, profile);
+  let tag_colour = tagColour(tagColourPref, profile, props.guildId);
   let tagProps = nameProps(props.message.author, 'system_tag', settings, tag_colour);
 
   if (!member_tag || typeof member_tag !== 'string') member_tag = '';
@@ -242,6 +247,12 @@ function createHeaderChildren(props, settings, profileMap, profile, userHash) {
   return tree;
 }
 
+function replaceBotWithPK(component, profile, profileMap, userHash) {
+  if(component?.props?.username?.props?.children?.[1]?.props?.children[0]?.props?.decorations) {
+    component.props.username.props.children[1].props.children[0].props.decorations = [createPKBadge(profileMap, userHash, profile)];
+  }
+}
+
 function handleMessageHeader(props, component, settingsCell, profileMap) {
   let userHash = getUserHash(props.message.author);
   const [profile] = hookupProfile(profileMap, userHash);
@@ -251,12 +262,14 @@ function handleMessageHeader(props, component, settingsCell, profileMap) {
     return;
   }
 
-  updateProfile(props.message, profileMap, settings.useServerNames, props.guildId);
+  updateProfile(props.message, profileMap, props.guildId);
 
   if (profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
     if (component?.props?.username?.props) {
       component.props.username.props.children = createHeaderChildren(props, settings, profileMap, profile, userHash);
     }
+  } else if (!profile || profile.status === ProfileStatus.Requesting) {
+    replaceBotWithPK(component, { status: ProfileStatus.Requesting }, profileMap, userHash)
   }
 }
 

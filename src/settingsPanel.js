@@ -36,6 +36,7 @@ function memberColorPref(settings) {
     [
       { label: 'Member', value: ColourPreference.Member },
       { label: 'System', value: ColourPreference.System },
+      { label: 'Role', value: ColourPreference.Role },
       { label: 'Theme', value: ColourPreference.Theme },
     ],
     val => {
@@ -54,6 +55,7 @@ function tagColourPref(settings) {
     [
       { label: 'Member', value: ColourPreference.Member },
       { label: 'System', value: ColourPreference.System },
+      { label: 'Role', value: ColourPreference.Role },
       { label: 'Theme', value: ColourPreference.Theme },
     ],
     val => {
