@@ -11,14 +11,14 @@ class PKBadge extends React.Component {
     var linkStyle = {
       color: '#ffffff',
     };
-    let content = "PK";
+    let content = 'PK';
     if (this.props.status === ProfileStatus.Updating || this.props.status === ProfileStatus.Requesting) {
       let dotstyle = {
-        'height': '.4em',
-        'width': '100%',
-        'display': 'inline',
+        height: '.4em',
+        width: '100%',
+        display: 'inline',
         'vertical-align': 'top',
-        'padding-top': '0.55em'
+        'padding-top': '0.55em',
       };
       content = <ThreeDots style={dotstyle} />;
     }

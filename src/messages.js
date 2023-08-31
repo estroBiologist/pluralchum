@@ -124,7 +124,7 @@ function handleMessageContent(props, component, settingsCell, profileMap) {
   if (!channel || !channel.guild_id) return; //No webhooks here lol
 
   if (settings.doColourText && profile) {
-    updateProfile(props.message, profileMap, props.guildId);
+    updateProfile(props.message, profileMap, channel.guild_id);
     setMessageTextColour(component, settings, profile);
   }
 }
@@ -169,9 +169,7 @@ function createPKBadge(profileMap, userHash, profile) {
     });
   };
 
-  return (
-    <PKBadge status={profile.status} onClick={onClick} />
-  );
+  return <PKBadge status={profile.status} onClick={onClick} />;
 }
 
 function nameProps(author, type, settings, colour) {
@@ -248,8 +246,10 @@ function createHeaderChildren(props, settings, profileMap, profile, userHash) {
 }
 
 function replaceBotWithPK(component, profile, profileMap, userHash) {
-  if(component?.props?.username?.props?.children?.[1]?.props?.children[0]?.props?.decorations) {
-    component.props.username.props.children[1].props.children[0].props.decorations = [createPKBadge(profileMap, userHash, profile)];
+  if (component?.props?.username?.props?.children?.[1]?.props?.children[0]?.props?.decorations) {
+    component.props.username.props.children[1].props.children[0].props.decorations = [
+      createPKBadge(profileMap, userHash, profile),
+    ];
   }
 }
 
@@ -269,7 +269,7 @@ function handleMessageHeader(props, component, settingsCell, profileMap) {
       component.props.username.props.children = createHeaderChildren(props, settings, profileMap, profile, userHash);
     }
   } else if (!profile || profile.status === ProfileStatus.Requesting) {
-    replaceBotWithPK(component, { status: ProfileStatus.Requesting }, profileMap, userHash)
+    replaceBotWithPK(component, { status: ProfileStatus.Requesting }, profileMap, userHash);
   }
 }
 
