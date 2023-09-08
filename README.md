@@ -42,23 +42,17 @@
   Yeah, it's not perfect. I tried my best, but I am categorically not a web developer. I'm always looking to make it better, and some of these will likely be fixed in due time, but, y'know, be aware of them.<br>
   <br>
   <br>
-  <b>- Major limitations as of v1.0 -</b><br>
+  <b>- Major limitations -</b><br>
   <br>
   <br>
-  1. <b>Initial data gathering.</b><br> Due to the way the plugin requests data from the API, the first time a member's proxy is displayed, it won't be patched by Pluralchum. Once that member's data is received (usually within a few seconds), subsequent messages will work just fine, and updating existing messages (by hovering over them, for example) will let PC patch them too. This becomes less and less of a problem over time, as the bot builds up a cache of member data, leading to an almost seamless experience. Except, however...<br> 
-  <br>
-  <br>
-  2. <b>Displayname/avatar changes.</b><br>The plugin identifies members by hashing the two, so changing them will lead to the bot having to re-identify the member in question. This usually just leads to a single message not being patched.<br>
-  <br>
-  <br>
-  3. <b>Member colours aren't updated when changed.</b><br>
+  1. <b>Member colours aren't updated when changed.</b><br>
   PC has no way of knowing when a member's colour changes. It only gets that information when it asks for an update from PK in the first place!<br>
   <br>
   <i>As a workaround, you can click the PK badge next to a user to request a member info update manually.</i><br>
   <br>
   <br>
-  4. <b>Member names aren't clickable.</b><br>
-  This one was more of a deliberate choice, as to not bite off more than I could chew for 1.0. At some point, I'd love to give member names and avatars special PK profile popouts when clicked. That's <b>The Big One</b>, baby.<br>
+  2. <b>Member names aren't clickable.</b><br>
+  This one was more of a deliberate choice, as to not bite off more than I could chew. At some point, I'd love to give member names and avatars special PK profile popouts when clicked. That's <b>The Big One</b>, baby.<br>
   <br>
   <br>
   Beyond that, there are likely to be loads of bugs and small issues I haven't spotted. Please don't hesitate to submit an <a href="https://github.com/transdisaster/pluralchum/issues">issue</a> if something's wrong, and any contributions are greatly appreciated! (I apologize for my code.)
