@@ -1,4 +1,4 @@
-<p align="center"><img src="https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png"><br><b>(PluralKit integration for BetterDiscord)</b><br><br>- by <a href="https://estrobiologist.carrd.co/">ash taylor</a> -</p>
+<p align="center"><img src="https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png"><br><b>(PluralKit integration for BetterDiscord)</b><br></p>
 
 ---
 
