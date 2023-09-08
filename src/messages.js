@@ -5,84 +5,9 @@ const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('s
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
 const React = BdApi.React;
 const PKBadge = require('./components/PKBadge');
+const { ColourPreference } = require('./data');
+const { updateProfile, ProfileStatus } = require('./profiles');
 const { isProxiedMessage } = require('./utility');
-
-const baseEndpoint = 'https://api.pluralkit.me/v2';
-
-let currentRequests = 0;
-
-function httpGetAsync(theUrl, callback) {
-  var xmlHttp = new XMLHttpRequest();
-
-  xmlHttp.onreadystatechange = function () {
-    if (xmlHttp.readyState == 4) {
-      callback(xmlHttp.responseText, xmlHttp.status);
-      currentRequests -= 1;
-    }
-  };
-
-  currentRequests += 1;
-  console.log('Sending request with delay ', currentRequests * 600);
-  setTimeout(function () {
-    xmlHttp.open('GET', baseEndpoint + theUrl, true); // true for asynchronous
-    xmlHttp.send(null);
-  }, currentRequests * 600);
-}
-
-function pkDataToProfile(data) {
-  let profile = {
-    name: data.member.name,
-    color: '#' + data.member.color,
-    tag: data.system.tag,
-    id: data.member.id,
-    system: data.system.id,
-    status: 'DONE',
-    system_color: '#' + data.system.color,
-  };
-
-  if (data.member.color === null) profile.color = '';
-
-  if (data.system.color === null) profile.system_color = '';
-
-  if (data.member.display_name) {
-    profile.name = data.member.display_name;
-  }
-
-  return profile;
-}
-
-function pkResponseToProfile(response, status) {
-  if (status == 200) {
-    console.log('RESPONSE');
-    let data = JSON.parse(response);
-    console.log(data);
-
-    return pkDataToProfile(data);
-  } else if (status == 404) {
-    return { status: 'NOT_PK' };
-  }
-}
-
-function createPKCallback(hash, profileMap) {
-  return function (response, status) {
-    profileMap.update(hash, function () {
-      return pkResponseToProfile(response, status);
-    });
-  };
-}
-
-function updateMemberByMsg(msg, hash, profileMap) {
-  profileMap.update(hash, function (profile) {
-    if (profile !== null) {
-      profile.status = 'UPDATING';
-      return profile;
-    } else {
-      return { status: 'REQUESTING' };
-    }
-  });
-
-  httpGetAsync('/messages/' + msg, createPKCallback(hash, profileMap));
-}
 
 function hashCode(text) {
   var hash = 0;
@@ -101,30 +26,28 @@ function getUserHash(author) {
   return hashCode(username + author.avatar);
 }
 
-function callbackIfMemberReady(props, profileMap, callback) {
-  if (!Object.hasOwn(props, 'message')) {
-    return;
-  }
+function hookupProfile(profileMap, userHash) {
+  // By accessing the profile and settings through react hooks, react will know
+  // to redraw the component when some data gets updated.
+  const [profile, setProfile] = React.useState(profileMap.get(userHash));
+  React.useEffect(function () {
+    return profileMap.addListener(function (key, value) {
+      if (key === userHash) {
+        setProfile(value);
+      }
+    });
+  });
 
-  let message = props.message;
+  return [profile, setProfile];
+}
 
-  if (!isProxiedMessage(message)) return;
+function hookupValueCell(cell) {
+  const [value, setValue] = React.useState(cell.get());
+  React.useEffect(function () {
+    return cell.addListener(setValue);
+  });
 
-  let username = message.author.username;
-  if (Object.hasOwn(message.author, 'username_real')) username = message.author.username_real;
-
-  let userHash = getUserHash(message.author);
-
-  let profile = profileMap.get(userHash);
-
-  if (profile) {
-    if (profile.status === 'DONE' || profile.status === 'UPDATING') {
-      callback(profile);
-    }
-  } else {
-    console.log('Requesting data for member ' + username + ' (' + userHash + ')');
-    updateMemberByMsg(message.id, userHash, profileMap);
-  }
+  return [value, setValue];
 }
 
 function luminance(r, g, b) {
@@ -166,7 +89,7 @@ function acceptableContrast(colour, doContrastTest, contrastTestColour, contrast
 }
 
 function setMessageTextColour(component, settings, member) {
-  let { doContrastTest, contrastTestColour, contrastThreshold } = settings.get();
+  let { doContrastTest, contrastTestColour, contrastThreshold } = settings;
   if (member.color && acceptableContrast(member.color, doContrastTest, contrastTestColour, contrastThreshold)) {
     const MessageElements = component.props.children[0];
     // se: Each formatted element gets a separate entry in the array ret.props.children[0].
@@ -177,29 +100,32 @@ function setMessageTextColour(component, settings, member) {
     // Waugh.
     // Making a list of the specific markup types that don't format correctly,
     // Because if we just do this to all formatting, that overrides the URL color too.
-    const MarkupTypes = ["h1", "h2", "h3"];
+    const MarkupTypes = ['h1', 'h2', 'h3'];
     for (const Element of MessageElements) {
       if (MarkupTypes.includes(Element.type)) {
         Element.props.style = {
-          color: member.color
+          color: member.color,
         };
       }
     }
     component.props.style = {
-      color: member.color
+      color: member.color,
     };
   }
 }
 
-function handleMessageContent(props, component, settings, profileMap) {
+function handleMessageContent(props, component, settingsCell, profileMap) {
+  let userHash = getUserHash(props.message.author);
+  const [profile] = hookupProfile(profileMap, userHash);
+  const [settings] = hookupValueCell(settingsCell);
+
   const channel = ChannelStore.getChannel(props.message.channel_id);
 
   if (!channel || !channel.guild_id) return; //No webhooks here lol
 
-  if (settings.get().doColourText) {
-    callbackIfMemberReady(props, profileMap, function (member) {
-      setMessageTextColour(component, settings, member);
-    });
+  if (settings.doColourText && profile) {
+    updateProfile(props.message, profileMap, channel.guild_id);
+    setMessageTextColour(component, settings, profile);
   }
 }
 
@@ -209,112 +135,142 @@ function patchMessageContent(pluginName, settings, profileMap) {
   });
 }
 
-function handleMessageHeader(props, component, settings, profileMap) {
-  const tree = ZLibrary.Utilities.getNestedProp(component, 'props.username.props.children');
+function servername(props, profile) {
+  if (!Object.hasOwn(props.message.author, 'username_real')) {
+    props.message.author.username_real = props.message.author.username.slice();
+  }
 
-  if (!Array.isArray(tree)) {
+  // most batshit string length function on earth
+  const count = str => {
+    const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
+    return ((str || '').match(regex) || []).length;
+  };
+
+  let username_len = count(props.message.author.username_real);
+  let tag_len = count(profile.tag) + 1;
+
+  return props.message.author.username_real.slice(0, username_len - tag_len);
+}
+
+function getUsername(settings, username, servername) {
+  if (settings.useServerNames && servername) {
+    return servername;
+  } else {
+    return username;
+  }
+}
+
+function createPKBadge(profileMap, userHash, profile) {
+  // lol
+  let onClick = function () {
+    profileMap.update(userHash, function (profile) {
+      profile.status = ProfileStatus.Stale;
+      return profile;
+    });
+  };
+
+  return <PKBadge status={profile.status} onClick={onClick} />;
+}
+
+function nameProps(author, type, settings, colour) {
+  let { doContrastTest, contrastTestColour, contrastThreshold } = settings;
+
+  let props = {
+    user: author,
+    className: 'username-h_Y3Us',
+    type: type,
+  };
+
+  if (colour && acceptableContrast(colour, doContrastTest, contrastTestColour, contrastThreshold)) {
+    props.style = { color: colour };
+  }
+
+  return props;
+}
+
+function memberColour(colourPref, member, guildId) {
+  switch (colourPref) {
+    case ColourPreference.Member:
+      return member.color ?? member.system_color;
+    case ColourPreference.System:
+      return member.system_color ?? member.color;
+    case ColourPreference.Role:
+      return member.server_settings?.[guildId]?.role_color;
+    default:
+      return null;
+  }
+}
+
+function tagColour(colourPref, member, guildId) {
+  switch (colourPref) {
+    case ColourPreference.Member:
+      return member.color ?? member.system_color;
+    case ColourPreference.System:
+      return member.system_color;
+    case ColourPreference.Role:
+      return member.server_settings?.[guildId]?.role_color;
+    default:
+      return null;
+  }
+}
+
+function createHeaderChildren(props, settings, profileMap, profile, userHash) {
+  let { memberColourPref, tagColourPref } = settings;
+
+  let username = getUsername(settings, profile.name, servername(props, profile));
+  let member_tag = profile.tag;
+
+  let tree = [];
+
+  let pkBadge = createPKBadge(profileMap, userHash, profile);
+
+  let member_colour = memberColour(memberColourPref, profile, props.guildId);
+  let userProps = nameProps(props.message.author, 'member_name', settings, member_colour);
+
+  let tag_colour = tagColour(tagColourPref, profile, props.guildId);
+  let tagProps = nameProps(props.message.author, 'system_tag', settings, tag_colour);
+
+  if (!member_tag || typeof member_tag !== 'string') member_tag = '';
+
+  if (props.compact) {
+    tree.push(pkBadge);
+    tree.push(React.createElement('span', userProps, ' ' + username));
+    tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString() + ' '));
+  } else {
+    tree.push(React.createElement('span', userProps, username));
+    tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString()));
+    tree.push(pkBadge);
+  }
+
+  return tree;
+}
+
+function replaceBotWithPK(component, profile, profileMap, userHash) {
+  if (component?.props?.username?.props?.children?.[1]?.props?.children[0]?.props?.decorations) {
+    component.props.username.props.children[1].props.children[0].props.decorations = [
+      createPKBadge(profileMap, userHash, profile),
+    ];
+  }
+}
+
+function handleMessageHeader(props, component, settingsCell, profileMap) {
+  let userHash = getUserHash(props.message.author);
+  const [profile] = hookupProfile(profileMap, userHash);
+  const [settings] = hookupValueCell(settingsCell);
+
+  if (!isProxiedMessage(props.message)) {
     return;
   }
 
-  callbackIfMemberReady(props, profileMap, function (member) {
-    let { useServerNames, memberColourPref, tagColourPref, doContrastTest, contrastTestColour, contrastThreshold } =
-      settings.get();
+  updateProfile(props.message, profileMap, props.guildId);
 
-    if (!Object.hasOwn(props.message.author, 'username_real')) {
-      props.message.author.username_real = props.message.author.username.slice();
-
-      if (useServerNames) {
-        // most batshit string length function on earth
-        const count = str => {
-          const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
-          return ((str || '').match(regex) || []).length;
-        };
-
-        let username_len = count(props.message.author.username_real);
-        let tag_len = count(member.tag);
-
-        props.message.author.username = props.message.author.username_real.slice(0, username_len - tag_len);
-      } else {
-        props.message.author.username = member.name + ' ';
-      }
+  if (profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
+    if (component?.props?.username?.props) {
+      component.props.username.props.children = createHeaderChildren(props, settings, profileMap, profile, userHash);
     }
-    tree.length = 0; //loser
-
-    let member_tag = member.tag;
-
-    let userProps = {
-      user: props.message.author,
-      className: 'username-h_Y3Us',
-      type: 'member_name',
-    };
-
-    let tagProps = {
-      user: props.message.author,
-      className: 'username-h_Y3Us',
-      type: 'system_tag',
-    };
-
-    // lol
-    let pkBadge = (
-      <span className='botTagCozy-3NTBvK botTag-1NoD0B botTagRegular-kpctgU botTag-7aX5WZ rem-3kT9wc'>
-        <PKBadge
-          pk_id={props.message.id}
-          onClick={id => updateMemberByMsg(id, getUserHash(props.message.author), profileMap)}
-          className='botText-1fD6Qk'
-        />
-      </span>
-    );
-    // Preferences
-
-    // 0 - Member
-    // 1 - System
-    // 2 - Theme (do nothing)
-    let member_colour;
-    let tag_colour;
-
-    if (memberColourPref === 0) {
-      member_colour = member.color;
-
-      if (!member_colour) member_colour = member.system_color; // Fallback
-    } else if (memberColourPref === 1) {
-      member_colour = member.system_color;
-
-      if (!member_colour) member_colour = member.color; // Fallback
-    }
-
-    if (tagColourPref === 0) {
-      tag_colour = member.color;
-
-      if (!tag_colour) tag_colour = member.system_color; // Fallback
-    } else if (tagColourPref === 1) {
-      tag_colour = member.system_color;
-    }
-
-    // Color testing and stuff
-    if (member_colour) {
-      if (acceptableContrast(member_colour, doContrastTest, contrastTestColour, contrastThreshold)) {
-        userProps.style = { color: member_colour };
-      }
-    }
-
-    if (tag_colour) {
-      if (acceptableContrast(tag_colour, doContrastTest, contrastTestColour, contrastThreshold)) {
-        tagProps.style = { color: tag_colour };
-      }
-    }
-
-    if (!member_tag || typeof member_tag !== 'string') member_tag = '';
-
-    if (props.compact) {
-      tree.push(pkBadge);
-      tree.push(React.createElement('span', userProps, ' ' + props.message.author.username.toString()));
-      tree.push(React.createElement('span', tagProps, member_tag.toString() + ' '));
-    } else {
-      tree.push(React.createElement('span', userProps, props.message.author.username.toString()));
-      tree.push(React.createElement('span', tagProps, member_tag.toString()));
-      tree.push(pkBadge);
-    }
-  });
+  } else if (!profile || profile.status === ProfileStatus.Requesting) {
+    replaceBotWithPK(component, { status: ProfileStatus.Requesting }, profileMap, userHash);
+  }
 }
 
 function patchMessageHeader(pluginName, settings, profileMap) {

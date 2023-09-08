@@ -1,4 +1,12 @@
 const { ValueCell, MapCell } = require('./utility');
+const { ProfileStatus } = require('./profiles');
+
+const ColourPreference = {
+  Member: 0,
+  System: 1,
+  Theme: 2, // (do nothing)
+  Role: 3,
+};
 
 function defaultSettings() {
   return {
@@ -7,8 +15,8 @@ function defaultSettings() {
     contrastTestColour: '#000000',
     doContrastTest: true,
     contrastThreshold: 3,
-    memberColourPref: 0,
-    tagColourPref: 1,
+    memberColourPref: ColourPreference.Member,
+    tagColourPref: ColourPreference.System,
     useServerNames: false,
   };
 }
@@ -33,7 +41,7 @@ function initializeSettings(pluginName) {
 }
 
 function filterDoneProfiles(entries) {
-  const filtered = entries.filter(([_, profile]) => profile.status === 'DONE');
+  const filtered = entries.filter(([_, profile]) => profile.status === ProfileStatus.Done);
   return Object.fromEntries(filtered);
 }
 
@@ -67,4 +75,4 @@ function purgeOldProfiles(profileMap) {
   }
 }
 
-module.exports = { initializeSettings, initializeProfileMap, purgeOldProfiles };
+module.exports = { ColourPreference, initializeSettings, initializeProfileMap, purgeOldProfiles };

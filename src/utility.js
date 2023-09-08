@@ -7,22 +7,32 @@ class ValueCell {
   }
 
   get() {
-    return structuredClone(this.#val);
+    return this.#val;
+  }
+
+  set(x) {
+    this.#val = x;
   }
 
   update(f) {
     let old = this.#val;
-    let current = f(structuredClone(old));
+    let current = f(old);
     this.#val = current;
     if (old !== current) {
       this.#listeners.forEach(function (listener) {
-        listener(structuredClone(current));
+        listener(current);
       });
     }
   }
 
   addListener(f) {
     this.#listeners.push(f);
+
+    // removeListener function
+    return function () {
+      let index = this.#listeners.indexOf(f);
+      this.#listeners.splice(index, 1);
+    }.bind(this);
   }
 }
 
@@ -36,52 +46,69 @@ class MapCell {
 
   get(key) {
     if (Object.hasOwn(this.#map, key)) {
-      return structuredClone(this.#map[key]);
+      return this.#map[key];
     } else {
       return null;
     }
   }
 
+  set(key, value) {
+    this.update(key, function () {
+      return value;
+    });
+  }
+
   entries() {
-    return Object.entries(structuredClone(this.#map));
+    return Object.entries(this.#map);
   }
 
   update(key, f) {
     let old = this.get(key);
-    let current = f(structuredClone(old));
+    let current = f(old);
     this.#map[key] = current;
     if (old !== current) {
       this.#listeners.forEach(function (listener) {
-        listener(key, structuredClone(current));
+        listener(key, current);
       });
     }
   }
 
   addListener(f) {
     this.#listeners.push(f);
+
+    // removeListener function
+    return function () {
+      let index = this.#listeners.indexOf(f);
+      this.#listeners.splice(index, 1);
+    }.bind(this);
   }
 
   delete(key) {
     delete this.#map[key];
     this.#listeners.forEach(function (listener) {
-      listener(key, structuredClone(null));
+      listener(key, null);
     });
   }
 
   clear() {
     this.#map = {};
     this.#listeners.forEach(function (listener) {
-      listener(null, structuredClone(null));
+      listener(null, null);
     });
   }
 }
 
 function isProxiedMessage(message) {
-  return message.webhook_id !== null;
+  return message.webhookId !== null;
+}
+
+async function sleep(timeout) {
+  return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
 module.exports = {
   ValueCell,
   MapCell,
   isProxiedMessage,
+  sleep,
 };

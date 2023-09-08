@@ -33,7 +33,6 @@ function patchEditAction(pluginName) {
     MessageActions,
     'editMessage',
     BdApi.Utils.debounce(function (ctx, [channel_id, message_id, message], original) {
-      console.log("call")
       if (isProxiedMessage(MessageStore.getMessage(channel_id, message_id))) {
         let { content } = message;
         let channel = ChannelStore.getChannel(channel_id);
