@@ -22,7 +22,7 @@ function headsUp(onConfirm, onCancel) {
   );
 }
 
-function requireEula(settings, pluginName) {
+export function requireEula(settings, pluginName) {
   if (!settings.get().eula) {
     let onConfirm = function () {
       settings.update(function (s) {
@@ -37,5 +37,3 @@ function requireEula(settings, pluginName) {
     headsUp(onConfirm, onCancel);
   }
 }
-
-module.exports = { requireEula };

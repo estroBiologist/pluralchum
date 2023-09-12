@@ -1,9 +1,9 @@
 const MessageActions = ZLibrary.DiscordModules.MessageActions;
 const MessageStore = ZLibrary.DiscordModules.MessageStore;
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
-const { isProxiedMessage } = require('./utility');
+import { isProxiedMessage } from './utility.js';
 
-function patchEditMenuItem() {
+export function patchEditMenuItem() {
   // Add edit menu item to proxied messages.
   return BdApi.ContextMenu.patch('message', (res, props) => {
     const { message } = props;
@@ -26,7 +26,7 @@ function patchEditMenuItem() {
   });
 }
 
-function patchEditAction(pluginName) {
+export function patchEditAction(pluginName) {
   // Patch edit actions on proxied messages to send a pluralkit command.
   BdApi.Patcher.instead(
     pluginName,
@@ -48,5 +48,3 @@ function patchEditAction(pluginName) {
     }, 100),
   );
 }
-
-module.exports = { patchEditMenuItem, patchEditAction };

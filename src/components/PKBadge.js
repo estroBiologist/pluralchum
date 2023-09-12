@@ -1,8 +1,8 @@
 const React = BdApi.React;
-const { ThreeDots } = require('svg-loaders-react');
-const { ProfileStatus } = require('../profiles.js');
+import { ThreeDots } from 'svg-loaders-react';
+import { ProfileStatus } from '../profiles.js';
 
-class PKBadge extends React.Component {
+export default class PKBadge extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -33,5 +33,3 @@ class PKBadge extends React.Component {
     );
   }
 }
-
-module.exports = PKBadge;

@@ -1,10 +1,10 @@
-const babel = require('@rollup/plugin-babel');
-const commonjs = require('@rollup/plugin-commonjs');
-const nodeResolve = require('@rollup/plugin-node-resolve');
-const replace = require('@rollup/plugin-replace');
-const fs = require('fs/promises');
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
+import fs from 'fs/promises';
 
-module.exports = {
+export default {
   input: 'src/main.js',
   output: {
     file: 'dist/Pluralchum.plugin.js',

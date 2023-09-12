@@ -1,4 +1,4 @@
-class ValueCell {
+export class ValueCell {
   #val;
   #listeners = [];
 
@@ -36,7 +36,7 @@ class ValueCell {
   }
 }
 
-class MapCell {
+export class MapCell {
   #map;
   #listeners = [];
 
@@ -98,17 +98,10 @@ class MapCell {
   }
 }
 
-function isProxiedMessage(message) {
+export function isProxiedMessage(message) {
   return message.webhookId !== null;
 }
 
-async function sleep(timeout) {
+export async function sleep(timeout) {
   return new Promise(resolve => setTimeout(resolve, timeout));
 }
-
-module.exports = {
-  ValueCell,
-  MapCell,
-  isProxiedMessage,
-  sleep,
-};

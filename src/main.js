@@ -1,10 +1,10 @@
-const { initializeSettings, initializeProfileMap, purgeOldProfiles } = require('./data');
-const { requireEula } = require('./eula');
-const { patchMessageContent, patchMessageHeader } = require('./messages');
-const { patchEditMenuItem, patchEditAction } = require('./edit');
-const { settingsPanel } = require('./settingsPanel');
+import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
+import { requireEula } from './eula.js';
+import { patchMessageContent, patchMessageHeader } from './messages.js';
+import { patchEditMenuItem, patchEditAction } from './edit.js';
+import { settingsPanel } from './settingsPanel.js';
 
-module.exports = class Pluralchum {
+export class Pluralchum {
   patches = [];
 
   start() {
@@ -46,4 +46,4 @@ module.exports = class Pluralchum {
   getName() {
     return 'Pluralchum';
   }
-};
+}

@@ -1,7 +1,7 @@
-const { ValueCell, MapCell } = require('./utility');
-const { ProfileStatus } = require('./profiles');
+import { ValueCell, MapCell } from './utility.js';
+import { ProfileStatus } from './profiles.js';
 
-const ColourPreference = {
+export const ColourPreference = {
   Member: 0,
   System: 1,
   Theme: 2, // (do nothing)
@@ -32,7 +32,7 @@ function loadSettings(pluginName) {
   return settings;
 }
 
-function initializeSettings(pluginName) {
+export function initializeSettings(pluginName) {
   let settings = new ValueCell(loadSettings(pluginName));
   settings.addListener(function (s) {
     ZLibrary.Utilities.saveSettings(pluginName, s);
@@ -45,7 +45,7 @@ function filterDoneProfiles(entries) {
   return Object.fromEntries(filtered);
 }
 
-function initializeProfileMap(pluginName) {
+export function initializeProfileMap(pluginName) {
   const key = 'profileMap';
   let map = new MapCell(BdApi.Data.load(pluginName, key) ?? {});
   map.addListener(function () {
@@ -59,7 +59,7 @@ function tooOld(lastUsed) {
   return Date.now() - lastUsed > expirationTime;
 }
 
-function purgeOldProfiles(profileMap) {
+export function purgeOldProfiles(profileMap) {
   if (!profileMap) return;
 
   for (const [id, profile] of profileMap.entries()) {
@@ -74,5 +74,3 @@ function purgeOldProfiles(profileMap) {
     }
   }
 }
-
-module.exports = { ColourPreference, initializeSettings, initializeProfileMap, purgeOldProfiles };

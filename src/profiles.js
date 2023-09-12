@@ -1,7 +1,7 @@
 const { GuildMemberStore } = ZLibrary.DiscordModules;
-const { sleep, isProxiedMessage } = require('./utility');
+import { sleep, isProxiedMessage } from './utility';
 
-const ProfileStatus = {
+export const ProfileStatus = {
   Done: 'DONE',
   Updating: 'UPDATING',
   Requesting: 'REQUESTING',
@@ -133,7 +133,7 @@ function shouldUpdateServerSetting(profile, guildId) {
   return profile.status === ProfileStatus.Done && !profile.server_settings?.[guildId];
 }
 
-async function updateProfile(message, profileMap, guildId) {
+export async function updateProfile(message, profileMap, guildId) {
   if (!isProxiedMessage(message)) return null;
 
   let username = message.author.username;
@@ -151,5 +151,3 @@ async function updateProfile(message, profileMap, guildId) {
     await updateServerSettings(message, userHash, profileMap);
   }
 }
-
-module.exports = { ProfileStatus, updateProfile };

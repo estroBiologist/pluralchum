@@ -4,10 +4,10 @@ const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('s
 });
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
 const React = BdApi.React;
-const PKBadge = require('./components/PKBadge');
-const { ColourPreference } = require('./data');
-const { updateProfile, ProfileStatus } = require('./profiles');
-const { isProxiedMessage } = require('./utility');
+import PKBadge from './components/PKBadge.js';
+import { ColourPreference } from './data.js';
+import { updateProfile, ProfileStatus } from './profiles.js';
+import { isProxiedMessage } from './utility.js';
 
 function hashCode(text) {
   var hash = 0;
@@ -129,7 +129,7 @@ function handleMessageContent(props, component, settingsCell, profileMap) {
   }
 }
 
-function patchMessageContent(pluginName, settings, profileMap) {
+export function patchMessageContent(pluginName, settings, profileMap) {
   BdApi.Patcher.after(pluginName, MessageContent, 'type', function (_, [props], ret) {
     handleMessageContent(props, ret, settings, profileMap);
   });
@@ -273,7 +273,7 @@ function handleMessageHeader(props, component, settingsCell, profileMap) {
   }
 }
 
-function patchMessageHeader(pluginName, settings, profileMap) {
+export function patchMessageHeader(pluginName, settings, profileMap) {
   // This could break with any Discord update but oh well
   // We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
   // So we just sort of patch all the member functions in the module and hope for the best
@@ -286,5 +286,3 @@ function patchMessageHeader(pluginName, settings, profileMap) {
     });
   }
 }
-
-module.exports = { patchMessageContent, patchMessageHeader };

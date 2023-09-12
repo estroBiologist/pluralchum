@@ -1,5 +1,5 @@
 const Settings = ZLibrary.Settings;
-const { ColourPreference } = require('./data');
+import { ColourPreference } from './data.js';
 
 function logo() {
   let logo = document.createElement('img');
@@ -157,7 +157,7 @@ function cachePanel(profileMap) {
   return cachePanel;
 }
 
-function settingsPanel(settings, profileMap) {
+export function settingsPanel(settings, profileMap) {
   let settingsPanel = new Settings.SettingPanel();
 
   settingsPanel.append(
@@ -170,5 +170,3 @@ function settingsPanel(settings, profileMap) {
 
   return settingsPanel.getElement();
 }
-
-module.exports = { settingsPanel };
