@@ -1,3 +1,4 @@
+import ZLibrary from './external/ZLibrary.js';
 const MessageActions = ZLibrary.DiscordModules.MessageActions;
 const MessageStore = ZLibrary.DiscordModules.MessageStore;
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;

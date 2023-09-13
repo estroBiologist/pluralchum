@@ -2,6 +2,7 @@ const MessageContent = BdApi.Webpack.getModule(m => m?.type?.toString().includes
 const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('showTimestampOnHover'), {
   defaultExport: false,
 });
+import ZLibrary from './external/ZLibrary.js';
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
 const React = BdApi.React;
 import PKBadge from './components/PKBadge.js';

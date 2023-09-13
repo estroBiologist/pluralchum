@@ -1,3 +1,4 @@
+import ZLibrary from './external/ZLibrary.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader } from './messages.js';
@@ -8,12 +9,6 @@ export class Pluralchum {
   patches = [];
 
   start() {
-    if (!global.ZeresPluginLibrary)
-      return window.BdApi.alert(
-        'Library Missing',
-        `The library plugin needed for ${this.getName()} is missing.<br /><br /> <a href="https://betterdiscord.app/plugin/ZeresPluginLibrary" target="_blank">Click here to download the library!</a>`,
-      );
-
     this.settings = initializeSettings(this.getName());
 
     console.log('[PLURALCHUM] Loaded settings');

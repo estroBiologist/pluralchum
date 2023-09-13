@@ -24,10 +24,11 @@ module.exports = {
   rules: {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
     'react/prop-types': ['off'],
+    'react/jsx-key': ['off'],
+    'react/jsx-no-target-blank': ['off'],
   },
   globals: {
     BdApi: 'readonly',
-    ZLibrary: 'readonly',
   },
   settings: {
     react: {

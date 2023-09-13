@@ -1,3 +1,4 @@
+import ZLibrary from './external/ZLibrary.js';
 const Settings = ZLibrary.Settings;
 import { ColourPreference } from './data.js';
 

@@ -1,4 +1,5 @@
-const { GuildMemberStore } = ZLibrary.DiscordModules;
+import ZLibrary from './external/ZLibrary.js';
+const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
 import { sleep, isProxiedMessage } from './utility';
 
 export const ProfileStatus = {
