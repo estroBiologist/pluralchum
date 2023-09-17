@@ -145,10 +145,19 @@ export async function updateProfile(message, profileMap, guildId) {
   let profile = profileMap.get(userHash);
 
   if (shouldUpdate(profile)) {
-    console.log('Requesting data for member ' + username + ' (' + userHash + ')');
-    await updateFreshProfile(message, userHash, profileMap);
+    console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
+    try {
+      await updateFreshProfile(message, userHash, profileMap);
+    } catch (e) {
+      console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
+    }
+    
   } else if (shouldUpdateServerSetting(profile, guildId)) {
-    console.log('Requesting data for member ' + username + ' (' + userHash + ')');
-    await updateServerSettings(message, userHash, profileMap);
+    console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
+    try {
+      await updateServerSettings(message, userHash, profileMap);
+    } catch (e) {
+      console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
+    }
   }
 }
