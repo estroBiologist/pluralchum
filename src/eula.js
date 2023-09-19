@@ -1,4 +1,5 @@
 const React = BdApi.React;
+import { pluginName } from "./utility";
 
 function headsUp(onConfirm, onCancel) {
   BdApi.UI.showConfirmationModal(
@@ -22,7 +23,7 @@ function headsUp(onConfirm, onCancel) {
   );
 }
 
-export function requireEula(settings, pluginName) {
+export function requireEula(settings) {
   if (!settings.get().eula) {
     let onConfirm = function () {
       settings.update(function (s) {

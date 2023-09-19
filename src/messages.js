@@ -8,7 +8,8 @@ const React = BdApi.React;
 import PKBadge from './components/PKBadge.js';
 import { ColourPreference } from './data.js';
 import { updateProfile, ProfileStatus } from './profiles.js';
-import { isProxiedMessage } from './utility.js';
+import { ValueCell, isProxiedMessage, pluginName } from './utility.js';
+import * as Patch from './patch.js';
 
 function hashCode(text) {
   var hash = 0;
@@ -27,9 +28,8 @@ function getUserHash(author) {
   return hashCode(username + author.avatar);
 }
 
-function hookupProfile(profileMap, userHash) {
-  // By accessing the profile and settings through react hooks, react will know
-  // to redraw the component when some data gets updated.
+function hookupProfile(profileMap, _ctx, [props], _ret) {
+  let userHash = getUserHash(props.message.author);
   const [profile, setProfile] = React.useState(profileMap.get(userHash));
   React.useEffect(function () {
     return profileMap.addListener(function (key, value) {
@@ -115,25 +115,21 @@ function setMessageTextColour(component, settings, member) {
   }
 }
 
-function handleMessageContent(props, component, settingsCell, profileMap) {
-  let userHash = getUserHash(props.message.author);
-  const [profile] = hookupProfile(profileMap, userHash);
-  const [settings] = hookupValueCell(settingsCell);
-
+function handleMessageContent(ctx, [props], component, [settings, profile, profileMap]) {
   const channel = ChannelStore.getChannel(props.message.channel_id);
 
   if (!channel || !channel.guild_id) return; //No webhooks here lol
 
-  if (settings.doColourText && profile) {
+  if (settings.doColourText && profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
     updateProfile(props.message, profileMap, channel.guild_id);
     setMessageTextColour(component, settings, profile);
   }
 }
 
-export function patchMessageContent(pluginName, settings, profileMap) {
-  BdApi.Patcher.after(pluginName, MessageContent, 'type', function (_, [props], ret) {
-    handleMessageContent(props, ret, settings, profileMap);
-  });
+const messageContentPatcher = new Patch.AfterPatcher(pluginName, MessageContent, 'type', [hookupValueCell, hookupProfile, hookupValueCell]);
+
+export function patchMessageContent(settings, profileMap) {
+  messageContentPatcher.setPatch(handleMessageContent, [settings, profileMap, new ValueCell(profileMap)])
 }
 
 function servername(props, profile) {
@@ -254,10 +250,8 @@ function replaceBotWithPK(component, profile, profileMap, userHash) {
   }
 }
 
-function handleMessageHeader(props, component, settingsCell, profileMap) {
+function handleMessageHeader(ctx, [props], component, [settings, profile, profileMap]) {
   let userHash = getUserHash(props.message.author);
-  const [profile] = hookupProfile(profileMap, userHash);
-  const [settings] = hookupValueCell(settingsCell);
 
   if (!isProxiedMessage(props.message)) {
     return;
@@ -274,16 +268,15 @@ function handleMessageHeader(props, component, settingsCell, profileMap) {
   }
 }
 
-export function patchMessageHeader(pluginName, settings, profileMap) {
-  // This could break with any Discord update but oh well
-  // We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
-  // So we just sort of patch all the member functions in the module and hope for the best
-  //
-  // i am sorry
-  //
-  for (const member in MessageHeader) {
-    BdApi.Patcher.after(pluginName, MessageHeader, member, function (_, [props], ret) {
-      handleMessageHeader(props, ret, settings, profileMap);
-    });
-  }
+
+// This could break with any Discord update but oh well
+// We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
+// So we just sort of patch all the member functions in the module and hope for the best
+//
+// i am sorry
+//
+const messagerHeaderPatchers = Object.keys(MessageHeader).map((member) => new Patch.AfterPatcher(pluginName, MessageHeader, member, [hookupValueCell, hookupProfile, hookupValueCell]));
+
+export function patchMessageHeader(settings, profileMap) {
+  messagerHeaderPatchers.forEach(patcher => patcher.setPatch(handleMessageHeader, [settings, profileMap, new ValueCell(profileMap)]));
 }

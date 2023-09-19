@@ -1,5 +1,5 @@
 import ZLibrary from './external/ZLibrary.js';
-import { ValueCell, MapCell } from './utility.js';
+import { ValueCell, MapCell, pluginName } from './utility.js';
 import { ProfileStatus } from './profiles.js';
 
 export const ColourPreference = {
@@ -22,7 +22,7 @@ function defaultSettings() {
   };
 }
 
-function loadSettings(pluginName) {
+function loadSettings() {
   let settings = ZLibrary.Utilities.loadSettings(pluginName, defaultSettings());
 
   // Clear out old cache from previous versions
@@ -33,8 +33,8 @@ function loadSettings(pluginName) {
   return settings;
 }
 
-export function initializeSettings(pluginName) {
-  let settings = new ValueCell(loadSettings(pluginName));
+export function initializeSettings() {
+  let settings = new ValueCell(loadSettings());
   settings.addListener(function (s) {
     ZLibrary.Utilities.saveSettings(pluginName, s);
   });
@@ -46,7 +46,7 @@ function filterDoneProfiles(entries) {
   return Object.fromEntries(filtered);
 }
 
-export function initializeProfileMap(pluginName) {
+export function initializeProfileMap() {
   const key = 'profileMap';
   let map = new MapCell(BdApi.Data.load(pluginName, key) ?? {});
   map.addListener(function () {

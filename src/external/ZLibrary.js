@@ -1,8 +1,5 @@
 const React = BdApi.React;
-
-function dummy() {
-  return new Proxy({}, dummy);
-}
+import { dummy } from "../utility";
 
 let warned = false;
 

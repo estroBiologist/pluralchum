@@ -4,34 +4,37 @@ import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader } from './messages.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
+import * as Patch from './patch.js';
+import { pluginName } from './utility.js';
 
 export class Pluralchum {
   patches = [];
 
   start() {
-    this.settings = initializeSettings(this.getName());
+    this.settings = initializeSettings();
 
     console.log('[PLURALCHUM] Loaded settings');
 
-    this.profileMap = initializeProfileMap(this.getName());
+    this.profileMap = initializeProfileMap();
 
     console.log('[PLURALCHUM] Loaded PK data');
 
-    requireEula(this.settings, this.getName());
+    requireEula(this.settings);
 
-    patchMessageContent(this.getName(), this.settings, this.profileMap);
-    patchMessageHeader(this.getName(), this.settings, this.profileMap);
+    patchMessageContent(this.settings, this.profileMap);
+    patchMessageHeader(this.settings, this.profileMap);
     this.patches.push(patchEditMenuItem());
-    patchEditAction(this.getName());
+    patchEditAction();
   }
 
   stop() {
     for (let i = this.patches.length - 1; i >= 0; i--) this.patches[i]();
 
     purgeOldProfiles(this.profileMap);
+    
+    Patch.unpatchAll();
 
-    BdApi.Patcher.unpatchAll(this.getName());
-    ZLibrary.DOMTools.removeStyle(this.getName());
+    ZLibrary.DOMTools.removeStyle(pluginName);
   }
 
   getSettingsPanel() {
@@ -39,6 +42,6 @@ export class Pluralchum {
   }
 
   getName() {
-    return 'Pluralchum';
+    return pluginName;
   }
 }
