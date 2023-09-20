@@ -8,7 +8,7 @@ const React = BdApi.React;
 import PKBadge from './components/PKBadge.js';
 import { ColourPreference } from './data.js';
 import { updateProfile, ProfileStatus } from './profiles.js';
-import { ValueCell, isProxiedMessage, pluginName } from './utility.js';
+import { ValueCell, isProxiedMessage, pluginName, hookupValueCell } from './utility.js';
 import * as Patch from './patch.js';
 
 function hashCode(text) {
@@ -40,15 +40,6 @@ function hookupProfile(profileMap, _ctx, [props], _ret) {
   });
 
   return [profile, setProfile];
-}
-
-function hookupValueCell(cell) {
-  const [value, setValue] = React.useState(cell.get());
-  React.useEffect(function () {
-    return cell.addListener(setValue);
-  });
-
-  return [value, setValue];
 }
 
 function luminance(r, g, b) {

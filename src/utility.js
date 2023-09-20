@@ -1,3 +1,5 @@
+const React = BdApi.React;
+
 export class ValueCell {
   #val;
   #listeners = [];
@@ -96,6 +98,15 @@ export class MapCell {
       listener(null, null);
     });
   }
+}
+
+export function hookupValueCell(cell) {
+  const [value, setValue] = React.useState(cell.get());
+  React.useEffect(function () {
+    return cell.addListener(setValue);
+  });
+
+  return [value, setValue];
 }
 
 export function isProxiedMessage(message) {

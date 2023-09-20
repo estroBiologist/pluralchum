@@ -1,4 +1,4 @@
-import { dummy } from "./utility";
+import { dummy, ValueCell, hookupValueCell } from "./utility";
 
 const Patcher = BdApi.Patcher;
 
@@ -9,15 +9,18 @@ function no_op() {
 }
 
 export class AfterPatcher {
+    #repatchCount;
     #hookCount;
     #callback;
     #hookArgs;
 
     constructor(caller, moduleToPatch, functionName, hooks = []) {
+        this.#repatchCount = new ValueCell(0);
         this.#hookCount = hooks.length;
         this.unpatch();
         
         Patcher.after(caller, moduleToPatch, functionName, function (ctx, args, ret) {
+            hookupValueCell(this.#repatchCount);
             let hookValues = [];
             
             for (let i = 0; i < this.#hookCount; i++) {
@@ -31,7 +34,6 @@ export class AfterPatcher {
     }
 
     unpatch() {
-        console.log(this);
         this.setPatch(no_op);
     }
 
@@ -42,6 +44,10 @@ export class AfterPatcher {
 
         this.#callback = callback;
         this.#hookArgs = hookArgs;
+
+        this.#repatchCount.update(function (count) {
+            return count + 1;
+        });
     }
 }
 
@@ -51,11 +57,13 @@ export function after(caller, moduleToPatch, functionName, callback) {
 }
 
 export class InsteadPatcher {
+    #repatchCount;
     #hookCount;
     #callback;
     #hookArgs;
 
     constructor(caller, moduleToPatch, functionName, hooks = []) {
+        this.#repatchCount = new ValueCell(0);
         this.#hookCount = hooks.length;
         this.unpatch();
         
@@ -83,6 +91,10 @@ export class InsteadPatcher {
 
         this.#callback = callback;
         this.#hookArgs = hookArgs;
+
+        this.#repatchCount.update(function (count) {
+            return count + 1;
+        });
     }
 }
 
