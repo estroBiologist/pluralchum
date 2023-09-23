@@ -23,6 +23,7 @@
     "rollup": "^3.25.0"
   },
   "dependencies": {
-    "svg-loaders-react": "^2.2.1"
+    "svg-loaders-react": "^2.2.1",
+    "@ariagivens/discord-unicode-fix-js": "1.0.0"
   }
 }

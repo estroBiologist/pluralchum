@@ -10,6 +10,7 @@ import { ColourPreference } from './data.js';
 import { updateProfile, ProfileStatus } from './profiles.js';
 import { ValueCell, isProxiedMessage, pluginName, hookupValueCell } from './utility.js';
 import * as Patch from './patch.js';
+import { fix } from '@ariagivens/discord-unicode-fix-js';
 
 function hashCode(text) {
   var hash = 0;
@@ -123,28 +124,42 @@ export function patchMessageContent(settings, profileMap) {
   messageContentPatcher.setPatch(handleMessageContent, [settings, profileMap, new ValueCell(profileMap)])
 }
 
-function servername(props, profile) {
-  if (!Object.hasOwn(props.message.author, 'username_real')) {
-    props.message.author.username_real = props.message.author.username.slice();
-  }
-
-  // most batshit string length function on earth
-  const count = str => {
-    const regex = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F|./gu;
-    return ((str || '').match(regex) || []).length;
-  };
-
-  let username_len = count(props.message.author.username_real);
-  let tag_len = count(profile.tag) + 1;
-
-  return props.message.author.username_real.slice(0, username_len - tag_len);
+function normalize(str) {
+  return fix(str).normalize('NFD');
 }
 
-function getUsername(settings, username, servername) {
-  if (settings.useServerNames && servername) {
-    return servername;
+function getServername(username, tag) {
+  if (!tag || tag.length === 0) {
+    return null;
+  }
+
+  username = fix(username).normalize('NFD');
+  tag = fix(tag).normalize('NFD');
+
+  let username_len = username.length;
+  let tag_len = tag.length + 1; // include the space as part of the tag
+
+  if (username.endsWith(tag)) {
+    return username.slice(0, username_len - tag_len);
   } else {
-    return username;
+    return null;
+  }
+}
+
+function getUsername(useServerNames, author, profile) {
+  let username = normalize(author.username_real ?? author.username.slice());
+  let tag = normalize(profile.tag ?? "");
+  if (useServerNames) {
+    let servername = getServername(username, tag);
+    if (servername) {
+      // we can seperate servername and tag
+      return { username: servername, member_tag: tag };
+    } else {
+      // most likely using a servertag, treat the whole thing as the username
+      return { username, member_tag: "" };
+    }
+  } else {
+    return { username: normalize(profile.name) , member_tag: tag };
   }
 }
 
@@ -205,8 +220,7 @@ function tagColour(colourPref, member, guildId) {
 function createHeaderChildren(props, settings, profileMap, profile, userHash) {
   let { memberColourPref, tagColourPref } = settings;
 
-  let username = getUsername(settings, profile.name, servername(props, profile));
-  let member_tag = profile.tag;
+  let { username, member_tag } = getUsername(settings.useServerNames, props.message.author, profile);
 
   let tree = [];
 
@@ -223,10 +237,14 @@ function createHeaderChildren(props, settings, profileMap, profile, userHash) {
   if (props.compact) {
     tree.push(pkBadge);
     tree.push(React.createElement('span', userProps, ' ' + username));
-    tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString() + ' '));
+    if (member_tag && member_tag.length > 0) {
+      tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString() + ' '));
+    }
   } else {
     tree.push(React.createElement('span', userProps, username));
-    tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString()));
+    if (member_tag && member_tag.length > 0) {
+      tree.push(React.createElement('span', tagProps, ' ' + member_tag.toString()));
+    }
     tree.push(pkBadge);
   }
 
