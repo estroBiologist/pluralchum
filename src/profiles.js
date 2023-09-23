@@ -151,7 +151,6 @@ export async function updateProfile(message, profileMap, guildId) {
     } catch (e) {
       console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
     }
-    
   } else if (shouldUpdateServerSetting(profile, guildId)) {
     console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
     try {

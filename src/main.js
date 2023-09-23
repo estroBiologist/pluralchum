@@ -31,7 +31,7 @@ export class Pluralchum {
     for (let i = this.patches.length - 1; i >= 0; i--) this.patches[i]();
 
     purgeOldProfiles(this.profileMap);
-    
+
     Patch.unpatchAll();
 
     ZLibrary.DOMTools.removeStyle(pluginName);

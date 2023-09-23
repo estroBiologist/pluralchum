@@ -120,8 +120,8 @@ export async function sleep(timeout) {
 export function dummy() {
   return new Proxy(dummy, {
     apply: dummy,
-    get: dummy
+    get: dummy,
   });
 }
 
-export const pluginName = "Pluralchum";
+export const pluginName = 'Pluralchum';

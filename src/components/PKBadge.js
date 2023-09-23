@@ -12,7 +12,7 @@ export default class PKBadge extends React.Component {
       color: '#ffffff',
     };
     let content = 'PK';
-    if (this.props.status === ProfileStatus.Updating || this.props.status === ProfileStatus.Requesting) {
+    if ([ProfileStatus.Updating, ProfileStatus.Requesting, ProfileStatus.Stale].includes(this.props.status)) {
       let dotstyle = {
         height: '.4em',
         width: '100%',

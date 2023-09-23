@@ -1,5 +1,5 @@
 const React = BdApi.React;
-import { dummy } from "../utility";
+import { dummy } from '../utility';
 
 let warned = false;
 

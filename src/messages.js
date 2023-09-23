@@ -112,16 +112,24 @@ function handleMessageContent(ctx, [props], component, [settings, profile, profi
 
   if (!channel || !channel.guild_id) return; //No webhooks here lol
 
-  if (settings.doColourText && profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
+  if (
+    settings.doColourText &&
+    profile &&
+    (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)
+  ) {
     updateProfile(props.message, profileMap, channel.guild_id);
     setMessageTextColour(component, settings, profile);
   }
 }
 
-const messageContentPatcher = new Patch.AfterPatcher(pluginName, MessageContent, 'type', [hookupValueCell, hookupProfile, hookupValueCell]);
+const messageContentPatcher = new Patch.AfterPatcher(pluginName, MessageContent, 'type', [
+  hookupValueCell,
+  hookupProfile,
+  hookupValueCell,
+]);
 
 export function patchMessageContent(settings, profileMap) {
-  messageContentPatcher.setPatch(handleMessageContent, [settings, profileMap, new ValueCell(profileMap)])
+  messageContentPatcher.setPatch(handleMessageContent, [settings, profileMap, new ValueCell(profileMap)]);
 }
 
 function normalize(str) {
@@ -148,7 +156,7 @@ function getServername(username, tag) {
 
 function getUsername(useServerNames, author, profile) {
   let username = normalize(author.username_real ?? author.username.slice());
-  let tag = normalize(profile.tag ?? "");
+  let tag = normalize(profile.tag ?? '');
   if (useServerNames) {
     let servername = getServername(username, tag);
     if (servername) {
@@ -156,10 +164,10 @@ function getUsername(useServerNames, author, profile) {
       return { username: servername, member_tag: tag };
     } else {
       // most likely using a servertag, treat the whole thing as the username
-      return { username, member_tag: "" };
+      return { username, member_tag: '' };
     }
   } else {
-    return { username: normalize(profile.name) , member_tag: tag };
+    return { username: normalize(profile.name), member_tag: tag };
   }
 }
 
@@ -277,15 +285,19 @@ function handleMessageHeader(ctx, [props], component, [settings, profile, profil
   }
 }
 
-
 // This could break with any Discord update but oh well
 // We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
 // So we just sort of patch all the member functions in the module and hope for the best
 //
 // i am sorry
 //
-const messagerHeaderPatchers = Object.keys(MessageHeader).map((member) => new Patch.AfterPatcher(pluginName, MessageHeader, member, [hookupValueCell, hookupProfile, hookupValueCell]));
+const messagerHeaderPatchers = Object.keys(MessageHeader).map(
+  member =>
+    new Patch.AfterPatcher(pluginName, MessageHeader, member, [hookupValueCell, hookupProfile, hookupValueCell]),
+);
 
 export function patchMessageHeader(settings, profileMap) {
-  messagerHeaderPatchers.forEach(patcher => patcher.setPatch(handleMessageHeader, [settings, profileMap, new ValueCell(profileMap)]));
+  messagerHeaderPatchers.forEach(patcher =>
+    patcher.setPatch(handleMessageHeader, [settings, profileMap, new ValueCell(profileMap)]),
+  );
 }
