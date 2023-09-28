@@ -84,7 +84,7 @@ function preferencesPanel(settings) {
     doColourText(settings),
     memberColorPref(settings),
     tagColourPref(settings),
-    useServerNames(settings),
+    useServerNames(settings)
   );
 
   return preferencesPanel;
@@ -147,13 +147,13 @@ function cachePanel(profileMap) {
   // Cache
   let cachePanel = new Settings.SettingGroup('Cache', { shown: false });
   let resetCacheBtn = document.createElement('button');
-  resetCacheBtn.className = 'button-f2h6uQ lookFilled-yCfaCM colorBrand-I6CyqQ sizeSmall-wU2dO- grow-2sR_-F';
+  resetCacheBtn.className = 'button-ejjZWC lookFilled-1H2Jvj colorBrand-2M3O3N sizeSmall-3R2P2p grow-2T4nbg';
   resetCacheBtn.innerHTML = 'Delete Cache';
   resetCacheBtn.onclick = () => {
     profileMap.clear();
   };
 
-  cachePanel.append(resetCacheBtn).class;
+  cachePanel.append(resetCacheBtn);
 
   return cachePanel;
 }

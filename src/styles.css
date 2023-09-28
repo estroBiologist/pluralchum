@@ -1,0 +1,7 @@
+.plugin-inputs.collapsible {
+  overflow: visible;
+}
+
+.plugin-inputs.collapsible.collapsed {
+  overflow: hidden;
+}

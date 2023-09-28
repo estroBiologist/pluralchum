@@ -1,4 +1,5 @@
 import ZLibrary from './external/ZLibrary.js';
+import './styles.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader } from './messages.js';
