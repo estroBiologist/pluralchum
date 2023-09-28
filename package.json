@@ -17,14 +17,15 @@
     "@rollup/plugin-commonjs": "^25.0.1",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-replace": "^5.0.2",
-    "rollup-plugin-import-css":"3.3.4",
     "eslint": "^8.43.0",
     "eslint-plugin-react": "^7.32.2",
     "prettier": "2.8.8",
-    "rollup": "^3.25.0"
+    "rollup": "^3.25.0",
+    "rollup-plugin-import-css": "3.3.4"
   },
   "dependencies": {
-    "svg-loaders-react": "^2.2.1",
-    "@ariagivens/discord-unicode-fix-js": "1.0.0"
+    "@ariagivens/discord-unicode-fix-js": "1.0.0",
+    "semver": "^7.5.4",
+    "svg-loaders-react": "^2.2.1"
   }
 }

@@ -7,6 +7,9 @@ import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import * as Patch from './patch.js';
 import { pluginName } from './utility.js';
+import { checkForUpdates } from './update.js';
+
+const version = '2.1.2';
 
 export class Pluralchum {
   patches = [];
@@ -26,6 +29,8 @@ export class Pluralchum {
     patchMessageHeader(this.settings, this.profileMap);
     this.patches.push(patchEditMenuItem());
     patchEditAction();
+
+    checkForUpdates(version);
   }
 
   stop() {
