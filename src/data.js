@@ -19,6 +19,7 @@ function defaultSettings() {
     memberColourPref: ColourPreference.Member,
     tagColourPref: ColourPreference.System,
     useServerNames: false,
+    version: null,
   };
 }
 

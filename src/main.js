@@ -7,7 +7,7 @@ import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import * as Patch from './patch.js';
 import { pluginName } from './utility.js';
-import { checkForUpdates } from './update.js';
+import { checkForUpdates, upgradeCache } from './update.js';
 
 const version = '2.1.2';
 
@@ -22,6 +22,8 @@ export class Pluralchum {
     this.profileMap = initializeProfileMap();
 
     console.log('[PLURALCHUM] Loaded PK data');
+
+    upgradeCache(this.settings, this.profileMap, version);
 
     requireEula(this.settings);
 
