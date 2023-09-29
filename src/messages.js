@@ -4,6 +4,7 @@ const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('s
 });
 import ZLibrary from './external/ZLibrary.js';
 const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
+const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
 const React = BdApi.React;
 import PKBadge from './components/PKBadge.js';
 import { ColourPreference } from './data.js';
@@ -117,7 +118,7 @@ function handleMessageContent(ctx, [props], component, [settings, profile, profi
     profile &&
     (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)
   ) {
-    updateProfile(props.message, profileMap, channel.guild_id);
+    updateProfile(props.message, profileMap);
     setMessageTextColour(component, settings, profile);
   }
 }
@@ -206,7 +207,7 @@ function memberColour(colourPref, member, guildId) {
     case ColourPreference.System:
       return member.system_color ?? member.color;
     case ColourPreference.Role:
-      return member.server_settings?.[guildId]?.role_color;
+      return GuildMemberStore.getMember(guildId, member.sender)?.colorString; 
     default:
       return null;
   }
@@ -219,7 +220,7 @@ function tagColour(colourPref, member, guildId) {
     case ColourPreference.System:
       return member.system_color;
     case ColourPreference.Role:
-      return member.server_settings?.[guildId]?.role_color;
+      return GuildMemberStore.getMember(guildId, member.sender)?.colorString;
     default:
       return null;
   }
@@ -274,7 +275,7 @@ function handleMessageHeader(ctx, [props], component, [settings, profile, profil
     return;
   }
 
-  updateProfile(props.message, profileMap, props.guildId);
+  updateProfile(props.message, profileMap);
 
   if (profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
     if (component?.props?.username?.props) {

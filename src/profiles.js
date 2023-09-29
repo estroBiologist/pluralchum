@@ -1,5 +1,3 @@
-import ZLibrary from './external/ZLibrary.js';
-const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
 import { sleep, isProxiedMessage } from './utility';
 
 export const ProfileStatus = {
@@ -24,11 +22,6 @@ async function httpGetAsync(url) {
   return response;
 }
 
-function pkDataToServerSetting(data) {
-  let roleColour = GuildMemberStore.getMember(data.guild, data.sender)?.colorString;
-  return { role_color: roleColour };
-}
-
 function pkDataToProfile(data) {
   let profile = {
     name: data.member.name,
@@ -38,7 +31,7 @@ function pkDataToProfile(data) {
     system: data.system.id,
     status: ProfileStatus.Done,
     system_color: '#' + data.system.color,
-    server_settings: {},
+    sender: data.sender
   };
 
   if (data.member.color === null) profile.color = '';
@@ -47,10 +40,6 @@ function pkDataToProfile(data) {
 
   if (data.member.display_name) {
     profile.name = data.member.display_name;
-  }
-
-  if (data.guild) {
-    profile.server_settings[data.guild] = pkDataToServerSetting(data);
   }
 
   return profile;
@@ -87,28 +76,6 @@ async function updateFreshProfile(message, hash, profileMap) {
   profileMap.set(hash, profile);
 }
 
-async function getProfileWithUpdatedServerSettings(message, oldProfile) {
-  let profile = await getFreshProfile(message);
-
-  profile.server_settings = { ...oldProfile.server_settings, ...profile.server_settings };
-
-  return profile;
-}
-
-async function updateServerSettings(message, hash, profileMap) {
-  let oldProfile;
-
-  profileMap.update(hash, function (profile) {
-    oldProfile = profile;
-    profile.status = ProfileStatus.Updating;
-    return profile;
-  });
-
-  let profile = await getProfileWithUpdatedServerSettings(message, oldProfile);
-
-  profileMap.set(hash, profile);
-}
-
 function hashCode(text) {
   var hash = 0;
   for (var i = 0; i < text.length; i++) {
@@ -130,11 +97,7 @@ function shouldUpdate(profile) {
   return !profile || profile.status === ProfileStatus.Stale;
 }
 
-function shouldUpdateServerSetting(profile, guildId) {
-  return profile.status === ProfileStatus.Done && !profile.server_settings?.[guildId];
-}
-
-export async function updateProfile(message, profileMap, guildId) {
+export async function updateProfile(message, profileMap) {
   if (!isProxiedMessage(message)) return null;
 
   let username = message.author.username;
@@ -148,13 +111,6 @@ export async function updateProfile(message, profileMap, guildId) {
     console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
     try {
       await updateFreshProfile(message, userHash, profileMap);
-    } catch (e) {
-      console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
-    }
-  } else if (shouldUpdateServerSetting(profile, guildId)) {
-    console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
-    try {
-      await updateServerSettings(message, userHash, profileMap);
     } catch (e) {
       console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
     }
