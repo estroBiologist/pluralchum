@@ -38,8 +38,7 @@
 ---
 
 <p align="center">
-  <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/limitations.png
-"><br><br>
+  <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/limitations.png"><br><br>
   Yeah, it's not perfect. I tried my best, but I am categorically not a web developer. I'm always looking to make it better, and some of these will likely be fixed in due time, but, y'know, be aware of them.<br>
   <br>
   <br>
@@ -62,8 +61,7 @@
 ---
  
 <p align="center">
-  <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/reviewns_WHYTE.png
-">
+  <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/reviewns_WHYTE.png">
   <br><br><br>
   <b>"This is great!"</b> <br><i> - The Entire Cast of Homestuck Several Times Over</i><br><br><br>
  <b>"This is gr8!"</b> <br><i> - Oh, You Know</i><br><br><br>
