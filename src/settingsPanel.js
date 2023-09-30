@@ -5,7 +5,8 @@ import { ColourPreference } from './data.js';
 function logo() {
   let logo = document.createElement('img');
 
-  logo.src = 'https://media.discordapp.net/attachments/846781793834106902/946425651634765824/overkill_logo_final.png';
+  logo.src = 'https://file.garden/ZRg8rDvANRar6gn8/pluralchum/overkill_logo_final.png';
+
   logo.style = 'max-width: 100%; height: auto;';
 
   return logo;
