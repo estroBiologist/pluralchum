@@ -148,7 +148,7 @@ function cachePanel(profileMap) {
   // Cache
   let cachePanel = new Settings.SettingGroup('Cache', { shown: false });
   let resetCacheBtn = document.createElement('button');
-  resetCacheBtn.className = 'button-ejjZWC lookFilled-1H2Jvj colorBrand-2M3O3N sizeSmall-3R2P2p grow-2T4nbg';
+  resetCacheBtn.className = 'button_afdfd9 lookFilled__19298 colorBrand_b2253e sizeSmall__71a98 grow__4c8a4';
   resetCacheBtn.innerHTML = 'Delete Cache';
   resetCacheBtn.onclick = () => {
     profileMap.clear();
