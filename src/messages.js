@@ -189,7 +189,7 @@ function nameProps(author, type, settings, colour) {
 
   let props = {
     user: author,
-    className: 'username-h_Y3Us',
+    className: 'username_d30d99',
     type: type,
   };
 
