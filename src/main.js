@@ -9,7 +9,7 @@ import * as Patch from './patch.js';
 import { pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
-const version = '2.1.4';
+const version = '2.1.5';
 
 export class Pluralchum {
   patches = [];
