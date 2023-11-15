@@ -85,7 +85,7 @@ function preferencesPanel(settings) {
     doColourText(settings),
     memberColorPref(settings),
     tagColourPref(settings),
-    useServerNames(settings)
+    useServerNames(settings),
   );
 
   return preferencesPanel;

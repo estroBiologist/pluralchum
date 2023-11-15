@@ -31,7 +31,7 @@ function pkDataToProfile(data) {
     system: data.system.id,
     status: ProfileStatus.Done,
     system_color: '#' + data.system.color,
-    sender: data.sender
+    sender: data.sender,
   };
 
   if (data.member.color === null) profile.color = '';
