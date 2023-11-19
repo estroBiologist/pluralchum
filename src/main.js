@@ -5,8 +5,7 @@ import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader } from './messages.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
-import * as Patch from './patch.js';
-import { pluginName } from './utility.js';
+import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
 const version = '2.1.6';
@@ -27,20 +26,26 @@ export class Pluralchum {
 
     requireEula(this.settings);
 
-    patchMessageContent(this.settings, this.profileMap);
-    patchMessageHeader(this.settings, this.profileMap);
+    this.enabled = new ValueCell(true);
+
+    patchMessageContent(this.settings, this.profileMap, this.enabled);
+    patchMessageHeader(this.settings, this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem());
     patchEditAction();
+
+    
 
     checkForUpdates(version);
   }
 
   stop() {
+    this.enabled.set(false);
+
     for (let i = this.patches.length - 1; i >= 0; i--) this.patches[i]();
 
     purgeOldProfiles(this.profileMap);
 
-    Patch.unpatchAll();
+    BdApi.Patcher.unpatchAll(pluginName);
 
     ZLibrary.DOMTools.removeStyle(pluginName);
   }

@@ -13,7 +13,9 @@ export class ValueCell {
   }
 
   set(x) {
-    this.#val = x;
+    this.update(function () {
+      return x;
+    });
   }
 
   update(f) {

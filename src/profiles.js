@@ -1,3 +1,5 @@
+const React = BdApi.React;
+
 import { sleep, isProxiedMessage } from './utility';
 
 export const ProfileStatus = {
@@ -86,7 +88,7 @@ function hashCode(text) {
   return hash;
 }
 
-function getUserHash(author) {
+export function getUserHash(author) {
   let username = author.username;
   if (Object.hasOwn(author, 'username_real')) username = author.username_real;
 
@@ -115,4 +117,18 @@ export async function updateProfile(message, profileMap) {
       console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
     }
   }
+}
+
+export function hookupProfile(profileMap, author) {
+  let userHash = getUserHash(author);
+  const [profile, setProfile] = React.useState(profileMap.get(userHash));
+  React.useEffect(function () {
+    return profileMap.addListener(function (key, value) {
+      if (key === userHash) {
+        setProfile(value);
+      }
+    });
+  });
+
+  return [profile, setProfile];
 }
