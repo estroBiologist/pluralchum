@@ -23,8 +23,8 @@ export default class PKBadge extends React.Component {
       content = <ThreeDots style={dotstyle} />;
     }
     return (
-      <span className='botTagCozy_dd88d1 botTag__11e95 botTagRegular_c89c9a botTag__4211a rem__931aa'>
-        <div className='botText__19848'>
+      <span className='botTagCozy__85d43 botTag__11e95 botTagRegular_fc4b4a botTag__4211a rem_be1e7a'>
+        <div className='botText_daff56'>
           <a style={linkStyle} onClick={() => this.props.onClick()}>
             {content}
           </a>
