@@ -114,7 +114,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   return elements;
 }
 
-export default function ColoredMessageHeader({
+export default function ColorMessageHeader({
   settings,
   profileMap,
   profile,

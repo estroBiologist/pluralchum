@@ -5,7 +5,7 @@ import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader } from './messages.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
-import { ValueCell, pluginName } from './utility.js';
+import { ValueCell, pluginName, sleep } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
 const version = '2.1.6';
@@ -64,6 +64,6 @@ async function softReload() {
   let guild = ZLibrary.DiscordModules.SelectedGuildStore.getGuildId();
 
   await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.INDEX);
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await sleep(100);
   await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.CHANNEL(guild, channel));
 }

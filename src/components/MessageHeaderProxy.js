@@ -2,7 +2,7 @@ const React = BdApi.React;
 
 import { hookupValueCell, isProxiedMessage } from '../utility.js';
 import { hookupProfile, updateProfile, ProfileStatus, getUserHash } from '../profiles.js';
-import ColoredMessageHeader from './ColoredMessageHeader.js';
+import ColoredMessageHeader from './ColorMessageHeader.js';
 import LoadingMessageHeader from './LoadingMessageHeader.js';
 
 export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCell, messageHeader, message, guildId }) {
