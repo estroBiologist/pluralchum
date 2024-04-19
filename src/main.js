@@ -2,7 +2,7 @@ import ZLibrary from './external/ZLibrary.js';
 import './styles.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
-import { patchMessageContent, patchMessageHeader } from './messages.js';
+import { patchMessageContent, patchMessageHeader, patchMessage } from './messages.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName, sleep } from './utility.js';
@@ -30,6 +30,7 @@ export class Pluralchum {
 
     patchMessageContent(this.settings, this.profileMap, this.enabled);
     patchMessageHeader(this.settings, this.profileMap, this.enabled);
+    patchMessage(this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem());
     patchEditAction();
 
@@ -65,5 +66,7 @@ async function softReload() {
 
   await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.INDEX);
   await sleep(100);
-  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.CHANNEL(guild, channel));
+  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(
+    ZLibrary.DiscordModules.DiscordConstants.Routes.CHANNEL(guild, channel),
+  );
 }
