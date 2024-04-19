@@ -24,11 +24,11 @@ function getUnblocked(unblockedMap, message, messageNode, label) {
 
   if (!unblocked.find(({ id }) => id === message.id)) {
     unblocked.push({ id: message.id, node: messageNode, timestamp: message.timestamp });
-    unblocked.sort((a, b) => a.timestamp < b.timestamp ? -1 : (a.timestamp > b.timestamp ? 1 : 0));
+    unblocked.sort((a, b) => (a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0));
     console.log('setting...');
     unblockedMap.set(getHeaderId(label), unblocked);
   }
-  
+
   return unblocked.map(({ node }) => node);
 }
 
@@ -47,7 +47,7 @@ function XIcon() {
 
 export default function BlockedMessage({ unblockedMap, message, messageNode, label, compact }) {
   const [expanded, setExpanded] = React.useState(false);
-  const unblocked = getUnblocked(unblockedMap, message, messageNode, label); 
+  const unblocked = getUnblocked(unblockedMap, message, messageNode, label);
 
   if (compact) {
     return null;
