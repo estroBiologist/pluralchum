@@ -69,7 +69,7 @@ function tagColourPref(settings) {
 }
 
 function useServerNames(settings) {
-  return new Settings.Switch('Use servernames (experimental)', '', settings.get().useServerNames, val => {
+  return new Settings.Switch('Use servernames', '', settings.get().useServerNames, val => {
     settings.update(function (s) {
       return { ...s, useServerNames: val };
     });
@@ -83,9 +83,9 @@ function preferencesPanel(settings) {
 
   preferencesPanel.append(
     doColourText(settings),
+    useServerNames(settings),
     memberColorPref(settings),
     tagColourPref(settings),
-    useServerNames(settings),
   );
 
   return preferencesPanel;

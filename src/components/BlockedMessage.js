@@ -9,9 +9,7 @@ export function hookupUnblocked(unblockedMap, author) {
   const [unblocked, setUnblocked] = React.useState(unblockedMap.get(header) ?? []);
 
   unblockedMap.addListener(function (key, value) {
-    console.log('listener', key, value);
     if (key === header) {
-      console.log('should update');
       setUnblocked(value);
     }
   });
@@ -25,7 +23,6 @@ function getUnblocked(unblockedMap, message, messageNode, label) {
   if (!unblocked.find(({ id }) => id === message.id)) {
     unblocked.push({ id: message.id, node: messageNode, timestamp: message.timestamp });
     unblocked.sort((a, b) => (a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0));
-    console.log('setting...');
     unblockedMap.set(getHeaderId(label), unblocked);
   }
 

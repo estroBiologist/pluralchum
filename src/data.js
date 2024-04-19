@@ -18,7 +18,7 @@ function defaultSettings() {
     contrastThreshold: 3,
     memberColourPref: ColourPreference.Member,
     tagColourPref: ColourPreference.System,
-    useServerNames: false,
+    useServerNames: true,
     version: null,
   };
 }
