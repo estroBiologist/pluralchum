@@ -33,7 +33,7 @@ export class Pluralchum {
     this.patches.push(patchEditMenuItem());
     patchEditAction();
 
-    
+    softReload();
 
     checkForUpdates(version);
   }
@@ -57,4 +57,13 @@ export class Pluralchum {
   getName() {
     return pluginName;
   }
+}
+
+async function softReload() {
+  let channel = ZLibrary.DiscordModules.SelectedChannelStore.getChannelId();
+  let guild = ZLibrary.DiscordModules.SelectedGuildStore.getGuildId();
+
+  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.INDEX);
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.CHANNEL(guild, channel));
 }
