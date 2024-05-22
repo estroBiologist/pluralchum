@@ -1,3 +1,4 @@
+/* eslint-disable react/no-children-prop */
 import ZLibrary from '../external/ZLibrary.js';
 const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
 const React = BdApi.React;
@@ -6,6 +7,8 @@ import { fix } from '@ariagivens/discord-unicode-fix-js';
 import { acceptableContrast } from '../contrast.js';
 import { ColourPreference } from '../data.js';
 import PKBadge from './PKBadge.js';
+
+const { Clickable, Popout } = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('Avatar', 'Popout'));
 
 function normalize(str) {
   return fix(str).normalize('NFD');
@@ -88,12 +91,40 @@ function tagColour(colourPref, member, guildId) {
   }
 }
 
-function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash) {
+function PopoutContainer({ originalProps, children }) {
+  const [shouldShowPopout, setShowPopout] = React.useState(false);
+  return (
+    <Popout
+      preload={() => {}}
+      renderPopout={originalProps.renderPopout}
+      shouldShow={shouldShowPopout}
+      position='right'
+      onRequestClose={() => {}}
+      children={e => {
+        let { onClick: _, ...popoutProps } = e;
+        return (
+          <Clickable
+            className='username__0b0e7 clickable__09456'
+            onClick={args => {
+              setShowPopout(shouldShowPopout => !shouldShowPopout);
+              originalProps.onClick(args);
+            }}
+            onContextMenu={originalProps.onContextMenu}
+            tag='span'
+            {...popoutProps}
+          >
+            {children}
+          </Clickable>
+        );
+      }}
+    />
+  );
+}
+
+function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, originalProps) {
   let { memberColourPref, tagColourPref } = settings;
 
   let { username, member_tag } = getUsername(settings.useServerNames, message.author, profile);
-
-  let pkBadge = <PKBadge profileMap={profileMap} userHash={userHash} profile={profile} />;
 
   let member_colour = memberColour(memberColourPref, profile, guildId);
   let userProps = nameProps(message.author, 'member_name', settings, member_colour);
@@ -105,11 +136,16 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
 
   let elements = [];
 
-  elements.push(React.createElement('span', userProps, username));
-  if (member_tag && member_tag.length > 0) {
-    elements.push(React.createElement('span', tagProps, ' ' + member_tag.toString()));
-  }
-  elements.push(pkBadge);
+  elements.push(
+    <PopoutContainer originalProps={originalProps.props}>
+      <React.Fragment>
+        <span {...userProps}>{username}</span>
+        {member_tag && member_tag.length > 0 && <span {...tagProps}>{' ' + member_tag.toString()}</span>}
+      </React.Fragment>
+    </PopoutContainer>,
+  );
+
+  elements.push(<PKBadge profileMap={profileMap} userHash={userHash} profile={profile} />);
 
   return elements;
 }
@@ -122,8 +158,11 @@ export default function ColorMessageHeader({
   messageHeader,
   message,
   guildId,
-  onClickAvatar
+  onClickAvatar,
 }) {
+  const [_, originalChildren] = messageHeader.props.username.props.children;
+  const originalProps = originalChildren.props.children[0];
+
   return {
     ...messageHeader,
     props: {
@@ -132,10 +171,10 @@ export default function ColorMessageHeader({
         ...messageHeader.props.username,
         props: {
           ...messageHeader.props.username.props,
-          children: createHeaderChildren(message, guildId, settings, profileMap, profile, userHash),
+          children: createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, originalProps),
         },
       },
-      onClickAvatar
+      onClickAvatar,
     },
   };
 }

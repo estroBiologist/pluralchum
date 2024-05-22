@@ -5,6 +5,8 @@ import { hookupProfile, updateProfile, ProfileStatus, getUserHash } from '../pro
 import ColoredMessageHeader from './ColorMessageHeader.js';
 import LoadingMessageHeader from './LoadingMessageHeader.js';
 
+const Components = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("Avatar", "Popout"));
+
 export default function MessageHeaderProxy({
   settingsCell,
   profileMap,
@@ -14,8 +16,6 @@ export default function MessageHeaderProxy({
   guildId,
   onClickAvatar,
 }) {
-  const Components = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("Avatar", "Popout"));
-
   let [settings] = hookupValueCell(settingsCell);
   let [profile] = hookupProfile(profileMap, message.author);
   let [enabled] = hookupValueCell(enabledCell);
