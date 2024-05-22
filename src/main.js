@@ -3,12 +3,13 @@ import './styles.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader, patchMessage } from './messages.js';
+import { patchProfileBanners, patchProfiles } from './profiles.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName, sleep } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
-const version = '2.2.0';
+const version = '2.3.0';
 
 export class Pluralchum {
   patches = [];
@@ -32,6 +33,8 @@ export class Pluralchum {
     patchMessageHeader(this.settings, this.profileMap, this.enabled);
     patchMessage(this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem());
+    patchProfileBanners();
+    patchProfiles();
     patchEditAction();
 
     softReload();

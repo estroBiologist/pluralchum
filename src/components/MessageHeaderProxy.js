@@ -1,11 +1,21 @@
 const React = BdApi.React;
 
-import { hookupValueCell, isProxiedMessage } from '../utility.js';
+import { pluginName, hookupValueCell, isProxiedMessage } from '../utility.js';
 import { hookupProfile, updateProfile, ProfileStatus, getUserHash } from '../profiles.js';
 import ColoredMessageHeader from './ColorMessageHeader.js';
 import LoadingMessageHeader from './LoadingMessageHeader.js';
 
-export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCell, messageHeader, message, guildId }) {
+export default function MessageHeaderProxy({
+  settingsCell,
+  profileMap,
+  enabledCell,
+  messageHeader,
+  message,
+  guildId,
+  onClickAvatar,
+}) {
+  const Components = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("Avatar", "Popout"));
+
   let [settings] = hookupValueCell(settingsCell);
   let [profile] = hookupProfile(profileMap, message.author);
   let [enabled] = hookupValueCell(enabledCell);
@@ -15,6 +25,22 @@ export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCe
   }
 
   updateProfile(message, profileMap);
+
+  BdApi.Patcher.instead(pluginName, Components.Popout.prototype, 'render', function (ctx, [props], f) {
+    ctx.props.preload = () => {
+      BdApi.Data.save(pluginName, "currentWebhookId", message.webhookId);
+      BdApi.Data.save(pluginName, "currentMessage", message);
+      const _ = () => {
+        if (profile.status == "DONE" || profile.status == "NOT_PK") {
+          BdApi.Data.save(pluginName, "currentProfile", profile);
+        } else {
+          setTimeout(_, 100);
+        }
+      }
+      _();
+    }
+    return f.call(ctx, props);
+  })
 
   let userHash = getUserHash(message.author);
 
@@ -28,6 +54,7 @@ export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCe
         messageHeader={messageHeader}
         message={message}
         guildId={guildId}
+        onClickAvatar={onClickAvatar}
       />
     );
   } else if (!profile || profile.status === ProfileStatus.Requesting) {

@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const React = BdApi.React;
 
-import { sleep, isProxiedMessage } from './utility';
+import ZLibrary from './external/ZLibrary.js';
+import { pluginName, sleep, isProxiedMessage } from './utility';
 
 export const ProfileStatus = {
   Done: 'DONE',
@@ -26,23 +28,19 @@ async function httpGetAsync(url) {
 
 function pkDataToProfile(data) {
   let profile = {
-    name: data.member.name,
-    color: '#' + data.member.color,
-    tag: data.system.tag,
+    name: data.member.display_name || data.member.name,
+    color: '#' + (data.member.color || 'ffffff'),
+    tag: data.system.tag || '',
     id: data.member.id,
     system: data.system.id,
     status: ProfileStatus.Done,
-    system_color: '#' + data.system.color,
+    system_color: '#' + (data.system.color || 'ffffff'),
     sender: data.sender,
+    raw: data,
+    banner: data.member.banner,
+    pronouns: data.member.pronouns,
+    description: data.member.description,
   };
-
-  if (data.member.color === null) profile.color = '';
-
-  if (data.system.color === null) profile.system_color = '';
-
-  if (data.member.display_name) {
-    profile.name = data.member.display_name;
-  }
 
   return profile;
 }
@@ -131,4 +129,124 @@ export function hookupProfile(profileMap, author) {
   });
 
   return [profile, setProfile];
+}
+
+export function patchProfileBanners() {
+  const ProfileUtils = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byPrototypeFields('getBannerURL'), {
+    searchExports: true,
+  });
+
+  BdApi.Patcher.instead(pluginName, ProfileUtils.prototype, 'getBannerURL', function (ctx, [props], f) {
+    const ret = f.call(ctx, props);
+    if (!ctx.banner || (ctx.banner && !ctx.banner.includes('https://'))) return ret;
+    return ctx.banner;
+  });
+}
+
+export function patchProfiles() {
+  const getCurrentProfile = () => BdApi.Data.load(pluginName, 'currentProfile');
+  const getCurrentWebhookId = () => BdApi.Data.load(pluginName, 'currentWebhookId');
+
+  const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'), {
+    searchExports: true,
+  });
+
+  const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'), {
+    searchExports: true,
+  });
+
+  const [UserProfile, blocker] = BdApi.Webpack.getWithKey(
+    BdApi.Webpack.Filters.byStrings('.useIsUserRecentGamesEnabled', '.usernameSection', '.USER_POPOUT'),
+  );
+
+  const TimestampUtils = BdApi.Webpack.getModule(m => m.default.extractTimestamp);
+
+  var userProfileArticialProps = {};
+  const currentUser = UserStore.getCurrentUser();
+  const currentUserProfile = UserProfileStore.getUserProfile(currentUser.id);
+
+  BdApi.Patcher.instead(pluginName, UserProfile, blocker, function (ctx, [props], f) {
+    userProfileArticialProps = props;
+    return f.call(ctx, { ...props, user: patchProfileUser(props.user) });
+  });
+
+  const makeArtificialProps = userId => {
+    const props = userProfileArticialProps;
+    const user = UserStore.getUser(userId);
+    return { ...props, user };
+  };
+
+  const patchProfileUser = ret => {
+    const user = Object.assign(Object.create(Object.getPrototypeOf(ret)), ret);
+    if (user.id == getCurrentWebhookId()) {
+      const profile = getCurrentProfile();
+      const author = UserStore.getUser(profile.sender);
+
+      user.bot = false;
+      user.isNonUserBot = () => false;
+      user.discriminator = '0';
+      user.username = `${profile.name} ${profile.tag || ''}`;
+      user.globalName = profile.name;
+      user.avatarDecorationData = author.avatarDecorationData;
+    }
+
+    return user;
+  };
+
+  BdApi.Patcher.instead(pluginName, TimestampUtils.default, 'extractTimestamp', function (ctx, [snowflake], f) {
+    var ret = f.call(ctx, snowflake);
+    if (snowflake !== getCurrentWebhookId()) return ret;
+
+    const profile = getCurrentProfile();
+    return new Date(profile.raw.member.created || new Date(ret).getTime());
+  });
+
+  BdApi.Patcher.instead(pluginName, UserStore, 'getUser', function (ctx, [id], f) {
+    var ret = f.call(ctx, id);
+    if (id !== getCurrentWebhookId()) return ret;
+    return patchProfileUser(ret);
+  });
+
+  BdApi.Patcher.instead(pluginName, UserProfileStore, 'getUserProfile', function (ctx, [id], f) {
+    const white = ZLibrary.ColorConverter.hex2int('#FFFFFF');
+    if (id !== getCurrentWebhookId()) return f.call(ctx, id);
+
+    const profile = getCurrentProfile();
+    const userProfile = { ...currentUserProfile };
+
+    userProfile.premiumSince = new Date().toISOString();
+    userProfile.premiumType = 2;
+    userProfile.banner = profile.banner;
+    
+    userProfile.accentColor =
+      ZLibrary.ColorConverter.hex2int(profile.color) != white
+        ? ZLibrary.ColorConverter.hex2int(profile.color)
+        : ZLibrary.ColorConverter.hex2int(profile.system_color) != white
+        ? ZLibrary.ColorConverter.hex2int(profile.system_color)
+        : null;
+
+    userProfile.primaryColor =
+      ZLibrary.ColorConverter.hex2int(profile.color) != white
+        ? ZLibrary.ColorConverter.hex2int(profile.color)
+        : ZLibrary.ColorConverter.hex2int(profile.system_color) != white
+        ? ZLibrary.ColorConverter.hex2int(profile.system_color)
+        : null;
+
+    userProfile.themeColors = profile.banner
+      ? null
+      : ZLibrary.ColorConverter.hex2int(profile.color) != white
+      ? [ZLibrary.ColorConverter.hex2int(profile.color), white]
+      : ZLibrary.ColorConverter.hex2int(profile.system_color) != white
+      ? [ZLibrary.ColorConverter.hex2int(profile.system_color), white]
+      : null;
+
+    userProfile.pronouns = profile.pronouns;
+    userProfile.profileFetchFailed = false;
+    userProfile.bio = profile.description;
+    userProfile.badges = [];
+    userProfile.connectedAccounts = [];
+    userProfile.applicationRoleConnections = [];
+
+    return userProfile;
+  });
 }

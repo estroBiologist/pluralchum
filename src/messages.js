@@ -36,19 +36,18 @@ export function patchMessageContent(settings, profileMap, enabled) {
 // i am sorry
 //
 export function patchMessageHeader(settings, profileMap, enabled) {
-  Object.keys(MessageHeader).forEach(function (functionName) {
-    BdApi.Patcher.instead(pluginName, MessageHeader, functionName, function (ctx, [props], f) {
-      return (
-        <MessageHeaderProxy
-          settingsCell={settings}
-          profileMap={profileMap}
-          enabledCell={enabled}
-          messageHeader={f.call(ctx, props)}
-          message={props.message}
-          guildId={props.guildId}
-        />
-      );
-    });
+  BdApi.Patcher.instead(pluginName, MessageHeader, "default", function (ctx, [props], f) {
+    return (
+      <MessageHeaderProxy
+        settingsCell={settings}
+        profileMap={profileMap}
+        enabledCell={enabled}
+        messageHeader={f.call(ctx, props)}
+        message={props.message}
+        guildId={props.guildId}
+        onClickAvatar={props.onClickAvatar}
+      />
+    );
   });
 }
 

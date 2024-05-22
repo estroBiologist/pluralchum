@@ -122,6 +122,7 @@ export default function ColorMessageHeader({
   messageHeader,
   message,
   guildId,
+  onClickAvatar
 }) {
   return {
     ...messageHeader,
@@ -134,6 +135,7 @@ export default function ColorMessageHeader({
           children: createHeaderChildren(message, guildId, settings, profileMap, profile, userHash),
         },
       },
+      onClickAvatar
     },
   };
 }
