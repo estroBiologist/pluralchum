@@ -164,11 +164,11 @@ export function patchProfiles() {
   });
 
   const [UserProfile, userProfileBlocker] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('.useIsUserRecentGamesEnabled', '.usernameSection', '.USER_POPOUT')
+    BdApi.Webpack.Filters.byStrings('.useIsUserRecentGamesEnabled', '.usernameSection', '.USER_POPOUT'),
   );
 
   const [UserProfileTag, userProfileTagBlocker] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('.PROFILE_POPOUT', 'shouldCopyOnClick', '.getUserTag')
+    BdApi.Webpack.Filters.byStrings('.PROFILE_POPOUT', 'shouldCopyOnClick', '.getUserTag'),
   );
 
   const TimestampUtils = BdApi.Webpack.getModule(m => m.default.extractTimestamp);
@@ -184,9 +184,13 @@ export function patchProfiles() {
     const author = UserStore.getUser(profile.sender);
 
     userProfileArticialProps = props;
-    props.id = "UserProfile";
+    props.id = 'UserProfile';
 
-    const ret = f.call(ctx, { ...props, user: patchProfileUser(props.user), guildMember: author ? GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), author.id) : null });
+    const ret = f.call(ctx, {
+      ...props,
+      user: patchProfileUser(props.user),
+      guildMember: author ? GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), author.id) : null,
+    });
     const children = ret.props.children.filter(child => child);
 
     const contextProvider = children[1];
@@ -200,7 +204,7 @@ export function patchProfiles() {
     const note = profileChildren[profileChildren.length - 1];
 
     const unfilteredChildren = ret.props.children[1].props.children[2].props.children;
-    unfilteredChildren[unfilteredChildren.indexOf(note)] = <div style={{ paddingBottom: "12px" }} />;
+    unfilteredChildren[unfilteredChildren.indexOf(note)] = <div style={{ paddingBottom: '16px' }} />;
 
     // console.log("[*] UserProfile:", ret, props, children);
     return ret;
@@ -214,8 +218,14 @@ export function patchProfiles() {
     const author = UserStore.getUser(profile.sender);
 
     props.user = clone(props.user);
-    props.user.username = author.username;
-    props.id = "UserProfileTag";
+    props.user.username = author
+      ? profile.raw.system.name
+        ? `${profile.raw.system.name} • ${author.username}`
+        : author.username
+      : profile.raw.system.name
+      ? profile.raw.system.name
+      : `System ID: ${profile.system}`;
+    props.id = 'UserProfileTag';
 
     const ret = f.call(ctx, props);
     const children = ret.props.children.filter(child => child);
@@ -241,6 +251,7 @@ export function patchProfiles() {
       user.discriminator = '0';
       user.username = `${profile.name} ${profile.tag || ''}`;
       user.globalName = `${profile.name} ${profile.tag || ''}`;
+      user.avatarDecorationData = null;
 
       if (author) {
         user.avatarDecorationData = author.avatarDecorationData;
