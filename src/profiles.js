@@ -182,12 +182,11 @@ export function patchProfiles() {
 
     const profile = getCurrentProfile();
     const author = UserStore.getUser(profile.sender);
-    const guildMember = GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), author.id);
-    
+
     userProfileArticialProps = props;
     props.id = "UserProfile";
 
-    const ret = f.call(ctx, { ...props, user: patchProfileUser(props.user), guildMember });
+    const ret = f.call(ctx, { ...props, user: patchProfileUser(props.user), guildMember: author ? GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), author.id) : null });
     const children = ret.props.children.filter(child => child);
 
     const contextProvider = children[1];
