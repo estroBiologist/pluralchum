@@ -93,7 +93,7 @@ function tagColour(colourPref, member, guildId) {
   }
 }
 
-function PopoutContainer({ message, profileMap, profile, guildId, originalProps, tagProps, children }) {
+function PopoutContainer({ message, profileMap, profile, originalProps, tagProps, children }) {
   const [shouldShowPopout, setShowPopout] = React.useState(false);
   return (
     <Popout
@@ -140,7 +140,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let elements = [];
 
   elements.push(
-    <PopoutContainer message={message} profile={profile} guildId={guildId} profileMap={profileMap} originalProps={originalProps} tagProps={{ style: member_tag && member_tag.length > 0 ? tagProps.style : userProps.style }}>
+    <PopoutContainer message={message} profile={profile} profileMap={profileMap} originalProps={originalProps} tagProps={{ style: member_tag && member_tag.length > 0 ? tagProps.style : userProps.style }}>
       <React.Fragment>
         <span {...userProps}>{username}</span>
         {member_tag && member_tag.length > 0 && <span {...tagProps}>{' ' + member_tag.toString()}</span>}
