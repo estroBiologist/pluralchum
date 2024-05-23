@@ -155,8 +155,20 @@ export function patchProfiles() {
     searchExports: true,
   });
 
-  const [UserProfile, blocker] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('.useIsUserRecentGamesEnabled', '.usernameSection', '.USER_POPOUT'),
+  const GuildMemberStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('GuildMemberStore'), {
+    searchExports: true,
+  });
+
+  const SelectedGuildStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('SelectedGuildStore'), {
+    searchExports: true,
+  });
+
+  const [UserProfile, userProfileBlocker] = BdApi.Webpack.getWithKey(
+    BdApi.Webpack.Filters.byStrings('.useIsUserRecentGamesEnabled', '.usernameSection', '.USER_POPOUT')
+  );
+
+  const [UserProfileTag, userProfileTagBlocker] = BdApi.Webpack.getWithKey(
+    BdApi.Webpack.Filters.byStrings('.PROFILE_POPOUT', 'shouldCopyOnClick', '.getUserTag')
   );
 
   const TimestampUtils = BdApi.Webpack.getModule(m => m.default.extractTimestamp);
@@ -165,9 +177,52 @@ export function patchProfiles() {
   const currentUser = UserStore.getCurrentUser();
   const currentUserProfile = UserProfileStore.getUserProfile(currentUser.id);
 
-  BdApi.Patcher.instead(pluginName, UserProfile, blocker, function (ctx, [props], f) {
+  BdApi.Patcher.instead(pluginName, UserProfile, userProfileBlocker, function (ctx, [props], f) {
+    if (props.user.id !== getCurrentWebhookId()) return f.call(ctx, props);
+
+    const profile = getCurrentProfile();
+    const author = UserStore.getUser(profile.sender);
+    const guildMember = GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), author.id);
+    
     userProfileArticialProps = props;
-    return f.call(ctx, { ...props, user: patchProfileUser(props.user) });
+    props.id = "UserProfile";
+
+    const ret = f.call(ctx, { ...props, user: patchProfileUser(props.user), guildMember });
+    const children = ret.props.children.filter(child => child);
+
+    const contextProvider = children[1];
+    const contextProviderChildren = contextProvider.props.children.filter(child => child);
+
+    const profileContent = contextProviderChildren[2];
+    const profileChildren = profileContent.props.children.filter(child => child);
+
+    const bio = profileChildren[1];
+    const memberSince = profileChildren[3];
+    const note = profileChildren[profileChildren.length - 1];
+
+    const unfilteredChildren = ret.props.children[1].props.children[2].props.children;
+    unfilteredChildren[unfilteredChildren.indexOf(note)] = <div style={{ paddingBottom: "12px" }} />;
+
+    // console.log("[*] UserProfile:", ret, props, children);
+    return ret;
+  });
+
+  const clone = obj => Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+
+  BdApi.Patcher.instead(pluginName, UserProfileTag, userProfileTagBlocker, function (ctx, [props], f) {
+    if (props.user.id !== getCurrentWebhookId()) return f.call(ctx, props);
+    const profile = getCurrentProfile();
+    const author = UserStore.getUser(profile.sender);
+
+    props.user = clone(props.user);
+    props.user.username = author.username;
+    props.id = "UserProfileTag";
+
+    const ret = f.call(ctx, props);
+    const children = ret.props.children.filter(child => child);
+
+    // console.log("[*] UserProfileTag:", ret, props, children);
+    return ret;
   });
 
   const makeArtificialProps = userId => {
@@ -177,7 +232,7 @@ export function patchProfiles() {
   };
 
   const patchProfileUser = ret => {
-    const user = Object.assign(Object.create(Object.getPrototypeOf(ret)), ret);
+    const user = clone(ret);
     if (user.id == getCurrentWebhookId()) {
       const profile = getCurrentProfile();
       const author = UserStore.getUser(profile.sender);
@@ -186,8 +241,11 @@ export function patchProfiles() {
       user.isNonUserBot = () => false;
       user.discriminator = '0';
       user.username = `${profile.name} ${profile.tag || ''}`;
-      user.globalName = profile.name;
-      user.avatarDecorationData = author.avatarDecorationData;
+      user.globalName = `${profile.name} ${profile.tag || ''}`;
+
+      if (author) {
+        user.avatarDecorationData = author.avatarDecorationData;
+      }
     }
 
     return user;
@@ -217,7 +275,7 @@ export function patchProfiles() {
     userProfile.premiumSince = new Date().toISOString();
     userProfile.premiumType = 2;
     userProfile.banner = profile.banner;
-    
+
     userProfile.accentColor =
       ZLibrary.ColorConverter.hex2int(profile.color) != white
         ? ZLibrary.ColorConverter.hex2int(profile.color)

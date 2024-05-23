@@ -6,9 +6,11 @@ const React = BdApi.React;
 import { fix } from '@ariagivens/discord-unicode-fix-js';
 import { acceptableContrast } from '../contrast.js';
 import { ColourPreference } from '../data.js';
+import { updateProfile } from '../profiles.js';
 import PKBadge from './PKBadge.js';
 
 const { Clickable, Popout } = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('Avatar', 'Popout'));
+const UserActionCreators = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('getUser', 'fetchProfile'));
 
 function normalize(str) {
   return fix(str).normalize('NFD');
@@ -91,17 +93,17 @@ function tagColour(colourPref, member, guildId) {
   }
 }
 
-function PopoutContainer({ originalProps, children }) {
+function PopoutContainer({ message, profileMap, profile, guildId, originalProps, tagProps, children }) {
   const [shouldShowPopout, setShowPopout] = React.useState(false);
   return (
     <Popout
-      preload={() => {}}
+      preload={async () => { updateProfile(message, profileMap); await UserActionCreators.getUser(profile.sender); }}
       renderPopout={originalProps.renderPopout}
       shouldShow={shouldShowPopout}
       position='right'
-      onRequestClose={() => {}}
-      children={e => {
-        let { onClick: _, ...popoutProps } = e;
+      onRequestClose={() => setShowPopout(false)}
+      children={_props => {
+        const { onClick: _, ...props } = _props;
         return (
           <Clickable
             className='username__0b0e7 clickable__09456'
@@ -111,7 +113,8 @@ function PopoutContainer({ originalProps, children }) {
             }}
             onContextMenu={originalProps.onContextMenu}
             tag='span'
-            {...popoutProps}
+            { ...tagProps }
+            { ...props }
           >
             {children}
           </Clickable>
@@ -137,7 +140,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let elements = [];
 
   elements.push(
-    <PopoutContainer originalProps={originalProps.props}>
+    <PopoutContainer message={message} profile={profile} guildId={guildId} profileMap={profileMap} originalProps={originalProps} tagProps={{ style: member_tag && member_tag.length > 0 ? tagProps.style : userProps.style }}>
       <React.Fragment>
         <span {...userProps}>{username}</span>
         {member_tag && member_tag.length > 0 && <span {...tagProps}>{' ' + member_tag.toString()}</span>}
@@ -161,7 +164,7 @@ export default function ColorMessageHeader({
   onClickAvatar,
 }) {
   const [_, originalChildren] = messageHeader.props.username.props.children;
-  const originalProps = originalChildren.props.children[0];
+  const originalProps = originalChildren.props.children[0].props;
 
   return {
     ...messageHeader,
