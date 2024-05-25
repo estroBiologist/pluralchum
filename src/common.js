@@ -71,4 +71,9 @@ globalThis.Common = {
   Components,
   React,
   ReactDOM,
+  MessageUtils,
+  TimestampUtils,
+  UserProfileUtils,
+  UserActionCreators,
+  MessageActions
 };
