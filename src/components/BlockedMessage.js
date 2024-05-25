@@ -1,4 +1,4 @@
-const React = BdApi.React;
+import { React } from '../common.js';
 
 function getHeaderId(label) {
   return /message-username-(?<headerId>\d+)/.exec(label)?.groups?.headerId;

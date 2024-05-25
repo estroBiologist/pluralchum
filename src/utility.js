@@ -1,4 +1,4 @@
-const React = BdApi.React;
+import { React } from './common.js';
 
 export class ValueCell {
   #val;
@@ -127,3 +127,26 @@ export function dummy() {
 }
 
 export const pluginName = 'Pluralchum';
+
+export function patchComponent(component, patch) {
+  const isMemo = component.module.$$typeof && component.module.$$typeof == Symbol('react.memo') ? true : false;
+  return BdApi.Patcher.instead(pluginName, component.module, isMemo ? 'type' : 'default', patch);
+}
+
+export function patchClass(_class, func, patch) {
+  return BdApi.Patcher.instead(pluginName, _class.prototype, func, patch);
+}
+
+export function patch(mod, func, patch) {
+  return BdApi.Patcher.instead(pluginName, mod, func, patch);
+}
+
+export function useAsyncEffect(func, deps) {
+  return React.useEffect(() => {
+    (async () => {
+      await func();
+    })();
+  }, deps);
+}
+
+export const clone = obj => Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);

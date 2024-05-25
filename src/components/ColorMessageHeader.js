@@ -1,16 +1,10 @@
-/* eslint-disable react/no-children-prop */
-import ZLibrary from '../external/ZLibrary.js';
-const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
-const React = BdApi.React;
+import { React, Stores } from '../common.js';
 
 import { fix } from '@ariagivens/discord-unicode-fix-js';
 import { acceptableContrast } from '../contrast.js';
 import { ColourPreference } from '../data.js';
-import { updateProfile } from '../profiles.js';
 import PKBadge from './PKBadge.js';
-
-const { Clickable, Popout } = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('Avatar', 'Popout'));
-const UserActionCreators = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps('getUser', 'fetchProfile'));
+import PopoutContainer from './PopoutContainer.js';
 
 function normalize(str) {
   return fix(str).normalize('NFD');
@@ -74,7 +68,7 @@ function memberColour(colourPref, member, guildId) {
     case ColourPreference.System:
       return member.system_color ?? member.color;
     case ColourPreference.Role:
-      return GuildMemberStore.getMember(guildId, member.sender)?.colorString;
+      return Stores.GuildMemberStore.getMember(guildId, member.sender)?.colorString;
     default:
       return null;
   }
@@ -87,41 +81,10 @@ function tagColour(colourPref, member, guildId) {
     case ColourPreference.System:
       return member.system_color;
     case ColourPreference.Role:
-      return GuildMemberStore.getMember(guildId, member.sender)?.colorString;
+      return Stores.GuildMemberStore.getMember(guildId, member.sender)?.colorString;
     default:
       return null;
   }
-}
-
-function PopoutContainer({ message, profileMap, profile, originalProps, tagProps, children }) {
-  const [shouldShowPopout, setShowPopout] = React.useState(false);
-  return (
-    <Popout
-      preload={async () => { updateProfile(message, profileMap); await UserActionCreators.getUser(profile.sender); }}
-      renderPopout={originalProps.renderPopout}
-      shouldShow={shouldShowPopout}
-      position='right'
-      onRequestClose={() => setShowPopout(false)}
-      children={_props => {
-        const { onClick: _, ...props } = _props;
-        return (
-          <Clickable
-            className='username__0b0e7 clickable__09456'
-            onClick={args => {
-              setShowPopout(shouldShowPopout => !shouldShowPopout);
-              originalProps.onClick(args);
-            }}
-            onContextMenu={originalProps.onContextMenu}
-            tag='span'
-            { ...tagProps }
-            { ...props }
-          >
-            {children}
-          </Clickable>
-        );
-      }}
-    />
-  );
 }
 
 function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, originalProps) {

@@ -1,22 +1,13 @@
-const MessageContent = BdApi.Webpack.getModule(m => {
-  let s = m?.type?.toString();
-  return s && s.includes('messageContent') && s.includes('MESSAGE_EDITED');
-});
-const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('showTimestampOnHover'), {
-  defaultExport: false,
-});
-const [Message, blocker] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('.cozy', '.hasReply', '.hasThread', '.isSystemMessage'),
-);
-const React = BdApi.React;
+import { React, Components } from './common.js';
 
-import { MapCell, pluginName } from './utility.js';
+import { MapCell, patchComponent } from './utility.js';
 import MessageContentProxy from './components/MessageContentProxy.js';
 import MessageHeaderProxy from './components/MessageHeaderProxy.js';
 import MessageProxy from './components/MessageProxy.js';
+import Popout from "./components/Popout.js"
 
 export function patchMessageContent(settings, profileMap, enabled) {
-  BdApi.Patcher.instead(pluginName, MessageContent, 'type', function (ctx, [props], f) {
+  patchComponent(Components.MessageContent, (ctx, [props], f) => {
     return (
       <MessageContentProxy
         settingsCell={settings}
@@ -36,13 +27,27 @@ export function patchMessageContent(settings, profileMap, enabled) {
 // i am sorry
 //
 export function patchMessageHeader(settings, profileMap, enabled) {
-  BdApi.Patcher.instead(pluginName, MessageHeader, "default", function (ctx, [props], f) {
+  patchComponent(Components.MessageHeader, (ctx, [props], f) => {
+    const ret = f.call(ctx, {
+      ...props,
+      renderPopout: (_props, message) => {
+        return (
+          <Popout
+            props={_props}
+            message={message}
+            renderPopout={props.renderPopout}
+            profileMap={profileMap}
+          />
+        );
+      },
+    });
+
     return (
       <MessageHeaderProxy
         settingsCell={settings}
         profileMap={profileMap}
         enabledCell={enabled}
-        messageHeader={f.call(ctx, props)}
+        messageHeader={ret}
         message={props.message}
         guildId={props.guildId}
         onClickAvatar={props.onClickAvatar}
@@ -54,7 +59,7 @@ export function patchMessageHeader(settings, profileMap, enabled) {
 export function patchMessage(profileMap, enabled) {
   let unblockedMap = new MapCell({});
 
-  BdApi.Patcher.instead(pluginName, Message, blocker, function (ctx, [props], f) {
+  patchComponent(Components.Message, (ctx, [props], f) => {
     return (
       <MessageProxy
         profileMap={profileMap}

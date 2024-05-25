@@ -1,12 +1,10 @@
+import { React, MessageUtils } from '../common.js';
 import { hookupProfile } from '../profiles';
 import { hookupValueCell } from '../utility';
 import BlockedMessage from './BlockedMessage';
-let isBlocked = BdApi.Webpack.getByKeys('isBlocked').isBlocked;
-
-const React = BdApi.React;
 
 function isBlockedProfile(profile) {
-  return profile?.sender && isBlocked(profile.sender);
+  return profile?.sender && MessageUtils.isBlocked(profile.sender);
 }
 
 function MessageProxyInner({ profileMap, unblockedMap, messageNode, message, label, compact }) {

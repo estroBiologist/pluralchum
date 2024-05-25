@@ -1,4 +1,4 @@
-const React = BdApi.React;
+import { React } from '../common.js';
 import { dummy } from '../utility';
 
 let warned = false;

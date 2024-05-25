@@ -1,4 +1,4 @@
-const React = BdApi.React;
+import { React } from '../common.js';
 
 import { hookupValueCell, isProxiedMessage } from '../utility';
 import { ProfileStatus, updateProfile, hookupProfile } from '../profiles';

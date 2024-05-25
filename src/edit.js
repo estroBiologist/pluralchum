@@ -1,7 +1,4 @@
-import ZLibrary from './external/ZLibrary.js';
-const MessageActions = ZLibrary.DiscordModules.MessageActions;
-const MessageStore = ZLibrary.DiscordModules.MessageStore;
-const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
+import { MessageActions, Stores } from './common.js';
 import { isProxiedMessage, pluginName } from './utility.js';
 
 export function patchEditMenuItem() {
@@ -34,9 +31,9 @@ export function patchEditAction() {
     MessageActions,
     'editMessage',
     BdApi.Utils.debounce(function (ctx, [channel_id, message_id, message], original) {
-      if (isProxiedMessage(MessageStore.getMessage(channel_id, message_id))) {
+      if (isProxiedMessage(Stores.MessageStore.getMessage(channel_id, message_id))) {
         let { content } = message;
-        let channel = ChannelStore.getChannel(channel_id);
+        let channel = Stores.ChannelStore.getChannel(channel_id);
         let guild_id = channel.guild_id;
         let str = 'pk;e https://discord.com/channels/' + guild_id + '/' + channel_id + '/' + message_id + ' ' + content;
         MessageActions.sendMessage(channel_id, {

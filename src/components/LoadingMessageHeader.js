@@ -1,5 +1,4 @@
-const React = BdApi.React;
-
+import { React } from '../common.js';
 import PKBadge from './PKBadge.js';
 
 // function replaceBotWithPK(component, profile, profileMap, userHash) {

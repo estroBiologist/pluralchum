@@ -1,4 +1,4 @@
-const React = BdApi.React;
+import { React } from '../common.js';
 import { ThreeDots } from 'svg-loaders-react';
 import { ProfileStatus } from '../profiles.js';
 
