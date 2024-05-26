@@ -129,7 +129,7 @@ export function dummy() {
 export const pluginName = 'Pluralchum';
 
 export function patchComponent(component, patch) {
-  const isMemo = component.module.$$typeof && component.module.$$typeof == Symbol('react.memo') ? true : false;
+  const isMemo = component.module.$$typeof && component.module.$$typeof == Symbol.for('react.memo') ? true : false;
   return BdApi.Patcher.instead(pluginName, component.module, isMemo ? 'type' : 'default', patch);
 }
 

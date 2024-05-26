@@ -8,7 +8,9 @@
   "scripts": {
     "build": "rollup -c",
     "format": "prettier './**/*.js' --write",
-    "lint": "eslint './**/*.js'"
+    "lint": "eslint './**/*.js'",
+    "inject": "npm run build && node ./inject.js",
+    "dev": "nodemon --ignore dist/ --exec npm run inject"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
@@ -19,6 +21,7 @@
     "@rollup/plugin-replace": "^5.0.2",
     "eslint": "^8.43.0",
     "eslint-plugin-react": "^7.32.2",
+    "nodemon": "^3.1.1",
     "prettier": "2.8.8",
     "rollup": "^3.25.0",
     "rollup-plugin-import-css": "3.3.4"
