@@ -8,7 +8,7 @@ import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName, sleep } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
-const version = '2.2.0';
+const version = '2.2.1';
 
 export class Pluralchum {
   patches = [];
