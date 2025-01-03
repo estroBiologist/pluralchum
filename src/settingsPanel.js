@@ -1,174 +1,180 @@
-import ZLibrary from './external/ZLibrary.js';
-const Settings = ZLibrary.Settings;
+const React = BdApi.React;
 import { ColourPreference } from './data.js';
 
-function logo() {
-  let logo = document.createElement('img');
+function title() {
+  let logo = (
+    <img
+      src='https://file.garden/ZRg8rDvANRar6gn8/pluralchum/overkill_logo_final.png'
+      style={{ maxWidth: '100%', height: 'auto' }}
+    />
+  );
 
-  logo.src = 'https://file.garden/ZRg8rDvANRar6gn8/pluralchum/overkill_logo_final.png';
+  let subtitle = (
+    <p style={{ textAlign: 'center', color: 'var(--header-primary)', width: '100%' }}>
+      PluralKit integration for BetterDiscord
+      <br />- by{' '}
+      <b>
+        <span style={{ color: '#ff002a' }}>ash taylor</span>
+      </b>{' '}
+      -
+    </p>
+  );
 
-  logo.style = 'max-width: 100%; height: auto;';
-
-  return logo;
-}
-
-function subtitle() {
-  let subtitle = document.createElement('p');
-
-  subtitle.innerHTML =
-    'PluralKit integration for BetterDiscord<br>- by <b><span style="color: #ff002a;">ash taylor</span></b> -';
-  subtitle.style = 'text-align: center; color: var(--header-primary);';
-
-  return subtitle;
+  return {
+    type: 'custom',
+    id: 'logo',
+    name: '',
+    note: '',
+    value: null,
+    children: (
+      <div>
+        {logo}
+        {subtitle}
+      </div>
+    ),
+  };
 }
 
 function doColourText(settings) {
-  return new Settings.Switch('Colored proxy text', '', settings.get().doColourText, val => {
-    settings.update(function (s) {
-      return { ...s, doColourText: val };
-    });
-  });
+  return {
+    type: 'switch',
+    id: 'doColourText',
+    name: 'Colored proxy text',
+    note: '',
+    value: settings.get().doColourText,
+  };
 }
 
-function memberColorPref(settings) {
-  return new Settings.Dropdown(
-    'Default member name color',
-    '',
-    settings.get().memberColourPref,
-    [
+function memberColourPref(settings) {
+  return {
+    type: 'dropdown',
+    id: 'memberColourPref',
+    name: 'Default member name color',
+    note: '',
+    value: settings.get().memberColourPref,
+    options: [
       { label: 'Member', value: ColourPreference.Member },
       { label: 'System', value: ColourPreference.System },
       { label: 'Role', value: ColourPreference.Role },
       { label: 'Theme', value: ColourPreference.Theme },
     ],
-    val => {
-      settings.update(function (s) {
-        return { ...s, memberColourPref: val };
-      });
-    },
-  );
+  };
 }
 
 function tagColourPref(settings) {
-  return new Settings.Dropdown(
-    'Default system tag color',
-    '',
-    settings.get().tagColourPref,
-    [
+  return {
+    type: 'dropdown',
+    id: 'tagColourPref',
+    name: 'Default system tag color',
+    note: '',
+    value: settings.get().tagColourPref,
+    options: [
       { label: 'Member', value: ColourPreference.Member },
       { label: 'System', value: ColourPreference.System },
       { label: 'Role', value: ColourPreference.Role },
       { label: 'Theme', value: ColourPreference.Theme },
     ],
-    val => {
-      settings.update(function (s) {
-        return { ...s, tagColourPref: val };
-      });
-    },
-  );
+  };
 }
 
 function useServerNames(settings) {
-  return new Settings.Switch('Use servernames', '', settings.get().useServerNames, val => {
-    settings.update(function (s) {
-      return { ...s, useServerNames: val };
-    });
-  });
+  return {
+    type: 'switch',
+    id: 'useServerNames',
+    name: 'Use servernames',
+    note: '',
+    value: settings.get().useServerNames,
+  };
 }
 
 function preferencesPanel(settings) {
-  let preferencesPanel = new Settings.SettingGroup('Preferences', {
+  return {
+    type: 'category',
+    id: 'preferencesPanel',
+    name: 'Preferences',
+    collapsible: true,
     shown: false,
-  });
-
-  preferencesPanel.append(
-    doColourText(settings),
-    useServerNames(settings),
-    memberColorPref(settings),
-    tagColourPref(settings),
-  );
-
-  return preferencesPanel;
+    settings: [doColourText(settings), useServerNames(settings), memberColourPref(settings), tagColourPref(settings)],
+  };
 }
 
 function doContrastTest(settings) {
-  return new Settings.Switch(
-    'Enable text contrast test',
-    "Uses the theme's default color if the proxy's contrast is too low",
-    settings.get().doContrastTest,
-    val => {
-      settings.update(function (s) {
-        return { ...s, doContrastTest: val };
-      });
-    },
-  );
+  return {
+    type: 'switch',
+    id: 'doContrastTest',
+    name: 'Enable text constrast test',
+    note: "Uses the theme's default color if the proxy's contrast is too low",
+    value: settings.get().doContrastTest,
+  };
 }
 
 function contrastTestColour(settings) {
-  return new Settings.ColorPicker(
-    'Contrast test color',
-    'The background color that proxy text will be tested against (black for dark themes, white for light themes)',
-    settings.get().contrastTestColour,
-    hex => {
-      settings.update(function (s) {
-        return { ...s, contrastTestColour: hex };
-      });
-    },
-  );
+  return {
+    type: 'color',
+    id: 'contrastTestColour',
+    name: 'Contrast test color',
+    note: 'The background color that proxy text will be tested against (black for dark themes, white for light themes)',
+    value: settings.get().contrastTestColour,
+  };
 }
 
 function contrastThreshold(settings) {
-  return new Settings.Slider(
-    'Contrast ratio threshold',
-    'Minimum contrast ratio for proxy colors (default: 3)',
-    1,
-    21,
-    settings.get().contrastThreshold,
-    val => {
-      settings.update(function (s) {
-        return { ...s, contrastThreshold: val };
-      });
-    },
-    { markers: [1, 2, 3, 4.5, 7, 14, 21] },
-  );
+  return {
+    type: 'slider',
+    id: 'contrastThreshold',
+    name: 'Contrast ratio threshold',
+    note: 'Minimum contrast ratio for proxy colors (default: 3)',
+    value: settings.get().contrastThreshold,
+    min: 1,
+    max: 21,
+    markers: [1, 2, 3, 4.5, 7, 14, 21],
+  };
 }
 
 function accessibilityPanel(settings) {
-  // Contrast test settings
-  let accessibilityPanel = new Settings.SettingGroup('Accessibility', {
+  return {
+    type: 'category',
+    id: 'accessibilityPanel',
+    name: 'Accessibility',
+    collapsible: true,
     shown: false,
-  });
-
-  accessibilityPanel.append(doContrastTest(settings), contrastTestColour(settings), contrastThreshold(settings));
-
-  return accessibilityPanel;
+    settings: [doContrastTest(settings), contrastTestColour(settings), contrastThreshold(settings)],
+  };
 }
 
 function cachePanel(profileMap) {
-  // Cache
-  let cachePanel = new Settings.SettingGroup('Cache', { shown: false });
-  let resetCacheBtn = document.createElement('button');
-  resetCacheBtn.className = 'button_dd4f85 lookFilled_dd4f85 colorBrand_dd4f85 sizeSmall_dd4f85 grow_dd4f85';
-  resetCacheBtn.innerHTML = 'Delete Cache';
-  resetCacheBtn.onclick = () => {
-    profileMap.clear();
+  let resetCacheBtn = (
+    <button
+      className='button_dd4f85 lookFilled_dd4f85 colorBrand_dd4f85 sizeSmall_dd4f85 grow_dd4f85'
+      style={{ textAlign: 'center', width: '100%' }}
+      onClick={() => profileMap.clear()}
+    >
+      Delete Cache
+    </button>
+  );
+
+  return {
+    type: 'category',
+    id: 'cachePanel',
+    name: 'Cache',
+    collapsible: true,
+    shown: false,
+    settings: [
+      {
+        type: 'custom',
+        id: 'logo',
+        name: '',
+        note: '',
+        value: null,
+        children: resetCacheBtn,
+      },
+    ],
   };
-
-  cachePanel.append(resetCacheBtn);
-
-  return cachePanel;
 }
 
 export function settingsPanel(settings, profileMap) {
-  let settingsPanel = new Settings.SettingPanel();
-
-  settingsPanel.append(
-    logo(),
-    subtitle(),
-    preferencesPanel(settings),
-    accessibilityPanel(settings),
-    cachePanel(profileMap),
-  );
-
-  return settingsPanel.getElement();
+  return BdApi.UI.buildSettingsPanel({
+    settings: [title(), preferencesPanel(settings), accessibilityPanel(settings), cachePanel(profileMap)],
+    onChange: (_category, id, value) => settings.update(s => Object.assign({}, s, { [id]: value })),
+  });
 }
