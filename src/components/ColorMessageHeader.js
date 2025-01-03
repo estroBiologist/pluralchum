@@ -1,5 +1,5 @@
-import ZLibrary from '../external/ZLibrary.js';
-const GuildMemberStore = ZLibrary.DiscordModules.GuildMemberStore;
+const Webpack = BdApi.Webpack;
+const GuildMemberStore = Webpack.getStore('GuildMemberStore');
 const React = BdApi.React;
 
 import { fix } from '@ariagivens/discord-unicode-fix-js';

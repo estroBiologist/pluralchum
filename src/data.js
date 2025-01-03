@@ -1,4 +1,3 @@
-import ZLibrary from './external/ZLibrary.js';
 import { ValueCell, MapCell, pluginName } from './utility.js';
 import { ProfileStatus } from './profiles.js';
 
@@ -24,20 +23,15 @@ function defaultSettings() {
 }
 
 function loadSettings() {
-  let settings = ZLibrary.Utilities.loadSettings(pluginName, defaultSettings());
-
-  // Clear out old cache from previous versions
-  delete settings.profileMap;
-  delete settings.idMap;
-  ZLibrary.Utilities.saveSettings(pluginName, settings);
-
+  let settings = Object.assign(defaultSettings(), BdApi.Data.load(pluginName, 'settings'));
+  BdApi.Data.save(pluginName, 'settings', settings);
   return settings;
 }
 
 export function initializeSettings() {
   let settings = new ValueCell(loadSettings());
   settings.addListener(function (s) {
-    ZLibrary.Utilities.saveSettings(pluginName, s);
+    BdApi.Data.save(pluginName, 'settings', s);
   });
   return settings;
 }

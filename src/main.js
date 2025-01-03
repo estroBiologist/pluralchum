@@ -1,11 +1,10 @@
-import ZLibrary from './external/ZLibrary.js';
 import './styles.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader, patchMessage } from './messages.js';
 import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
-import { ValueCell, pluginName, sleep } from './utility.js';
+import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 
 const version = '2.2.1';
@@ -34,8 +33,6 @@ export class Pluralchum {
     this.patches.push(patchEditMenuItem());
     patchEditAction();
 
-    softReload();
-
     checkForUpdates(version);
   }
 
@@ -47,8 +44,6 @@ export class Pluralchum {
     purgeOldProfiles(this.profileMap);
 
     BdApi.Patcher.unpatchAll(pluginName);
-
-    ZLibrary.DOMTools.removeStyle(pluginName);
   }
 
   getSettingsPanel() {
@@ -58,15 +53,4 @@ export class Pluralchum {
   getName() {
     return pluginName;
   }
-}
-
-async function softReload() {
-  let channel = ZLibrary.DiscordModules.SelectedChannelStore.getChannelId();
-  let guild = ZLibrary.DiscordModules.SelectedGuildStore.getGuildId();
-
-  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(ZLibrary.DiscordModules.DiscordConstants.Routes.INDEX);
-  await sleep(100);
-  await ZLibrary.DiscordModules.NavigationUtils.transitionTo(
-    ZLibrary.DiscordModules.DiscordConstants.Routes.CHANNEL(guild, channel),
-  );
 }

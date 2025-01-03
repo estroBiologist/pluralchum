@@ -1,7 +1,7 @@
-import ZLibrary from './external/ZLibrary.js';
-const MessageActions = ZLibrary.DiscordModules.MessageActions;
-const MessageStore = ZLibrary.DiscordModules.MessageStore;
-const ChannelStore = ZLibrary.DiscordModules.ChannelStore;
+const Webpack = BdApi.Webpack;
+const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage');
+const MessageStore = Webpack.getStore('MessageStore');
+const ChannelStore = Webpack.getStore('ChannelStore');
 import { isProxiedMessage, pluginName } from './utility.js';
 
 export function patchEditMenuItem() {
