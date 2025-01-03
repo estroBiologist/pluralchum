@@ -6,12 +6,11 @@
   <br>
   Hey! Is your head FULL OF PEOPLE? Are you an avid PLURALKIT USER?<br>Does seeing plain white usernames, broken profile popups and <code>BOT</code> tags all day make you want to BREAK THINGS?<br><br>Then <b>PLURALCHUM</b> is the plugin for you!
   <br><br><br>
-  - [ <a href="https://github.com/estroBiologist/pluralchum/releases/latest">Download</a> - 
-  <a href="https://github.com/estroBiologist/pluralchum/releases">Changelog</a> - 
+  - [ <a href="https://github.com/estroBiologist/pluralchum/releases/latest">Download</a> -
+  <a href="https://github.com/estroBiologist/pluralchum/releases">Changelog</a> -
   <a href="https://www.twitter.com/estroBiologist">Twitter</a> ] - <br><br>
-  <i>(requires <a href="https://betterdiscord.app/plugin/ZeresPluginLibrary">Zere's Plugin Library</a>)</i>
   <br><br></p>
-  
+
 ---
 <p align="center">
   <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/introduction.png"><br>
@@ -24,7 +23,7 @@
   These limitations aren't PK's fault. The bot uses <b>webhooks</b> to create proxy messages, which Discord just doesn't give features like custom name colours to. Nothing to do about it, unfortunately.<br>
   <br>
   Except, of course, if you could mod the client. Enter <b>Pluralchum</b>.<br>
-  <br> 
+  <br>
   <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/Discord_1cL2ymcL79.png" width="550" border="10"><br>
   <br>
   <b>Pluralchum</b> is a plugin for BetterDiscord that utilizes PluralKit's web API to provide better integration for proxied messages.<br>
@@ -57,9 +56,9 @@
   <br>
   Beyond that, there are likely to be loads of bugs and small issues I haven't spotted. Please don't hesitate to submit an <a href="https://github.com/estroBiologist/pluralchum/issues">issue</a> if something's wrong, and any contributions are greatly appreciated! (I apologize for my code.)
 </p>
-  
+
 ---
- 
+
 <p align="center">
   <img src="https://file.garden/ZRg8rDvANRar6gn8/pluralchum/reviewns_WHYTE.png">
   <br><br><br>
