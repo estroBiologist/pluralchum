@@ -1,6 +1,6 @@
 const MessageContent = BdApi.Webpack.getModule(m => {
   let s = m?.type?.toString();
-  return s && s.includes('messageContent') && s.includes('MESSAGE_EDITED');
+  return s && s.includes('messageContent') && s.includes('SEND_FAILED');
 });
 const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('showTimestampOnHover'), {
   defaultExport: false,
