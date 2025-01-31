@@ -28,7 +28,7 @@ export default function PKBadge({ profileMap, userHash, profile }) {
   }
 
   return (
-    <span className='botTagCozy_f9f2ca botTag_f9f2ca botTagRegular_a9e77f botTag_a9e77f rem_a9e77f'>
+    <span className='botTagCozy_c19a55 botTag_c19a55 botTagRegular__82f07 botTag__82f07 rem__82f07'>
       <div className='botText_a9e77f'>
         <a style={linkStyle} onClick={onClick}>
           {content}
