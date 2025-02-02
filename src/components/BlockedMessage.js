@@ -31,8 +31,8 @@ function getUnblocked(unblockedMap, message, messageNode, label) {
 
 function XIcon() {
   return (
-    <div className='iconContainer_d76df7'>
-      <svg aria-hidden='true' role='img' className='blockedIcon_c09d0f' width='24' height='24' viewBox='0 0 24 24'>
+    <div className='iconContainer__235ca'>
+      <svg aria-hidden='true' role='img' className='blockedIcon__7a70a' width='24' height='24' viewBox='0 0 24 24'>
         <path
           fill='currentColor'
           d='M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z'
@@ -51,16 +51,16 @@ export default function BlockedMessage({ unblockedMap, message, messageNode, lab
   }
 
   return (
-    <div className='groupStart_d5deea'>
-      <div className='wrapper_f9f2ca cozy_f9f2ca zalgo_f9f2ca' role='article'>
-        <div className='contents_f9f2ca'>
-          <div className='blockedSystemMessage_c09d0f container_d76df7 cozy_d76df7'>
+    <div className='groupStart__5126c'>
+      <div className='wrapper_c19a55 cozy_c19a55 zalgo_c19a55' role='article'>
+        <div className='contents_c19a55'>
+          <div className='blockedSystemMessage__7a70a container__235ca cozy__235ca'>
             <XIcon />
-            <div className='content_d76df7'>
-              <div className='blockedMessageText_c09d0f'>
+            <div className='content__235ca'>
+              <div className='blockedMessageText__7a70a'>
                 {unblocked.length} blocked {unblocked.length === 1 ? 'message' : 'messages'} —{' '}
                 <span
-                  className='blockedAction_c09d0f'
+                  className='blockedAction__7a70a'
                   role='button'
                   tabIndex='0'
                   onClick={() => setExpanded(!expanded)}
