@@ -1,13 +1,9 @@
 const React = BdApi.React;
 import { ColourPreference } from './data.js';
+import logo_png from '../images/logo.png';
 
 function title() {
-  let logo = (
-    <img
-      src='https://file.garden/ZRg8rDvANRar6gn8/pluralchum/overkill_logo_final.png'
-      style={{ maxWidth: '100%', height: 'auto' }}
-    />
-  );
+  let logo = <img src={logo_png} style={{ maxWidth: '100%', height: 'auto' }} />;
 
   let subtitle = (
     <p style={{ textAlign: 'center', color: 'var(--header-primary)', width: '100%' }}>

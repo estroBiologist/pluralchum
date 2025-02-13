@@ -4,6 +4,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import css from 'rollup-plugin-import-css';
 import replace from '@rollup/plugin-replace';
 import fs from 'fs/promises';
+import image from '@rollup/plugin-image';
 
 export default {
   input: 'src/main.js',
@@ -17,6 +18,7 @@ export default {
     nodeResolve(),
     babel({ babelHelpers: 'bundled' }),
     css(),
+    image(),
     commonjs(),
     replace({ preventAssignment: false, delimiters: ['', ''], values: { "require('react')": 'BdApi.React' } }),
   ],
