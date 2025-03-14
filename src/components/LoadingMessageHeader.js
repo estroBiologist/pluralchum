@@ -1,14 +1,6 @@
 const React = BdApi.React;
 
-import PKBadge from './PKBadge.js';
-
-// function replaceBotWithPK(component, profile, profileMap, userHash) {
-//   if (component?.props?.username?.props?.children?.[1]?.props?.children[0]?.props?.decorations) {
-//     component.props.username.props.children[1].props.children[0].props.decorations = [
-//       <PKBadge profileMap={profileMap} userHash={userHash} profile={profile} />,
-//     ];
-//   }
-// }
+import HeaderPKBadge from './HeaderPKBadge.js';
 
 export default function LoadingMessageHeader({ messageHeader, profile, profileMap, userHash }) {
   return {
@@ -27,7 +19,7 @@ export default function LoadingMessageHeader({ messageHeader, profile, profileMa
                 ...messageHeader.props.username.props.children[1].props.children[0],
                 props: {
                   ...messageHeader.props.username.props.children[1].props.children[0].props,
-                  decorations: [<PKBadge profileMap={profileMap} userHash={userHash} profile={profile} />],
+                  decorations: [<HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />],
                 },
               }),
             },

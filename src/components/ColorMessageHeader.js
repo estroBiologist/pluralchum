@@ -5,7 +5,7 @@ const React = BdApi.React;
 import { fix } from '@ariagivens/discord-unicode-fix-js';
 import { acceptableContrast } from '../contrast.js';
 import { ColourPreference } from '../data.js';
-import PKBadge from './PKBadge.js';
+import HeaderPKBadge from './HeaderPKBadge.js';
 
 function normalize(str) {
   return fix(str).normalize('NFD');
@@ -36,82 +36,72 @@ function getUsername(useServerNames, author, profile) {
     let servername = getServername(username, tag);
     if (servername) {
       // we can seperate servername and tag
-      return { username: servername, member_tag: tag };
+      return { username: servername, memberTag: tag };
     } else {
       // most likely using a servertag, treat the whole thing as the username
-      return { username, member_tag: '' };
+      return { username, memberTag: '' };
     }
   } else {
-    return { username: normalize(profile.name), member_tag: tag };
+    return { username: normalize(profile.name), memberTag: tag };
   }
 }
 
-function nameProps(author, type, settings, colour) {
+function NameSegment({ colour, name }) {
+  return (
+    <span className='username_c19a55 pk-name-segment' style={{ color: colour }}>
+      {name}
+    </span>
+  );
+}
+
+function getColour(colourPref, member, guildId, settings, defaultSystemColourToMemberColour) {
+  let colour;
+
+  switch (colourPref) {
+    case ColourPreference.Member:
+      colour = member.color ?? member.system_color;
+      break;
+    case ColourPreference.System:
+      if (defaultSystemColourToMemberColour) {
+        colour = member.system_color ?? member.color;
+      } else {
+        colour = member.system_color;
+      }
+      break;
+    case ColourPreference.Role:
+      colour = GuildMemberStore.getMember(guildId, member.sender)?.colorString;
+      break;
+    default:
+      colour = null;
+      break;
+  }
+
   let { doContrastTest, contrastTestColour, contrastThreshold } = settings;
-
-  let props = {
-    user: author,
-    className: 'username__0b0e7',
-    type: type,
-  };
-
   if (colour && acceptableContrast(colour, doContrastTest, contrastTestColour, contrastThreshold)) {
-    props.style = { color: colour };
-  }
-
-  return props;
-}
-
-function memberColour(colourPref, member, guildId) {
-  switch (colourPref) {
-    case ColourPreference.Member:
-      return member.color ?? member.system_color;
-    case ColourPreference.System:
-      return member.system_color ?? member.color;
-    case ColourPreference.Role:
-      return GuildMemberStore.getMember(guildId, member.sender)?.colorString;
-    default:
-      return null;
+    return colour;
+  } else {
+    return null;
   }
 }
 
-function tagColour(colourPref, member, guildId) {
-  switch (colourPref) {
-    case ColourPreference.Member:
-      return member.color ?? member.system_color;
-    case ColourPreference.System:
-      return member.system_color;
-    case ColourPreference.Role:
-      return GuildMemberStore.getMember(guildId, member.sender)?.colorString;
-    default:
-      return null;
-  }
-}
-
-function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash) {
+function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClick) {
   let { memberColourPref, tagColourPref } = settings;
 
-  let { username, member_tag } = getUsername(settings.useServerNames, message.author, profile);
+  let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile);
 
-  let pkBadge = <PKBadge profileMap={profileMap} userHash={userHash} profile={profile} />;
+  let memberColour = getColour(memberColourPref, profile, guildId, settings, true);
+  let tagColour = getColour(tagColourPref, profile, guildId, settings, false);
 
-  let member_colour = memberColour(memberColourPref, profile, guildId);
-  let userProps = nameProps(message.author, 'member_name', settings, member_colour);
+  let doSysTag = memberTag && memberTag.length > 0;
 
-  let tag_colour = tagColour(tagColourPref, profile, guildId);
-  let tagProps = nameProps(message.author, 'system_tag', settings, tag_colour);
-
-  if (!member_tag || typeof member_tag !== 'string') member_tag = '';
-
-  let elements = [];
-
-  elements.push(React.createElement('span', userProps, username));
-  if (member_tag && member_tag.length > 0) {
-    elements.push(React.createElement('span', tagProps, ' ' + member_tag.toString()));
-  }
-  elements.push(pkBadge);
-
-  return elements;
+  return [
+    <span className='username_c19a55 pk-name' onClick={onClick}>
+      <NameSegment colour={memberColour} name={username} />
+      {doSysTag ? ' ' : null}
+      {doSysTag ? <NameSegment colour={tagColour} name={memberTag} /> : null}
+      <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />
+    </span>,
+  ];
 }
 
 export default function ColorMessageHeader({
@@ -122,6 +112,7 @@ export default function ColorMessageHeader({
   messageHeader,
   message,
   guildId,
+  onClick,
 }) {
   return {
     ...messageHeader,
@@ -131,7 +122,12 @@ export default function ColorMessageHeader({
         ...messageHeader.props.username,
         props: {
           ...messageHeader.props.username.props,
-          children: createHeaderChildren(message, guildId, settings, profileMap, profile, userHash),
+          children: [
+            createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClick),
+            // Triggering the popout with correct position is hard, so we just leave the original
+            // header here (but hide it using CSS) so the popout can take its position.
+            <div className='pk-hidden'>{messageHeader.props.username.props.children}</div>,
+          ],
         },
       },
     },

@@ -6,6 +6,7 @@ import { patchEditMenuItem, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
+import { patchBotPopout } from './popout.js';
 
 const version = '2.3.0';
 
@@ -32,6 +33,7 @@ export class Pluralchum {
     patchMessage(this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem());
     patchEditAction();
+    patchBotPopout(this.profileMap);
 
     checkForUpdates(version);
   }

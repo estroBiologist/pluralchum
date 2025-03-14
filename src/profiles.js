@@ -34,6 +34,10 @@ function pkDataToProfile(data) {
     status: ProfileStatus.Done,
     system_color: '#' + data.system.color,
     sender: data.sender,
+    description: data.member.description,
+    avatar: data.member.avatar_url ?? data.system.avatar_url,
+    banner: data.member.banner,
+    system_name: data.system.name,
   };
 
   if (data.member.color === null) profile.color = '';

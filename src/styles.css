@@ -5,3 +5,20 @@
 .plugin-inputs.collapsible.collapsed {
   overflow: hidden;
 }
+
+.pk-name:hover .pk-name-segment {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pk-hidden {
+  visibility: hidden;
+  display: inline;
+  position: absolute;
+  width: 0px;
+}
+
+.pk-hidden * {
+  display: inline-block;
+  width: 0px;
+}

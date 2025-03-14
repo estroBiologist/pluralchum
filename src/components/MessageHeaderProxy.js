@@ -5,7 +5,15 @@ import { hookupProfile, updateProfile, ProfileStatus, getUserHash } from '../pro
 import ColoredMessageHeader from './ColorMessageHeader.js';
 import LoadingMessageHeader from './LoadingMessageHeader.js';
 
-export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCell, messageHeader, message, guildId }) {
+export default function MessageHeaderProxy({
+  settingsCell,
+  profileMap,
+  enabledCell,
+  messageHeader,
+  message,
+  guildId,
+  onClickUsername,
+}) {
   let [settings] = hookupValueCell(settingsCell);
   let [profile] = hookupProfile(profileMap, message.author);
   let [enabled] = hookupValueCell(enabledCell);
@@ -28,6 +36,7 @@ export default function MessageHeaderProxy({ settingsCell, profileMap, enabledCe
         messageHeader={messageHeader}
         message={message}
         guildId={guildId}
+        onClick={onClickUsername}
       />
     );
   } else if (!profile || profile.status === ProfileStatus.Requesting) {

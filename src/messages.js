@@ -46,6 +46,7 @@ export function patchMessageHeader(settings, profileMap, enabled) {
           messageHeader={f.call(ctx, props)}
           message={props.message}
           guildId={props.guildId}
+          onClickUsername={props.onClickUsername}
         />
       );
     });

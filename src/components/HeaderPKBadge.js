@@ -2,7 +2,7 @@ const React = BdApi.React;
 import { ThreeDots } from 'svg-loaders-react';
 import { ProfileStatus } from '../profiles.js';
 
-export default function PKBadge({ profileMap, userHash, profile }) {
+export default function PopoutPKBadge({ profileMap, userHash, profile }) {
   const status = profile.status;
 
   let onClick = function () {
