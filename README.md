@@ -50,10 +50,6 @@
   <i>As a workaround, you can click the PK badge next to a user to request a member info update manually.</i><br>
   <br>
   <br>
-  2. <b>Member names aren't clickable.</b><br>
-  This one was more of a deliberate choice, as to not bite off more than I could chew. At some point, I'd love to give member names and avatars special PK profile popouts when clicked. That's <b>The Big One</b>, baby.<br>
-  <br>
-  <br>
   Beyond that, there are likely to be loads of bugs and small issues I haven't spotted. Please don't hesitate to submit an <a href="https://github.com/estroBiologist/pluralchum/issues">issue</a> if something's wrong, and any contributions are greatly appreciated! (I apologize for my code.)
 </p>
 
