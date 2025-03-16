@@ -1,4 +1,4 @@
-import semver from 'semver';
+const { semverCompare } = BdApi.Utils;
 import { ProfileStatus } from './profiles';
 
 export async function showUpdateNotice(url) {
@@ -16,7 +16,7 @@ export async function checkForUpdates(currentVersion) {
     let latestRelease = await data.json();
     let latestVersion = latestRelease.tag_name;
 
-    if (semver.gt(latestVersion, currentVersion)) {
+    if (semverCompare(currentVersion, latestVersion) > 0) {
       showUpdateNotice(latestRelease.html_url);
     }
   }
@@ -24,7 +24,7 @@ export async function checkForUpdates(currentVersion) {
 
 export function upgradeCache(settings, profileMap, currentVersion) {
   let cacheVersion = settings.get().version;
-  if (!cacheVersion || semver.gt(currentVersion, cacheVersion)) {
+  if (!cacheVersion || semverCompare(cacheVersion, currentVersion) > 0) {
     settings.update(function (s) {
       return { ...s, version: currentVersion };
     });

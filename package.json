@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@ariagivens/discord-unicode-fix-js": "1.1.0",
-    "semver": "^7.5.4",
     "svg-loaders-react": "^2.2.1"
   }
 }
