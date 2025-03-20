@@ -36,7 +36,7 @@ export default function MessageHeaderProxy({
         messageHeader={messageHeader}
         message={message}
         guildId={guildId}
-        onClick={onClickUsername}
+        onClickUsername={onClickUsername}
       />
     );
   } else if (!profile || profile.status === ProfileStatus.Requesting) {

@@ -84,7 +84,7 @@ function getColour(colourPref, member, guildId, settings, defaultSystemColourToM
   }
 }
 
-function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClick) {
+function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername) {
   let { memberColourPref, tagColourPref } = settings;
 
   let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile);
@@ -95,12 +95,12 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let doSysTag = memberTag && memberTag.length > 0;
 
   return [
-    <span className='username_c19a55 pk-name' onClick={onClick}>
+    <span className='username_c19a55 pk-name' onClick={onClickUsername}>
       <NameSegment colour={memberColour} name={username} />
       {doSysTag ? ' ' : null}
       {doSysTag ? <NameSegment colour={tagColour} name={memberTag} /> : null}
-      <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />
     </span>,
+    <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />,
   ];
 }
 
@@ -112,8 +112,9 @@ export default function ColorMessageHeader({
   messageHeader,
   message,
   guildId,
-  onClick,
+  onClickUsername,
 }) {
+  const showPopout = messageHeader.props.username.props.children[1].props.children[0].props.showPopout;
   return {
     ...messageHeader,
     props: {
@@ -123,7 +124,16 @@ export default function ColorMessageHeader({
         props: {
           ...messageHeader.props.username.props,
           children: [
-            createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClick),
+            createHeaderChildren(
+              message,
+              guildId,
+              settings,
+              profileMap,
+              profile,
+              userHash,
+              onClickUsername,
+              showPopout,
+            ),
             // Triggering the popout with correct position is hard, so we just leave the original
             // header here (but hide it using CSS) so the popout can take its position.
             <div className='pk-hidden'>{messageHeader.props.username.props.children}</div>,
