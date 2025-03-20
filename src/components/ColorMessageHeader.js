@@ -114,7 +114,6 @@ export default function ColorMessageHeader({
   guildId,
   onClickUsername,
 }) {
-  const showPopout = messageHeader.props.username.props.children[1].props.children[0].props.showPopout;
   return {
     ...messageHeader,
     props: {
@@ -124,16 +123,7 @@ export default function ColorMessageHeader({
         props: {
           ...messageHeader.props.username.props,
           children: [
-            createHeaderChildren(
-              message,
-              guildId,
-              settings,
-              profileMap,
-              profile,
-              userHash,
-              onClickUsername,
-              showPopout,
-            ),
+            createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername),
             // Triggering the popout with correct position is hard, so we just leave the original
             // header here (but hide it using CSS) so the popout can take its position.
             <div className='pk-hidden'>{messageHeader.props.username.props.children}</div>,
