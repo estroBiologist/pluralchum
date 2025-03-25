@@ -10,6 +10,10 @@ const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
 );
 
+const [Banner, banner] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.byStrings('bannerSrc')
+);
+
 const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('_.clanTagContainer'));
 
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
@@ -64,6 +68,13 @@ export function patchBotPopout(profileMap) {
     return ret;
   });
 
+  BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
+    if (isValidHttpUrl(displayProfile.banner)) {
+      ret.bannerSrc = displayProfile.banner;
+    }
+    return ret;
+  });
+
   BdApi.Patcher.instead(pluginName, BotPopout, viewBotPopout, function (_, [args], f) {
     let message = MessageStore.getMessage(args.channelId, args.messageId);
 
@@ -88,6 +99,10 @@ export function patchBotPopout(profileMap) {
       userProfile.accentColor = Number('0x' + profile.color.substring(1));
     } else {
       userProfile.accentColor = Number('0x5b63f4');
+    }
+
+    if (profile.banner) {
+      userProfile.banner = profile.banner;
     }
 
     let user = new User({
