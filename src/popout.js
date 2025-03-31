@@ -10,9 +10,7 @@ const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
 );
 
-const [Banner, banner] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('bannerSrc')
-);
+const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('bannerSrc'));
 
 const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('_.clanTagContainer'));
 
@@ -115,7 +113,7 @@ export function patchBotPopout(profileMap) {
     user.id = { userProfile, user, isPK: true };
 
     if (args.user.avatar) {
-      user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp?size=80';
+      user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
     }
 
     return f({ ...args, user });
