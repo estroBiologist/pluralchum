@@ -2,9 +2,7 @@ const MessageContent = BdApi.Webpack.getModule(m => {
   let s = m?.type?.toString();
   return s && s.includes('messageContent') && s.includes('SEND_FAILED');
 });
-const MessageHeader = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings('showTimestampOnHover'), {
-  defaultExport: false,
-});
+const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('BaseUsername'));
 const [Message, blocker] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('.cozy', '.hasReply', '.hasThread', '.isSystemMessage'),
 );
@@ -29,27 +27,23 @@ export function patchMessageContent(settings, profileMap, enabled) {
   });
 }
 
-// This could break with any Discord update but oh well
-// We look up the message header module, which has two functions; The mangled `default` fn, and the one we get
-// So we just sort of patch all the member functions in the module and hope for the best
-//
-// i am sorry
-//
 export function patchMessageHeader(settings, profileMap, enabled) {
-  Object.keys(MessageHeader).forEach(function (functionName) {
-    BdApi.Patcher.instead(pluginName, MessageHeader, functionName, function (ctx, [props], f) {
-      return (
-        <MessageHeaderProxy
-          settingsCell={settings}
-          profileMap={profileMap}
-          enabledCell={enabled}
-          messageHeader={f.call(ctx, props)}
-          message={props.message}
-          guildId={props.guildId}
-          onClickUsername={props.onClickUsername}
-        />
-      );
-    });
+  BdApi.Patcher.instead(pluginName, MessageHeader, messageHeader, function (ctx, [props], f) {
+    // Props can sometimes be undefined.
+    if (!props) {
+      return;
+    }
+    return (
+      <MessageHeaderProxy
+        settingsCell={settings}
+        profileMap={profileMap}
+        enabledCell={enabled}
+        messageHeader={f(props)}
+        message={props.message}
+        guildId={props.channel.guild_id}
+        onClickUsername={props.onClick}
+      />
+    );
   });
 }
 

@@ -118,18 +118,12 @@ export default function ColorMessageHeader({
     ...messageHeader,
     props: {
       ...messageHeader.props,
-      username: {
-        ...messageHeader.props.username,
-        props: {
-          ...messageHeader.props.username.props,
-          children: [
-            createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername),
-            // Triggering the popout with correct position is hard, so we just leave the original
-            // header here (but hide it using CSS) so the popout can take its position.
-            <div className='pk-hidden'>{messageHeader.props.username.props.children}</div>,
-          ],
-        },
-      },
+      children: [
+        createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername),
+        // Triggering the popout with correct position is hard, so we just leave the original
+        // header here (but hide it using CSS) so the popout can take its position.
+        <div className='pk-hidden'>{messageHeader.props.children}</div>,
+      ],
     },
   };
 }
