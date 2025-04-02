@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { pluginName } from './utility.js';
+import { onElementLoad, pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -59,7 +59,7 @@ export function patchBotPopout(profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [{ user }], ret) {
-    if (isValidHttpUrl(user.avatar)) {
+    if (user && isValidHttpUrl(user.avatar)) {
       ret.avatarSrc = user.avatar;
       ret.avatarPlaceholder = user.avatar;
     }
@@ -67,7 +67,7 @@ export function patchBotPopout(profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
-    if (isValidHttpUrl(displayProfile.banner)) {
+    if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
       ret.bannerSrc = displayProfile.banner;
     }
     return ret;
@@ -91,6 +91,7 @@ export function patchBotPopout(profileMap) {
       bio: profile.description,
       userId: args.user.id,
       guildId: args.guildId,
+      pronouns: profile.pronouns,
     };
 
     if (profile.color) {
@@ -107,7 +108,7 @@ export function patchBotPopout(profileMap) {
       username: profile.system_name ?? profile.system,
       globalName: profile.name,
       bot: true,
-      discriminator: '0000',
+      discriminator: profile.system,
     });
 
     user.id = { userProfile, user, isPK: true };
@@ -115,6 +116,12 @@ export function patchBotPopout(profileMap) {
     if (args.user.avatar) {
       user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
     }
+
+    //this may break with future Discord updates, it's just an extra safeguard though
+    const popoutSelector = `[id^="popout_"] [aria-label="${user.username}"] [aria-label="More"]`;
+    onElementLoad(popoutSelector, (element) => {
+      element.style.display = 'none';
+    });
 
     return f({ ...args, user });
   });
@@ -125,5 +132,39 @@ export function patchBotPopout(profileMap) {
     }
 
     return ret;
+  });
+
+  const userProfile = BdApi.Webpack.getByKeys("openUserProfileModal")
+  const Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
+  BdApi.Patcher.instead(pluginName, userProfile, "openUserProfileModal", (ctx, [args], f) => {
+      if(typeof args.userId !== 'string' && args.userId?.isPK)
+      {
+        Dispatcher.dispatch({
+          type: "USER_PROFILE_MODAL_OPEN",
+          userId: args.userId,
+          appContext: args.appContext
+        });
+
+        //this may break with future Discord updates, it's just an extra safeguard though
+        const modalSelector = '[aria-label="User Profile Modal"]';
+        onElementLoad(modalSelector, (element) => {
+          try{
+            element.querySelector('[aria-label="More"]').style.display = 'none';
+            for(const e of element.querySelectorAll('button[aria-label="Message"]')) e.style.display='none';
+            element.querySelector('div[class^="note_"]').parentNode.style.display = 'none';
+          }catch(e){ console.warn("[PLURALCHUM] Error while removing modal items, ", e)}
+        });
+
+        return;
+      }
+      return f(args);
+  });
+
+  const [UpdateNote, updateNote] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('updateNote'));
+  BdApi.Patcher.instead(pluginName, UpdateNote, updateNote, function (ctx, [args], f) {
+    if (args.user?.id?.isPK) {
+      return;
+    }
+    return f(args);
   });
 }

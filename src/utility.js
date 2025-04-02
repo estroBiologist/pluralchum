@@ -126,4 +126,25 @@ export function dummy() {
   });
 }
 
+export function onElementLoad(selector, callback, timeout=5000){
+  const observer = new MutationObserver((mutationsList, obs) => {
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            const element = document.querySelector(selector);
+            if (element){
+              observer.disconnect();
+              callback(element);
+            }
+        }
+    }
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  const observerTimeout = setTimeout(() => {
+    observer.disconnect();
+  }, 5000);
+}
+
 export const pluginName = 'Pluralchum';
