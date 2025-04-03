@@ -117,12 +117,6 @@ export function patchBotPopout(profileMap) {
       user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
     }
 
-    //this may break with future Discord updates, it's just an extra safeguard though
-    const popoutSelector = `[id^="popout_"] [aria-label="${user.username}"] [aria-label="More"]`;
-    onElementLoad(popoutSelector, (element) => {
-      element.style.display = 'none';
-    });
-
     return f({ ...args, user });
   });
 
@@ -145,26 +139,31 @@ export function patchBotPopout(profileMap) {
           appContext: args.appContext
         });
 
-        //this may break with future Discord updates, it's just an extra safeguard though
-        const modalSelector = '[aria-label="User Profile Modal"]';
-        onElementLoad(modalSelector, (element) => {
-          try{
-            element.querySelector('[aria-label="More"]').style.display = 'none';
-            for(const e of element.querySelectorAll('button[aria-label="Message"]')) e.style.display='none';
-            element.querySelector('div[class^="note_"]').parentNode.style.display = 'none';
-          }catch(e){ console.warn("[PLURALCHUM] Error while removing modal items, ", e)}
-        });
-
         return;
       }
       return f(args);
   });
-
-  const [UpdateNote, updateNote] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('updateNote'));
-  BdApi.Patcher.instead(pluginName, UpdateNote, updateNote, function (ctx, [args], f) {
-    if (args.user?.id?.isPK) {
+  
+  const UpdateNote = BdApi.Webpack.getByKeys("updateNote");
+  BdApi.Patcher.instead(pluginName, UpdateNote, "updateNote", function (ctx, args, f) {
+    if (args[0]?.isPK) {
       return;
     }
-    return f(args);
+    return f(...args);
+  });
+
+  //this might eventually break with an update? just nuke the overflow menu button for PK profiles
+  const OverflowMenu = BdApi.Webpack.getByStrings('user-bot-profile-overflow-menu', 'BLOCK', {defaultExport: false});
+  BdApi.Patcher.after(pluginName, OverflowMenu, "Z", (ctx, [args], returnValue) => {
+      if(args.user?.id?.isPK) returnValue.props?.targetElementRef?.current?.remove();
+  });
+
+  //this could potentially be changed to message the system user?
+  const MessageButton = BdApi.Webpack.getByKeys("openPrivateChannel");
+  BdApi.Patcher.instead(pluginName, MessageButton, "openPrivateChannel", function (ctx, args, f) {
+    if (args[0]?.isPK) {
+      return;
+    }
+    return f(...args);
   });
 }
