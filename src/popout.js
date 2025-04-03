@@ -88,8 +88,8 @@ export function patchBotPopout(profileMap) {
     }
 
     let userProfile = {
-      bio: profile.description,
-      system_bio: profile.system_description,
+      bio: profile.description ?? "",
+      system_bio: profile.system_description ?? "",
       userId: args.user.id,
       guildId: args.guildId,
       pronouns: profile.pronouns,
