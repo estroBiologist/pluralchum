@@ -116,6 +116,9 @@ export function patchBotPopout(profileMap) {
 
     if (args.user.avatar) {
       user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
+    }else{
+      //fallback to default avatar
+      user.avatar = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
 
     return f({ ...args, user });
