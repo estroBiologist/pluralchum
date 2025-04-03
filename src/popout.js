@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { onElementLoad, pluginName } from './utility.js';
+import { pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -89,6 +89,7 @@ export function patchBotPopout(profileMap) {
 
     let userProfile = {
       bio: profile.description,
+      system_bio: profile.system_description,
       userId: args.user.id,
       guildId: args.guildId,
       pronouns: profile.pronouns,
@@ -128,34 +129,47 @@ export function patchBotPopout(profileMap) {
     return ret;
   });
 
-  const userProfile = BdApi.Webpack.getByKeys("openUserProfileModal")
-  const Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
-  BdApi.Patcher.instead(pluginName, userProfile, "openUserProfileModal", (ctx, [args], f) => {
-      if(typeof args.userId !== 'string' && args.userId?.isPK)
-      {
-        Dispatcher.dispatch({
-          type: "USER_PROFILE_MODAL_OPEN",
-          userId: args.userId,
-          appContext: args.appContext
-        });
-
-        return;
-      }
-      return f(args);
-  });
-  
-  const UpdateNote = BdApi.Webpack.getByKeys("updateNote");
-  BdApi.Patcher.instead(pluginName, UpdateNote, "updateNote", function (ctx, args, f) {
-    if (args[0]?.isPK) {
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys("openUserProfileModal")).then(function(userProfile){
+    if(userProfile === undefined){
+      console.error("[PLURALCHUM] Error while patching the user profile modal!");
       return;
     }
-    return f(...args);
+    const Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
+    BdApi.Patcher.instead(pluginName, userProfile, "openUserProfileModal", (ctx, [args], f) => {
+        if(typeof args.userId !== 'string' && args.userId?.isPK)
+        {
+          Dispatcher.dispatch({
+            type: "USER_PROFILE_MODAL_OPEN",
+            userId: args.userId,
+            appContext: args.appContext
+          });
+
+          return;
+        }
+        return f(args);
+    });
+  });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys("updateNote")).then(function(UpdateNote){
+    if(UpdateNote === undefined){
+      console.error("[PLURALCHUM] Error while patching UpdateNote!");
+    }
+    BdApi.Patcher.instead(pluginName, UpdateNote, "updateNote", function (ctx, args, f) {
+      if (args[0]?.isPK) {
+        return;
+      }
+      return f(...args);
+    });
   });
 
   //this might eventually break with an update? just nuke the overflow menu button for PK profiles
-  const OverflowMenu = BdApi.Webpack.getByStrings('user-bot-profile-overflow-menu', 'BLOCK', {defaultExport: false});
-  BdApi.Patcher.after(pluginName, OverflowMenu, "Z", (ctx, [args], returnValue) => {
-      if(args.user?.id?.isPK) returnValue.props?.targetElementRef?.current?.remove();
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('user-bot-profile-overflow-menu', 'BLOCK'), {defaultExport: false}).then(function(OverflowMenu){
+    if(OverflowMenu === undefined){
+      console.error("[PLURALCHUM] Error while patching OverflowMenu!");
+    }
+    BdApi.Patcher.after(pluginName, OverflowMenu, "Z", (ctx, [args], returnValue) => {
+        if(args.user?.id?.isPK) returnValue.props?.targetElementRef?.current?.remove();
+    });
   });
 
   //this could potentially be changed to message the system user?
@@ -166,4 +180,41 @@ export function patchBotPopout(profileMap) {
     }
     return f(...args);
   });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("BOT_INFO", "MUTUAL_GUILDS", "BOT_DATA_ACCESS"), {defaultExport: false}).then(function(ModalTabBar){
+    if(ModalTabBar === undefined){
+      console.error("[PLURALCHUM] Error while patching ModalTabBar!");
+      return;
+    }
+    BdApi.Patcher.after(pluginName, ModalTabBar, "Z", (ctx, [args], returnValue) => {
+      if(!args?.id?.isPK) return;
+  
+      returnValue.pop();
+      returnValue[0].text = "Member Info";
+      returnValue[1].section = "BOT_DATA_ACCESS";
+      returnValue[1].text = "System Info";
+    });
+    console.debug("[PLURALCHUM] patched ModalTabBar");
+  });
+
+  //this will also probably eventually break -- is there a better way to grab this module?
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("https://support.discord.com/hc/articles/7933951485975"), {defaultExport: false}).then(function(BotDataPanel){
+      if(BotDataPanel === undefined){
+      console.error("[PLURALCHUM] Error while patching BotDataPanel!");
+    }
+    const parseBio = BdApi.Webpack.getByKeys("parseBioReact");
+    const markupClass = BdApi.Webpack.getByKeys("markup")?.markup;
+    const textClass = BdApi.Webpack.getByKeys("text-sm/normal")['text-sm/normal'];
+    BdApi.Patcher.after(pluginName, BotDataPanel, "Z", (ctx, [args], returnValue) => {
+      if(!args?.user?.id?.isPK) return;
+  
+      returnValue.props.children[3] = false;
+      const systemBio = parseBio.parseBioReact(args.user.id.userProfile.system_bio);
+      const bioContainer = BdApi.React.createElement("div", {className: textClass}, systemBio);
+      const markupContainer = BdApi.React.createElement("div", {className: markupClass}, bioContainer);
+      const container = BdApi.React.createElement("div", {className: "bio"}, markupContainer);
+      returnValue.props.children.push(container);
+    });
+  });
+
 }

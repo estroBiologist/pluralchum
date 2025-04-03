@@ -35,6 +35,7 @@ function pkDataToProfile(data) {
     system_color: '#' + data.system.color,
     sender: data.sender,
     description: data.member.description,
+    system_description: data.system.description,
     avatar: data.member.avatar_url ?? data.system.avatar_url,
     banner: data.member.banner,
     system_name: data.system.name,
