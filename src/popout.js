@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { pluginName } from './utility.js';
+import { generateBioComponents, pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -153,22 +153,11 @@ export function patchBotPopout(profileMap) {
     });
   });
 
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys("updateNote")).then(function(UpdateNote){
-    if(UpdateNote === undefined){
-      console.error("[PLURALCHUM] Error while patching UpdateNote!");
-    }
-    BdApi.Patcher.instead(pluginName, UpdateNote, "updateNote", function (ctx, args, f) {
-      if (args[0]?.isPK) {
-        return;
-      }
-      return f(...args);
-    });
-  });
-
   //this might eventually break with an update? just nuke the overflow menu button for PK profiles
   BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('user-bot-profile-overflow-menu', 'BLOCK'), {defaultExport: false}).then(function(OverflowMenu){
     if(OverflowMenu === undefined){
       console.error("[PLURALCHUM] Error while patching OverflowMenu!");
+      return;
     }
     BdApi.Patcher.after(pluginName, OverflowMenu, "Z", (ctx, [args], returnValue) => {
         if(args.user?.id?.isPK) returnValue.props?.targetElementRef?.current?.remove();
@@ -189,34 +178,40 @@ export function patchBotPopout(profileMap) {
       console.error("[PLURALCHUM] Error while patching ModalTabBar!");
       return;
     }
-    BdApi.Patcher.after(pluginName, ModalTabBar, "Z", (ctx, [args], returnValue) => {
-      if(!args?.id?.isPK) return;
-  
-      returnValue.pop();
-      returnValue[0].text = "Member Info";
-      returnValue[1].section = "BOT_DATA_ACCESS";
-      returnValue[1].text = "System Info";
+    BdApi.Patcher.instead(pluginName, ModalTabBar, "Z", (ctx, [args], f) => {
+      if(!args?.id?.isPK) return f(args);
+      const newHeaders = [{section: 'BOT_INFO', text: 'Member Info'}, {section: 'BOT_DATA_ACCESS', text: 'System Info'}];
+      return newHeaders;
     });
     console.debug("[PLURALCHUM] patched ModalTabBar");
   });
 
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("getUserProfile", "SET_NOTE"), {defaultExport: false}).then(function(UserProfilePanel){
+    if(UserProfilePanel === undefined){
+      console.error("[PLURALCHUM] Error while patching UserProfilePanel!");
+      return;
+    }
+    BdApi.Patcher.after(pluginName, UserProfilePanel, "Z", (ctx, [args], returnValue) => {
+      if(!args?.user?.id?.isPK) return;
+  
+      const bioComponents = generateBioComponents(args.user.id.userProfile.bio);
+      returnValue.props.children.length = 0;
+      returnValue.props.children.push(bioComponents);
+    });
+  });
+
   //this will also probably eventually break -- is there a better way to grab this module?
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("https://support.discord.com/hc/articles/7933951485975"), {defaultExport: false}).then(function(BotDataPanel){
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("getUserProfile", "application", "helpCenterUrl"), {defaultExport: false}).then(function(BotDataPanel){
       if(BotDataPanel === undefined){
       console.error("[PLURALCHUM] Error while patching BotDataPanel!");
+      return;
     }
-    const parseBio = BdApi.Webpack.getByKeys("parseBioReact");
-    const markupClass = BdApi.Webpack.getByKeys("markup")?.markup;
-    const textClass = BdApi.Webpack.getByKeys("text-sm/normal")['text-sm/normal'];
     BdApi.Patcher.after(pluginName, BotDataPanel, "Z", (ctx, [args], returnValue) => {
       if(!args?.user?.id?.isPK) return;
   
-      returnValue.props.children[3] = false;
-      const systemBio = parseBio.parseBioReact(args.user.id.userProfile.system_bio);
-      const bioContainer = BdApi.React.createElement("div", {className: textClass}, systemBio);
-      const markupContainer = BdApi.React.createElement("div", {className: markupClass}, bioContainer);
-      const container = BdApi.React.createElement("div", {className: "bio"}, markupContainer);
-      returnValue.props.children.push(container);
+      const bioComponents = generateBioComponents(args.user.id.userProfile.system_bio);
+      returnValue.props.children.length = 0;
+      returnValue.props.children.push(bioComponents);
     });
   });
 
