@@ -164,14 +164,17 @@ export function bioToReact(bio){
   }
 }
 
-const markupClass = BdApi.Webpack.getByKeys("markup")?.markup;
-const textClass = BdApi.Webpack.getByKeys("text-sm/normal")['text-sm/normal'];
 export function generateBioComponents(bio){
+  const markupClass = BdApi.Webpack.getByKeys("markup")?.markup;
+  const textClass = BdApi.Webpack.getByKeys("text-sm/normal")['text-sm/normal'];
+  const scrollerClass = BdApi.Webpack.getByKeys("scroller", "note")?.scroller;
+  const thinClass = BdApi.Webpack.getByKeys("scrollerBase", "thin")?.thin;
+  
   const memberBio = bioToReact(bio);
   const bioContainer = BdApi.React.createElement("div", {className: textClass}, memberBio);
   const markupContainer = BdApi.React.createElement("div", {className: markupClass}, bioContainer);
-  const container = BdApi.React.createElement("div", {className: "pluralchum_bio"}, markupContainer);
-  return container;
+  const scrollerContainer = BdApi.React.createElement("div", {className: (scrollerClass + " " + thinClass), style:{overflow: 'hidden scroll', paddingRight: '8px'}}, markupContainer);
+  return scrollerContainer;
 }
 
 export const pluginName = 'Pluralchum';

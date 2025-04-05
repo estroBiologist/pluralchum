@@ -153,14 +153,14 @@ export function patchBotPopout(profileMap) {
     });
   });
 
-  //this might eventually break with an update? just nuke the overflow menu button for PK profiles
   BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('user-bot-profile-overflow-menu', 'BLOCK'), {defaultExport: false}).then(function(OverflowMenu){
     if(OverflowMenu === undefined){
       console.error("[PLURALCHUM] Error while patching OverflowMenu!");
       return;
     }
-    BdApi.Patcher.after(pluginName, OverflowMenu, "Z", (ctx, [args], returnValue) => {
-        if(args.user?.id?.isPK) returnValue.props?.targetElementRef?.current?.remove();
+    BdApi.Patcher.instead(pluginName, OverflowMenu, "Z", (ctx, [args], f) => {
+        if(args.user?.id?.isPK) return;
+        return f(args);
     });
   });
 
@@ -191,12 +191,10 @@ export function patchBotPopout(profileMap) {
       console.error("[PLURALCHUM] Error while patching UserProfilePanel!");
       return;
     }
-    BdApi.Patcher.after(pluginName, UserProfilePanel, "Z", (ctx, [args], returnValue) => {
-      if(!args?.user?.id?.isPK) return;
+    BdApi.Patcher.instead(pluginName, UserProfilePanel, "Z", (ctx, [args], f) => {
+      if(!args?.user?.id?.isPK) return f(args);
   
-      const bioComponents = generateBioComponents(args.user.id.userProfile.bio);
-      returnValue.props.children.length = 0;
-      returnValue.props.children.push(bioComponents);
+      return generateBioComponents(args.user.id.userProfile.bio);
     });
   });
 
@@ -206,13 +204,10 @@ export function patchBotPopout(profileMap) {
       console.error("[PLURALCHUM] Error while patching BotDataPanel!");
       return;
     }
-    BdApi.Patcher.after(pluginName, BotDataPanel, "Z", (ctx, [args], returnValue) => {
-      if(!args?.user?.id?.isPK) return;
+    BdApi.Patcher.instead(pluginName, BotDataPanel, "Z", (ctx, [args], f) => {
+      if(!args?.user?.id?.isPK) return f(args);
   
-      const bioComponents = generateBioComponents(args.user.id.userProfile.system_bio);
-      returnValue.props.children.length = 0;
-      returnValue.props.children.push(bioComponents);
+      return generateBioComponents(args.user.id.userProfile.system_bio);
     });
   });
-
 }
