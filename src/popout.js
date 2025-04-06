@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { generateBioComponents, pluginName } from './utility.js';
+import { generateBioComponents, generatePopoutBioComponents, pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -200,7 +200,7 @@ export function patchBotPopout(profileMap) {
 
   //this will also probably eventually break -- is there a better way to grab this module?
   BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("getUserProfile", "application", "helpCenterUrl"), {defaultExport: false}).then(function(BotDataPanel){
-      if(BotDataPanel === undefined){
+    if(BotDataPanel === undefined){
       console.error("[PLURALCHUM] Error while patching BotDataPanel!");
       return;
     }
@@ -209,5 +209,11 @@ export function patchBotPopout(profileMap) {
   
       return generateBioComponents(args.user.id.userProfile.system_bio);
     });
+  });
+
+  const [PopoutBioPatch, popoutBioPatch] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('viewFullBioDisabled', 'hidePersonalInformation'));
+  BdApi.Patcher.instead(pluginName, PopoutBioPatch, popoutBioPatch, function (_, [args], f) {
+      if(!args?.user?.id?.isPK) return f(args);
+      return generatePopoutBioComponents(args.bio);
   });
 }

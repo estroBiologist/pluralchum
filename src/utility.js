@@ -176,5 +176,16 @@ export function generateBioComponents(bio){
   const scrollerContainer = BdApi.React.createElement("div", {className: (scrollerClass + " " + thinClass), style:{overflow: 'hidden scroll', paddingRight: '8px'}}, markupContainer);
   return scrollerContainer;
 }
+export function generatePopoutBioComponents(bio){
+  const markupClass = BdApi.Webpack.getByKeys("markup")?.markup;
+  const textClass = BdApi.Webpack.getByKeys("text-sm/normal")['text-sm/normal'];
+  const thinClass = BdApi.Webpack.getByKeys("scrollerBase", "thin")?.thin;
+  
+  const memberBio = bioToReact(bio);
+  const bioContainer = BdApi.React.createElement("div", {className: textClass}, memberBio);
+  const markupContainer = BdApi.React.createElement("div", {className: markupClass}, bioContainer);
+  const scrollerContainer = BdApi.React.createElement("div", {className: thinClass, style:{overflow: 'hidden scroll', "max-height": '30vh'}}, markupContainer);
+  return scrollerContainer;
+}
 
 export const pluginName = 'Pluralchum';
