@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { pluginName } from './utility.js';
+import { generateBioComponents, generatePopoutBioComponents, pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -59,7 +59,7 @@ export function patchBotPopout(profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [{ user }], ret) {
-    if (isValidHttpUrl(user.avatar)) {
+    if (user && isValidHttpUrl(user.avatar)) {
       ret.avatarSrc = user.avatar;
       ret.avatarPlaceholder = user.avatar;
     }
@@ -67,7 +67,7 @@ export function patchBotPopout(profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
-    if (isValidHttpUrl(displayProfile.banner)) {
+    if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
       ret.bannerSrc = displayProfile.banner;
     }
     return ret;
@@ -83,14 +83,16 @@ export function patchBotPopout(profileMap) {
     let userHash = getUserHash(message.author);
     let profile = profileMap.get(userHash);
 
-    if (!profile) {
+    if (!profile || profile?.status === "NOT_PK") {
       return f(args);
     }
 
     let userProfile = {
-      bio: profile.description,
+      bio: profile.description ?? "",
+      system_bio: profile.system_description ?? "",
       userId: args.user.id,
       guildId: args.guildId,
+      pronouns: profile.pronouns,
     };
 
     if (profile.color) {
@@ -107,13 +109,16 @@ export function patchBotPopout(profileMap) {
       username: profile.system_name ?? profile.system,
       globalName: profile.name,
       bot: true,
-      discriminator: '0000',
+      discriminator: profile.system,
     });
 
     user.id = { userProfile, user, isPK: true };
 
     if (args.user.avatar) {
       user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
+    }else{
+      //fallback to default avatar
+      user.avatar = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
 
     return f({ ...args, user });
@@ -125,5 +130,90 @@ export function patchBotPopout(profileMap) {
     }
 
     return ret;
+  });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys("openUserProfileModal")).then(function(userProfile){
+    if(userProfile === undefined){
+      console.error("[PLURALCHUM] Error while patching the user profile modal!");
+      return;
+    }
+    const Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
+    BdApi.Patcher.instead(pluginName, userProfile, "openUserProfileModal", (ctx, [args], f) => {
+        if(typeof args.userId !== 'string' && args.userId?.isPK)
+        {
+          Dispatcher.dispatch({
+            type: "USER_PROFILE_MODAL_OPEN",
+            userId: args.userId,
+            appContext: args.appContext
+          });
+
+          return;
+        }
+        return f(args);
+    });
+  });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('user-bot-profile-overflow-menu', 'BLOCK'), {defaultExport: false}).then(function(OverflowMenu){
+    if(OverflowMenu === undefined){
+      console.error("[PLURALCHUM] Error while patching OverflowMenu!");
+      return;
+    }
+    BdApi.Patcher.instead(pluginName, OverflowMenu, "Z", (ctx, [args], f) => {
+        if(args.user?.id?.isPK) return;
+        return f(args);
+    });
+  });
+
+  //this could potentially be changed to message the system user?
+  const MessageButton = BdApi.Webpack.getByKeys("openPrivateChannel");
+  BdApi.Patcher.instead(pluginName, MessageButton, "openPrivateChannel", function (ctx, args, f) {
+    if (args[0]?.isPK) {
+      return;
+    }
+    return f(...args);
+  });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("BOT_INFO", "MUTUAL_GUILDS", "BOT_DATA_ACCESS"), {defaultExport: false}).then(function(ModalTabBar){
+    if(ModalTabBar === undefined){
+      console.error("[PLURALCHUM] Error while patching ModalTabBar!");
+      return;
+    }
+    BdApi.Patcher.instead(pluginName, ModalTabBar, "Z", (ctx, [args], f) => {
+      if(!args?.id?.isPK) return f(args);
+      const newHeaders = [{section: 'BOT_INFO', text: 'Member Info'}, {section: 'BOT_DATA_ACCESS', text: 'System Info'}];
+      return newHeaders;
+    });
+    console.debug("[PLURALCHUM] patched ModalTabBar");
+  });
+
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("getUserProfile", "SET_NOTE"), {defaultExport: false}).then(function(UserProfilePanel){
+    if(UserProfilePanel === undefined){
+      console.error("[PLURALCHUM] Error while patching UserProfilePanel!");
+      return;
+    }
+    BdApi.Patcher.instead(pluginName, UserProfilePanel, "Z", (ctx, [args], f) => {
+      if(!args?.user?.id?.isPK) return f(args);
+  
+      return generateBioComponents(args.user.id.userProfile.bio);
+    });
+  });
+
+  //this will also probably eventually break -- is there a better way to grab this module?
+  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings("getUserProfile", "application", "helpCenterUrl"), {defaultExport: false}).then(function(BotDataPanel){
+    if(BotDataPanel === undefined){
+      console.error("[PLURALCHUM] Error while patching BotDataPanel!");
+      return;
+    }
+    BdApi.Patcher.instead(pluginName, BotDataPanel, "Z", (ctx, [args], f) => {
+      if(!args?.user?.id?.isPK) return f(args);
+  
+      return generateBioComponents(args.user.id.userProfile.system_bio);
+    });
+  });
+
+  const [PopoutBioPatch, popoutBioPatch] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('viewFullBioDisabled', 'hidePersonalInformation'));
+  BdApi.Patcher.instead(pluginName, PopoutBioPatch, popoutBioPatch, function (_, [args], f) {
+      if(!args?.user?.id?.isPK) return f(args);
+      return generatePopoutBioComponents(args.bio);
   });
 }

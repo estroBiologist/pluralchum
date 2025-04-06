@@ -34,10 +34,12 @@ function pkDataToProfile(data) {
     status: ProfileStatus.Done,
     system_color: '#' + data.system.color,
     sender: data.sender,
-    description: data.member.description,
+    description: data.member.description ?? "",
+    system_description: data.system.description ?? "",
     avatar: data.member.avatar_url ?? data.system.avatar_url,
     banner: data.member.banner,
     system_name: data.system.name,
+    pronouns: data.member.pronouns,
   };
 
   if (data.member.color === null) profile.color = '';
@@ -47,6 +49,8 @@ function pkDataToProfile(data) {
   if (data.member.display_name) {
     profile.name = data.member.display_name;
   }
+
+  if (data.member.pronouns === null) profile.pronouns = '';
 
   return profile;
 }
