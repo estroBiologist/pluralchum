@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { generateBioComponents, generatePopoutBioComponents, pluginName } from './utility.js';
+import { pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
@@ -18,8 +18,10 @@ const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreNa
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
 const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
 const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
-import { getUserHash } from './profiles.js';
+import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
+import DataPanelBio from './components/DataPanelBio.js';
+import PopoutBio from './components/PopoutBio.js';
 
 function isValidHttpUrl(string) {
   let url;
@@ -83,7 +85,7 @@ export function patchBotPopout(profileMap) {
     let userHash = getUserHash(message.author);
     let profile = profileMap.get(userHash);
 
-    if (!profile || profile?.status === 'NOT_PK') {
+    if (!profile || profile?.status === ProfileStatus.NotPK) {
       return f(args);
     }
 
@@ -202,7 +204,7 @@ export function patchBotPopout(profileMap) {
     BdApi.Patcher.instead(pluginName, UserProfilePanel, 'Z', (ctx, [args], f) => {
       if (!args?.user?.id?.isPK) return f(args);
 
-      return generateBioComponents(args.user.id.userProfile.bio);
+      return <DataPanelBio content={args.user.id.userProfile.bio} />;
     });
   });
 
@@ -217,7 +219,7 @@ export function patchBotPopout(profileMap) {
     BdApi.Patcher.instead(pluginName, BotDataPanel, 'Z', (ctx, [args], f) => {
       if (!args?.user?.id?.isPK) return f(args);
 
-      return generateBioComponents(args.user.id.userProfile.system_bio);
+      return <DataPanelBio content={args.user.id.userProfile.system_bio} />;
     });
   });
 
@@ -225,7 +227,9 @@ export function patchBotPopout(profileMap) {
     BdApi.Webpack.Filters.byStrings('viewFullBioDisabled', 'hidePersonalInformation'),
   );
   BdApi.Patcher.instead(pluginName, PopoutBioPatch, popoutBioPatch, function (_, [args], f) {
-    if (!args?.user?.id?.isPK) return f(args);
-    return generatePopoutBioComponents(args.bio);
+    if (!args?.user?.id?.isPK) {
+      return f(args);
+    }
+    return <PopoutBio content={args.bio} />;
   });
 }
