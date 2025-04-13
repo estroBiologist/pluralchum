@@ -35,7 +35,7 @@ function isValidHttpUrl(string) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
-export function patchBotPopout(profileMap) {
+export function patchBotPopout(settings, profileMap) {
   BdApi.Patcher.instead(pluginName, UserProfileStore, 'getGuildMemberProfile', function (ctx, [userId, guildId], f) {
     if (userId && typeof userId !== 'string' && userId.userProfile) {
       return userId.userProfile;
@@ -70,7 +70,12 @@ export function patchBotPopout(profileMap) {
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
     if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
-      ret.bannerSrc = displayProfile.banner;
+      if(settings.get()?.doDisableBanners) {
+        ret.bannerSrc = undefined;
+        ret.status = 'COMPLETE';
+      }else {
+        ret.bannerSrc = displayProfile.banner;
+      }
     }
     return ret;
   });
