@@ -3,7 +3,10 @@ const React = BdApi.React;
 import { pluginName } from './utility.js';
 
 const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
+  BdApi.Webpack.Filters.combine(
+    BdApi.Webpack.Filters.byStrings("isNonUserBot", "bot", "onHide"), 
+    BdApi.Webpack.Filters.byRegex("^((?!UserProfilePanelRenderer).)*$")
+  )
 );
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
