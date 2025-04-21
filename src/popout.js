@@ -2,12 +2,11 @@ const React = BdApi.React;
 
 import { pluginName } from './utility.js';
 
-const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.combine(
-    BdApi.Webpack.Filters.byStrings("isNonUserBot", "bot", "onHide"), 
-    BdApi.Webpack.Filters.byRegex("^((?!UserProfilePanelRenderer).)*$")
-  )
+const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'isClyde'),
 );
+
+const viewBotPopout = BdApi.Webpack.getByStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'BotUserProfilePopout');
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
@@ -83,7 +82,7 @@ export function patchBotPopout(settings, profileMap) {
     return ret;
   });
 
-  BdApi.Patcher.instead(pluginName, BotPopout, viewBotPopout, function (_, [args], f) {
+  BdApi.Patcher.instead(pluginName, WebhookPopout, viewWebhookPopout, function (_, [args], f) {
     let message = MessageStore.getMessage(args.channelId, args.messageId);
 
     if (!message) {
@@ -131,7 +130,11 @@ export function patchBotPopout(settings, profileMap) {
       user.avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
     }
 
-    return f({ ...args, user });
+    if(viewBotPopout) return viewBotPopout({ ...args, user });
+    else {
+      console.error('[PLURALCHUM] Error, bot popout function is undefined! Falling back to webhook function...');
+      return f({ ...args, user });
+    }
   });
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
