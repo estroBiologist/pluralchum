@@ -2,9 +2,11 @@ const React = BdApi.React;
 
 import { pluginName } from './utility.js';
 
-const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('UserProfilePopoutWrapper:'),
+const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'isClyde'),
 );
+
+const viewBotPopout = BdApi.Webpack.getByStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'BotUserProfilePopout');
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
@@ -35,7 +37,7 @@ function isValidHttpUrl(string) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
-export function patchBotPopout(profileMap) {
+export function patchBotPopout(settings, profileMap) {
   BdApi.Patcher.instead(pluginName, UserProfileStore, 'getGuildMemberProfile', function (ctx, [userId, guildId], f) {
     if (userId && typeof userId !== 'string' && userId.userProfile) {
       return userId.userProfile;
@@ -70,12 +72,17 @@ export function patchBotPopout(profileMap) {
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
     if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
-      ret.bannerSrc = displayProfile.banner;
+      if(settings.get()?.doDisableBanners) {
+        ret.bannerSrc = undefined;
+        ret.status = 'COMPLETE';
+      }else {
+        ret.bannerSrc = displayProfile.banner;
+      }
     }
     return ret;
   });
 
-  BdApi.Patcher.instead(pluginName, BotPopout, viewBotPopout, function (_, [args], f) {
+  BdApi.Patcher.instead(pluginName, WebhookPopout, viewWebhookPopout, function (_, [args], f) {
     let message = MessageStore.getMessage(args.channelId, args.messageId);
 
     if (!message) {
@@ -123,7 +130,11 @@ export function patchBotPopout(profileMap) {
       user.avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
     }
 
-    return f({ ...args, user });
+    if(viewBotPopout) return viewBotPopout({ ...args, user });
+    else {
+      console.error('[PLURALCHUM] Error, bot popout function is undefined! Falling back to webhook function...');
+      return f({ ...args, user });
+    }
   });
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {

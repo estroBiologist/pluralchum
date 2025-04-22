@@ -19,6 +19,7 @@ function defaultSettings() {
     tagColourPref: ColourPreference.System,
     useServerNames: true,
     version: null,
+    doDisableBanners: false,
   };
 }
 
