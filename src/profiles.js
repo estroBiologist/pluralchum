@@ -60,7 +60,7 @@ async function pkResponseToProfile(response) {
     console.log('RESPONSE');
     let data = await response.json();
     console.log(data);
-    if(data.system == null && data.member == null) return { status: ProfileStatus.NotPK };
+    if (data.system == null && data.member == null) return { status: ProfileStatus.NotPK };
     return pkDataToProfile(data);
   } else if (response.status == 404) {
     return { status: ProfileStatus.NotPK };

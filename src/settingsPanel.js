@@ -99,7 +99,7 @@ function doDisableBanners(settings) {
     type: 'switch',
     id: 'doDisableBanners',
     name: 'Disable banners',
-    note: "",
+    note: '',
     value: settings.get().doDisableBanners,
   };
 }
@@ -144,7 +144,12 @@ function accessibilityPanel(settings) {
     name: 'Accessibility',
     collapsible: true,
     shown: false,
-    settings: [doDisableBanners(settings), doContrastTest(settings), contrastTestColour(settings), contrastThreshold(settings)],
+    settings: [
+      doDisableBanners(settings),
+      doContrastTest(settings),
+      contrastTestColour(settings),
+      contrastThreshold(settings),
+    ],
   };
 }
 

@@ -6,7 +6,13 @@ const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'isClyde'),
 );
 
-const viewBotPopout = BdApi.Webpack.getByStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'BotUserProfilePopout');
+const viewBotPopout = BdApi.Webpack.getByStrings(
+  'messageId',
+  'user',
+  'openUserProfileModal',
+  'setPopoutRef',
+  'BotUserProfilePopout',
+);
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
@@ -72,10 +78,10 @@ export function patchBotPopout(settings, profileMap) {
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
     if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
-      if(settings.get()?.doDisableBanners) {
+      if (settings.get()?.doDisableBanners) {
         ret.bannerSrc = undefined;
         ret.status = 'COMPLETE';
-      }else {
+      } else {
         ret.bannerSrc = displayProfile.banner;
       }
     }
@@ -130,7 +136,7 @@ export function patchBotPopout(settings, profileMap) {
       user.avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
     }
 
-    if(viewBotPopout) return viewBotPopout({ ...args, user });
+    if (viewBotPopout) return viewBotPopout({ ...args, user });
     else {
       console.error('[PLURALCHUM] Error, bot popout function is undefined! Falling back to webhook function...');
       return f({ ...args, user });
