@@ -1,6 +1,6 @@
 {
   "name": "pluralchum",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "repository": "https://github.com/estroBiologist/pluralchum.git",
   "author": "Ash Taylor",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "rollup-plugin-import-css": "3.3.4"
   },
   "dependencies": {
-    "@ariagivens/discord-unicode-fix-js": "1.1.0",
+    "@ariagivens/discord-unicode-fix-js": "1.1.1",
     "svg-loaders-react": "^2.2.1"
   }
 }
