@@ -59,20 +59,18 @@ function tooOld(lastUsed) {
   return Date.now() - lastUsed > expirationTime;
 }
 
-export function purgeOldProfiles(profileMap) {
-  if (!profileMap || !profileMap.systems || !profileMap.members) return;
+export function purgeOldProfiles(map) {
+  if (!map) return;
 
-  for (const [id, profile] of profileMap.systems.entries()) {
-    //TODO: rewrite this~~
-
-    // if (Object.hasOwn(profile, 'lastUsed')) {
-    //   if (tooOld(profile.lastUsed)) {
-    //     profileMap.delete(id);
-    //   }
-    // } else {
-    //   profileMap.update(id, function () {
-    //     return { ...profile, lastUsed: Date.now() };
-    //   });
-    // }
+  for (const [id, profile] of map.entries()) {
+    if (Object.hasOwn(profile, 'lastUsed')) {
+      if (tooOld(profile.lastUsed)) {
+        map.delete(id);
+      }
+    } else {
+      map.update(id, function () {
+        return { ...profile, lastUsed: Date.now() };
+      });
+    }
   }
 }
