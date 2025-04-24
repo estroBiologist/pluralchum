@@ -29,8 +29,11 @@ export function upgradeCache(settings, profileMap, currentVersion) {
       return { ...s, version: currentVersion };
     });
 
-    for (const [key, value] of profileMap.entries()) {
-      profileMap.set(key, { ...value, status: ProfileStatus.Stale });
+    for (const [key, value] of profileMap.systems.entries()) {
+      profileMap.systems.set(key, { ...value, status: ProfileStatus.Stale });
+    }
+    for (const [key, value] of profileMap.members.entries()) {
+      profileMap.members.set(key, { ...value, status: ProfileStatus.Stale });
     }
   }
 }

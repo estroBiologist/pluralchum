@@ -97,35 +97,39 @@ export function patchBotPopout(settings, profileMap) {
     }
 
     let userHash = getUserHash(message.author);
-    let profile = profileMap.get(userHash);
+    let memberProfile = profileMap.members.get(userHash);
 
-    if (!profile || profile?.status === ProfileStatus.NotPK) {
+    if (!memberProfile || memberProfile?.status === ProfileStatus.NotPK) {
       return f(args);
+    } else if (memberProfile.status === ProfileStatus.Deleted) {
+      return f(args); //for now, just return?
     }
 
+    let systemProfile = profileMap.systems.get(memberProfile.system);
+
     let userProfile = {
-      bio: profile.description ?? '',
-      system_bio: profile.system_description ?? '',
+      bio: memberProfile.description ?? '',
+      system_bio: systemProfile.description ?? '',
       userId: args.user.id,
       guildId: args.guildId,
-      pronouns: profile.pronouns,
+      pronouns: memberProfile.pronouns,
     };
 
-    if (profile.color) {
-      userProfile.accentColor = Number('0x' + profile.color.substring(1));
+    if (memberProfile.color) {
+      userProfile.accentColor = Number('0x' + memberProfile.color.substring(1));
     } else {
       userProfile.accentColor = Number('0x5b63f4');
     }
 
-    if (profile.banner) {
-      userProfile.banner = profile.banner;
+    if (memberProfile.banner) {
+      userProfile.banner = memberProfile.banner;
     }
 
     let user = new User({
-      username: profile.system_name ?? profile.system,
-      globalName: profile.name,
+      username: systemProfile.name ?? systemProfile.id,
+      globalName: memberProfile.name,
       bot: true,
-      discriminator: profile.system,
+      discriminator: systemProfile.id,
     });
 
     user.id = { userProfile, user, isPK: true };

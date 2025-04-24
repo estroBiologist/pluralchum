@@ -8,6 +8,7 @@ export const ProfileStatus = {
   Requesting: 'REQUESTING',
   NotPK: 'NOT_PK',
   Stale: 'STALE',
+  Deleted: 'DELETED',
 };
 
 const baseEndpoint = 'https://api.pluralkit.me/v2';
@@ -25,42 +26,44 @@ async function httpGetAsync(url) {
 }
 
 function pkDataToProfile(data) {
-  let profile = {
-    name: data.member.name,
-    color: '#' + data.member.color,
+  let systemProfile = {
+    id: data.system.id,
+    name: data.system.name,
+    description: data.system.description ?? '',
     tag: data.system.tag,
+    pronouns: data.system.pronouns,
+    avatar: data.system.avatar_url,
+    banner: data.system.banner,
+    color: '#' + data.system.color,
+
+    status: ProfileStatus.Done,
+    sender: data.sender,
+  };
+  let memberProfile = {
     id: data.member.id,
     system: data.system.id,
-    status: ProfileStatus.Done,
-    system_color: '#' + data.system.color,
-    sender: data.sender,
-    description: data.member.description ?? '',
-    system_description: data.system.description ?? '',
+    name: data.member.display_name ?? data.member.name,
+    color: '#' + data.member.color,
+    pronouns: data.member.pronouns,
     avatar: data.member.avatar_url ?? data.system.avatar_url,
     banner: data.member.banner,
-    system_name: data.system.name,
-    pronouns: data.member.pronouns,
+    description: data.member.description ?? '',
+
+    status: ProfileStatus.Done,
+    sender: data.sender,
   };
+  if (data.system.color === null) systemProfile.color = '';
+  if (data.member.color === null) memberProfile.color = '';
 
-  if (data.member.color === null) profile.color = '';
-
-  if (data.system.color === null) profile.system_color = '';
-
-  if (data.member.display_name) {
-    profile.name = data.member.display_name;
-  }
-
-  if (data.member.pronouns === null) profile.pronouns = '';
-
-  return profile;
+  return { systemProfile, memberProfile };
 }
 
 async function pkResponseToProfile(response) {
   if (response.status == 200) {
-    console.log('RESPONSE');
+    console.debug('RESPONSE');
     let data = await response.json();
-    console.log(data);
-    if (data.system == null && data.member == null) return { status: ProfileStatus.NotPK };
+    console.debug(data);
+    if (data.system == null && data.member == null) return { status: ProfileStatus.Deleted };
     return pkDataToProfile(data);
   } else if (response.status == 404) {
     return { status: ProfileStatus.NotPK };
@@ -73,18 +76,22 @@ async function getFreshProfile(message) {
 }
 
 async function updateFreshProfile(message, hash, profileMap) {
-  profileMap.update(hash, function (profile) {
+  let updateFunction = function (profile) {
     if (profile !== null) {
       profile.status = ProfileStatus.Updating;
       return profile;
     } else {
       return { status: ProfileStatus.Requesting };
     }
-  });
+  };
+  // profileMap.systems.update(hash, updateFunction);
+  profileMap.members.update(hash, updateFunction);
+  
 
-  let profile = await getFreshProfile(message);
+  let profiles = await getFreshProfile(message);
 
-  profileMap.set(hash, profile);
+  profileMap.systems.set(profiles.systemProfile.id, profiles.systemProfile);
+  profileMap.members.set(hash, profiles.memberProfile);
 }
 
 function hashCode(text) {
@@ -116,23 +123,23 @@ export async function updateProfile(message, profileMap) {
 
   let userHash = getUserHash(message.author);
 
-  let profile = profileMap.get(userHash);
+  let memberProfile = profileMap.members.get(userHash);
 
-  if (shouldUpdate(profile)) {
+  if (shouldUpdate(memberProfile)) {
     console.log(`[PLURALCHUM] Requesting data for ${username} (${userHash})`);
     try {
       await updateFreshProfile(message, userHash, profileMap);
     } catch (e) {
-      console.log(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
+      console.error(`[PLURALCHUM] Error while requesting data for ${username} (${userHash}): ${e}`);
     }
   }
 }
 
 export function hookupProfile(profileMap, author) {
   let userHash = getUserHash(author);
-  const [profile, setProfile] = React.useState(profileMap.get(userHash));
+  const [profile, setProfile] = React.useState(profileMap.members.get(userHash));
   React.useEffect(function () {
-    return profileMap.addListener(function (key, value) {
+    return profileMap.members.addListener(function (key, value) {
       if (key === userHash) {
         setProfile(value);
       }
