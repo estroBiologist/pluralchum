@@ -28,7 +28,8 @@ const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot'
 const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
 import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
-import DataPanelBio from './components/DataPanelBio.js';
+import UserModalInner from './components/UserModalInner.js';
+import UserModalBio from './components/UserModalBio.js';
 import PopoutBio from './components/PopoutBio.js';
 
 function isValidHttpUrl(string) {
@@ -96,35 +97,39 @@ export function patchBotPopout(settings, profileMap) {
     }
 
     let userHash = getUserHash(message.author);
-    let profile = profileMap.get(userHash);
+    let memberProfile = profileMap.members.get(userHash);
 
-    if (!profile || profile?.status === ProfileStatus.NotPK) {
+    if (!memberProfile || memberProfile?.status === ProfileStatus.NotPK) {
       return f(args);
+    } else if (memberProfile.status === ProfileStatus.Deleted) {
+      return f(args); //for now, just return?
     }
 
+    let systemProfile = profileMap.systems.get(memberProfile.system);
+
     let userProfile = {
-      bio: profile.description ?? '',
-      system_bio: profile.system_description ?? '',
+      bio: memberProfile.description ?? '',
+      system_bio: systemProfile.description ?? '',
       userId: args.user.id,
       guildId: args.guildId,
-      pronouns: profile.pronouns,
+      pronouns: memberProfile.pronouns,
     };
 
-    if (profile.color) {
-      userProfile.accentColor = Number('0x' + profile.color.substring(1));
+    if (memberProfile.color) {
+      userProfile.accentColor = Number('0x' + memberProfile.color.substring(1));
     } else {
       userProfile.accentColor = Number('0x5b63f4');
     }
 
-    if (profile.banner) {
-      userProfile.banner = profile.banner;
+    if (memberProfile.banner) {
+      userProfile.banner = memberProfile.banner;
     }
 
     let user = new User({
-      username: profile.system_name ?? profile.system,
-      globalName: profile.name,
+      username: systemProfile.name ?? systemProfile.id,
+      globalName: memberProfile.name,
       bot: true,
-      discriminator: profile.system,
+      discriminator: systemProfile.id,
     });
 
     user.id = { userProfile, user, isPK: true };
@@ -193,53 +198,6 @@ export function patchBotPopout(settings, profileMap) {
     return f(...args);
   });
 
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('BOT_INFO', 'MUTUAL_GUILDS', 'BOT_DATA_ACCESS'), {
-    defaultExport: false,
-  }).then(function (ModalTabBar) {
-    if (ModalTabBar === undefined) {
-      console.error('[PLURALCHUM] Error while patching ModalTabBar!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, ModalTabBar, 'Z', (ctx, [args], f) => {
-      if (!args?.id?.isPK) return f(args);
-      const newHeaders = [
-        { section: 'BOT_INFO', text: 'Member Info' },
-        { section: 'BOT_DATA_ACCESS', text: 'System Info' },
-      ];
-      return newHeaders;
-    });
-    console.debug('[PLURALCHUM] patched ModalTabBar');
-  });
-
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('getUserProfile', 'SET_NOTE'), {
-    defaultExport: false,
-  }).then(function (UserProfilePanel) {
-    if (UserProfilePanel === undefined) {
-      console.error('[PLURALCHUM] Error while patching UserProfilePanel!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, UserProfilePanel, 'Z', (ctx, [args], f) => {
-      if (!args?.user?.id?.isPK) return f(args);
-
-      return <DataPanelBio content={args.user.id.userProfile.bio} />;
-    });
-  });
-
-  //this will also probably eventually break -- is there a better way to grab this module?
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('getUserProfile', 'application', 'helpCenterUrl'), {
-    defaultExport: false,
-  }).then(function (BotDataPanel) {
-    if (BotDataPanel === undefined) {
-      console.error('[PLURALCHUM] Error while patching BotDataPanel!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, BotDataPanel, 'Z', (ctx, [args], f) => {
-      if (!args?.user?.id?.isPK) return f(args);
-
-      return <DataPanelBio content={args.user.id.userProfile.system_bio} />;
-    });
-  });
-
   const [PopoutBioPatch, popoutBioPatch] = BdApi.Webpack.getWithKey(
     BdApi.Webpack.Filters.byStrings('viewFullBioDisabled', 'hidePersonalInformation'),
   );
@@ -248,5 +206,35 @@ export function patchBotPopout(settings, profileMap) {
       return f(args);
     }
     return <PopoutBio content={args.bio} />;
+  });
+
+  BdApi.Webpack.waitForModule(
+    BdApi.Webpack.Filters.byStrings('section', 'subsection', 'displayProfile', 'initialSection'),
+    {
+      defaultExport: false,
+    },
+  ).then(function (UserModal) {
+    if (UserModal === undefined) {
+      console.error('[PLURALCHUM] Error while patching UserModal!');
+      return;
+    }
+    BdApi.Patcher.instead(pluginName, UserModal, 'Z', (ctx, [args], f) => {
+      if (!args?.user?.id?.isPK) {
+        return f(args);
+      }
+      return (
+        <UserModalInner
+          initialSection={'PLURALCHUM_MEMBER_INFO'}
+          sections={[
+            { section: 'PLURALCHUM_MEMBER_INFO', text: 'Member Info' },
+            { section: 'PLURALCHUM_SYSTEM_INFO', text: 'System Info' },
+          ]}
+          sectionContents={{
+            PLURALCHUM_MEMBER_INFO: <UserModalBio content={args.user.id.userProfile.bio} />,
+            PLURALCHUM_SYSTEM_INFO: <UserModalBio content={args.user.id.userProfile.system_bio} />,
+          }}
+        />
+      );
+    });
   });
 }

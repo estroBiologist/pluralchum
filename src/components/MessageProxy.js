@@ -37,7 +37,7 @@ function MessageProxyInner({ profileMap, unblockedMap, unignoredMap, messageNode
         compact={compact}
       />
     );
-  } else{
+  } else {
     return messageNode;
   }
 }
