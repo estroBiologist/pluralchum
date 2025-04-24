@@ -55,7 +55,7 @@ function pkDataToProfile(data) {
   if (data.system.color === null) systemProfile.color = '';
   if (data.member.color === null) memberProfile.color = '';
 
-  return { systemProfile, memberProfile };
+  return { systemProfile, memberProfile, status: ProfileStatus.Done };
 }
 
 async function pkResponseToProfile(response) {
@@ -84,14 +84,16 @@ async function updateFreshProfile(message, hash, profileMap) {
       return { status: ProfileStatus.Requesting };
     }
   };
-  // profileMap.systems.update(hash, updateFunction);
   profileMap.members.update(hash, updateFunction);
-  
 
   let profiles = await getFreshProfile(message);
 
-  profileMap.systems.set(profiles.systemProfile.id, profiles.systemProfile);
-  profileMap.members.set(hash, profiles.memberProfile);
+  if(profiles.status === ProfileStatus.Done) {
+    profileMap.systems.set(profiles.systemProfile.id, profiles.systemProfile);
+    profileMap.members.set(hash, profiles.memberProfile);
+  }else {
+    profileMap.members.set(hash, profiles);
+  }
 }
 
 function hashCode(text) {
