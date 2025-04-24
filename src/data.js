@@ -43,12 +43,15 @@ function filterDoneProfiles(entries) {
 }
 
 export function initializeProfileMap() {
-  const key = 'profileMap';
-  let map = new MapCell(BdApi.Data.load(pluginName, key) ?? {});
-  map.addListener(function () {
-    BdApi.Data.save(pluginName, key, filterDoneProfiles(map.entries()));
+  let memberMap = new MapCell(BdApi.Data.load(pluginName, 'memberMap') ?? {});
+  memberMap.addListener(function () {
+    BdApi.Data.save(pluginName, 'memberMap', filterDoneProfiles(memberMap.entries()));
   });
-  return map;
+  let systemMap = new MapCell(BdApi.Data.load(pluginName, 'systemMap') ?? {});
+  systemMap.addListener(function () {
+    BdApi.Data.save(pluginName, 'systemMap', filterDoneProfiles(systemMap.entries()));
+  });
+  return { systems: systemMap, members: memberMap };
 }
 
 function tooOld(lastUsed) {
@@ -56,16 +59,16 @@ function tooOld(lastUsed) {
   return Date.now() - lastUsed > expirationTime;
 }
 
-export function purgeOldProfiles(profileMap) {
-  if (!profileMap) return;
+export function purgeOldProfiles(map) {
+  if (!map) return;
 
-  for (const [id, profile] of profileMap.entries()) {
+  for (const [id, profile] of map.entries()) {
     if (Object.hasOwn(profile, 'lastUsed')) {
       if (tooOld(profile.lastUsed)) {
-        profileMap.delete(id);
+        map.delete(id);
       }
     } else {
-      profileMap.update(id, function () {
+      map.update(id, function () {
         return { ...profile, lastUsed: Date.now() };
       });
     }

@@ -43,7 +43,8 @@ export class Pluralchum {
 
     for (let i = this.patches.length - 1; i >= 0; i--) this.patches[i]();
 
-    purgeOldProfiles(this.profileMap);
+    purgeOldProfiles(this.profileMap.systems);
+    purgeOldProfiles(this.profileMap.members);
 
     BdApi.Patcher.unpatchAll(pluginName);
   }
