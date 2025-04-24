@@ -2,7 +2,7 @@ const React = BdApi.React;
 import { ProfileStatus } from '../profiles.js';
 import Loader from './Loader.js';
 
-export default function PopoutPKBadge({ profileMap, userHash, profile}) {
+export default function PopoutPKBadge({ profileMap, userHash, profile }) {
   const status = profile.status;
 
   let onClick = function () {

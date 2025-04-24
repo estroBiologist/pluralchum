@@ -88,10 +88,10 @@ async function updateFreshProfile(message, hash, profileMap) {
 
   let profiles = await getFreshProfile(message);
 
-  if(profiles.status === ProfileStatus.Done) {
+  if (profiles.status === ProfileStatus.Done) {
     profileMap.systems.set(profiles.systemProfile.id, profiles.systemProfile);
     profileMap.members.set(hash, profiles.memberProfile);
-  }else {
+  } else {
     profileMap.members.set(hash, profiles);
   }
 }

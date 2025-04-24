@@ -209,9 +209,11 @@ export function patchBotPopout(settings, profileMap) {
   });
 
   BdApi.Webpack.waitForModule(
-    BdApi.Webpack.Filters.byStrings('section', 'subsection', 'displayProfile', 'initialSection'),{
+    BdApi.Webpack.Filters.byStrings('section', 'subsection', 'displayProfile', 'initialSection'),
+    {
       defaultExport: false,
-    },).then(function (UserModal) {
+    },
+  ).then(function (UserModal) {
     if (UserModal === undefined) {
       console.error('[PLURALCHUM] Error while patching UserModal!');
       return;

@@ -88,7 +88,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let { memberColourPref, tagColourPref } = settings;
 
   let systemProfile = profileMap.systems.get(profile.system);
-  let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile, systemProfile);  
+  let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile, systemProfile);
 
   let memberColour = getColour(memberColourPref, profile, systemProfile, guildId, settings, true);
   let tagColour = getColour(tagColourPref, profile, systemProfile, guildId, settings, false);
