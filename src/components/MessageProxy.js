@@ -42,7 +42,16 @@ function MessageProxyInner({ profileMap, unblockedMap, unignoredMap, messageNode
   }
 }
 
-export default function MessageProxy({ profileMap, enabledCell, unblockedMap, unignoredMap, messageNode, message, label, compact }) {
+export default function MessageProxy({
+  profileMap,
+  enabledCell,
+  unblockedMap,
+  unignoredMap,
+  messageNode,
+  message,
+  label,
+  compact,
+}) {
   let [enabled] = hookupValueCell(enabledCell);
 
   if (enabled && message) {
