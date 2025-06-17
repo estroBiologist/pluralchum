@@ -3,7 +3,10 @@ const React = BdApi.React;
 import { pluginName } from './utility.js';
 
 const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'isClyde'),
+  BdApi.Webpack.Filters.combine(
+    BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef'),
+    BdApi.Webpack.Filters.byRegex('^((?!getGuild).)*$'),
+  ),
 );
 
 const viewBotPopout = BdApi.Webpack.getByStrings(
@@ -20,7 +23,7 @@ const [Avatar, avatar] = BdApi.Webpack.getWithKey(
 
 const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('bannerSrc'));
 
-const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('_.clanTagContainer'));
+const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('_.guildTagContainer'));
 
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
