@@ -29,9 +29,9 @@ function getServername(username, tag) {
   }
 }
 
-function getUsername(useServerNames, author, profile) {
+function getUsername(useServerNames, author, profile, systemProfile) {
   let username = normalize(author.username_real ?? author.username.slice());
-  let tag = normalize(profile.tag ?? '');
+  let tag = normalize(systemProfile.tag ?? '');
   if (useServerNames) {
     let servername = getServername(username, tag);
     if (servername) {
@@ -54,18 +54,18 @@ function NameSegment({ colour, name }) {
   );
 }
 
-function getColour(colourPref, member, guildId, settings, defaultSystemColourToMemberColour) {
+function getColour(colourPref, member, system, guildId, settings, defaultSystemColourToMemberColour) {
   let colour;
 
   switch (colourPref) {
     case ColourPreference.Member:
-      colour = member.color ?? member.system_color;
+      colour = member.color ?? system.color;
       break;
     case ColourPreference.System:
       if (defaultSystemColourToMemberColour) {
-        colour = member.system_color ?? member.color;
+        colour = system.color ?? member.color;
       } else {
-        colour = member.system_color;
+        colour = system.color;
       }
       break;
     case ColourPreference.Role:
@@ -87,10 +87,11 @@ function getColour(colourPref, member, guildId, settings, defaultSystemColourToM
 function createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername) {
   let { memberColourPref, tagColourPref } = settings;
 
-  let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile);
+  let systemProfile = profileMap.systems.get(profile.system);
+  let { username, memberTag } = getUsername(settings.useServerNames, message.author, profile, systemProfile);
 
-  let memberColour = getColour(memberColourPref, profile, guildId, settings, true);
-  let tagColour = getColour(tagColourPref, profile, guildId, settings, false);
+  let memberColour = getColour(memberColourPref, profile, systemProfile, guildId, settings, true);
+  let tagColour = getColour(tagColourPref, profile, systemProfile, guildId, settings, false);
 
   let doSysTag = memberTag && memberTag.length > 0;
 

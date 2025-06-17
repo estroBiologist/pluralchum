@@ -25,7 +25,6 @@
     "rollup-plugin-import-css": "3.3.4"
   },
   "dependencies": {
-    "@ariagivens/discord-unicode-fix-js": "1.1.1",
-    "svg-loaders-react": "^2.2.1"
+    "@ariagivens/discord-unicode-fix-js": "1.1.1"
   }
 }

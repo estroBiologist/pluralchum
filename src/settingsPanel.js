@@ -158,7 +158,10 @@ function cachePanel(profileMap) {
     <button
       className='button_dd4f85 lookFilled_dd4f85 colorBrand_dd4f85 sizeSmall_dd4f85 grow_dd4f85'
       style={{ textAlign: 'center', width: '100%' }}
-      onClick={() => profileMap.clear()}
+      onClick={() => {
+        profileMap.systems.clear();
+        profileMap.members.clear();
+      }}
     >
       Delete Cache
     </button>

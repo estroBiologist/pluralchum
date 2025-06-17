@@ -49,6 +49,7 @@ export function patchMessageHeader(settings, profileMap, enabled) {
 
 export function patchMessage(profileMap, enabled) {
   let unblockedMap = new MapCell({});
+  let unignoredMap = new MapCell({});
 
   BdApi.Patcher.instead(pluginName, Message, blocker, function (ctx, [props], f) {
     return (
@@ -56,6 +57,7 @@ export function patchMessage(profileMap, enabled) {
         profileMap={profileMap}
         enabledCell={enabled}
         unblockedMap={unblockedMap}
+        unignoredMap={unignoredMap}
         messageNode={f.call(ctx, props)}
         message={props.childrenMessageContent?.props?.message}
         label={props['aria-labelledby']}
