@@ -2,7 +2,9 @@ const MessageContent = BdApi.Webpack.getModule(m => {
   let s = m?.type?.toString();
   return s && s.includes('messageContent') && s.includes('SEND_FAILED');
 });
-const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('BaseUsername'));
+const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.byStrings('message', 'clanTagChiplet'),
+);
 const [Message, blocker] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('.cozy', '.hasReply', '.hasThread', '.isSystemMessage'),
 );
