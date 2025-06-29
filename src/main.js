@@ -8,7 +8,7 @@ import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 import { patchBotPopout } from './popout.js';
 
-const version = '2.7.1';
+const version = '2.7.2';
 
 export class Pluralchum {
   patches = [];
