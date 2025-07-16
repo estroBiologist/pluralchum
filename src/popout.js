@@ -23,7 +23,7 @@ const [Avatar, avatar] = BdApi.Webpack.getWithKey(
 
 const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('bannerSrc'));
 
-const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('_.guildTagContainer'));
+const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('usernameRow', 'isVerifiedBot'));
 
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
@@ -71,7 +71,8 @@ export function patchBotPopout(settings, profileMap) {
     }
   });
 
-  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [{ user }], ret) {
+  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [args], ret) {
+    let user = args?.userId?.user;
     if (user && isValidHttpUrl(user.avatar)) {
       ret.avatarSrc = user.avatar;
       ret.avatarPlaceholder = user.avatar;
