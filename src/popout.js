@@ -71,7 +71,8 @@ export function patchBotPopout(settings, profileMap) {
     }
   });
 
-  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [{ user }], ret) {
+  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [args], ret) {
+    let user = args?.userId?.user;
     if (user && isValidHttpUrl(user.avatar)) {
       ret.avatarSrc = user.avatar;
       ret.avatarPlaceholder = user.avatar;
