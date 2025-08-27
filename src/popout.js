@@ -6,13 +6,7 @@ const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'isClyde'),
 );
 
-const viewBotPopout = BdApi.Webpack.getByStrings(
-  'messageId',
-  'user',
-  'openUserProfileModal',
-  'setPopoutRef',
-  'BotUserProfilePopout',
-);
+const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.combine(BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'currentUser'), BdApi.Webpack.Filters.byRegex('^((?!customStatusPrompt).)*$')));
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
@@ -141,7 +135,7 @@ export function patchBotPopout(settings, profileMap) {
       user.avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
     }
 
-    if (viewBotPopout) return viewBotPopout({ ...args, user });
+    if (BotPopout && viewBotPopout) return BotPopout[viewBotPopout]({ ...args, user });
     else {
       console.error('[PLURALCHUM] Error, bot popout function is undefined! Falling back to webhook function...');
       return f({ ...args, user });
