@@ -31,8 +31,8 @@ function getUnblocked(unblockedMap, message, messageNode, label) {
 
 function XIcon() {
   return (
-    <div className='iconContainer__235ca'>
-      <svg aria-hidden='true' role='img' className='blockedIcon__7a70a' width='24' height='24' viewBox='0 0 24 24'>
+    <div className='_235ca3770d90ab7c-iconContainer'>
+      <svg aria-hidden='true' role='img' className='_7a70a677dab584df-blockedIcon' width='24' height='24' viewBox='0 0 24 24'>
         <path
           fill='currentColor'
           d='M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z'
@@ -51,16 +51,16 @@ export default function BlockedMessage({ unblockedMap, message, messageNode, lab
   }
 
   return (
-    <div className='groupStart__5126c'>
-      <div className='wrapper_c19a55 cozy_c19a55 zalgo_c19a55' role='article'>
-        <div className='contents_c19a55'>
-          <div className='blockedSystemMessage__7a70a container__235ca cozy__235ca'>
+    <div className='_5126c0cd07f243a0-groupStart'>
+      <div className='c19a557985eb7793-wrapper c19a557985eb7793-cozy c19a557985eb7793-zalgo' role='article'>
+        <div className='c19a557985eb7793-contents'>
+          <div className='_7a70a677dab584df-blockedSystemMessage _235ca3770d90ab7c-container _235ca3770d90ab7c-cozy'>
             <XIcon />
-            <div className='content__235ca'>
-              <div className='blockedMessageText__7a70a'>
+            <div className='_235ca3770d90ab7c-content'>
+              <div className='_7a70a677dab584df-blockedMessageText'>
                 {unblocked.length} blocked {unblocked.length === 1 ? 'message' : 'messages'} —{' '}
                 <span
-                  className='blockedAction__7a70a'
+                  className='_7a70a677dab584df-blockedAction'
                   role='button'
                   tabIndex='0'
                   onClick={() => setExpanded(!expanded)}
