@@ -2,8 +2,8 @@ const React = BdApi.React;
 
 export default function PopoutPKBadge() {
   return (
-    <span className='botTagRegular__82f07 botTag__82f07 px__82f07'>
-      <div className='botText__82f07'>PK</div>
+    <span className='_82f0793afa59e5dc-botTagRegular _82f0793afa59e5dc-botTag _82f0793afa59e5dc-px'>
+      <div className='_82f0793afa59e5dc-botText'>PK</div>
     </span>
   );
 }

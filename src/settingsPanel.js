@@ -156,7 +156,7 @@ function accessibilityPanel(settings) {
 function cachePanel(profileMap) {
   let resetCacheBtn = (
     <button
-      className='button_dd4f85 lookFilled_dd4f85 colorBrand_dd4f85 sizeSmall_dd4f85 grow_dd4f85'
+      className='_201d5e8a3c09670a-button _201d5e8a3c09670a-lookFilled _201d5e8a3c09670a-colorBrand _201d5e8a3c09670a-sizeSmall _201d5e8a3c09670a-grow'
       style={{ textAlign: 'center', width: '100%' }}
       onClick={() => profileMap.clear()}
     >
