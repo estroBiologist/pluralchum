@@ -5,6 +5,7 @@ import css from 'rollup-plugin-import-css';
 import replace from '@rollup/plugin-replace';
 import fs from 'fs/promises';
 import image from '@rollup/plugin-image';
+import svgr from '@svgr/rollup';
 
 export default {
   input: 'src/main.js',
@@ -18,7 +19,8 @@ export default {
     nodeResolve(),
     babel({ babelHelpers: 'bundled' }),
     css(),
-    image(),
+    image({ exclude: '**.svg' }),
+    svgr({ icon: true }),
     commonjs(),
     replace({ preventAssignment: false, delimiters: ['', ''], values: { "require('react')": 'BdApi.React' } }),
   ],
