@@ -2,7 +2,7 @@ import './styles.js';
 import { initializeSettings, initializeProfileMap, purgeOldProfiles } from './data.js';
 import { requireEula } from './eula.js';
 import { patchMessageContent, patchMessageHeader, patchMessage } from './messages.js';
-import { patchEditMenuItem, patchEditAction } from './edit.js';
+import { patchEditMenuItem, patchLastEditableMessage, patchEditAction } from './edit.js';
 import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
@@ -32,6 +32,7 @@ export class Pluralchum {
     patchMessageHeader(this.settings, this.profileMap, this.enabled);
     patchMessage(this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem(this.profileMap));
+    patchLastEditableMessage(this.profileMap);
     patchEditAction();
     patchBotPopout(this.settings, this.profileMap);
 
