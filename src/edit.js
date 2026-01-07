@@ -3,15 +3,21 @@ const Webpack = BdApi.Webpack;
 const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage');
 const MessageStore = Webpack.getStore('MessageStore');
 const ChannelStore = Webpack.getStore('ChannelStore');
+const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
+
 import { isProxiedMessage, pluginName } from './utility.js';
 import PKEditIcon from './components/PKEditIcon.js';
+import { getUserHash } from './profiles.js';
 
-export function patchEditMenuItem() {
+const currentUserId = UserStore.getCurrentUser().id;
+export function patchEditMenuItem(profileMap) {
   // Add edit menu item to proxied messages.
   return BdApi.ContextMenu.patch('message', (res, props) => {
     const { message } = props;
 
-    if (!message || !isProxiedMessage(message)) {
+    const sender = profileMap.get(getUserHash(message.author))?.sender;
+
+    if (!message || !isProxiedMessage(message) || sender != currentUserId) {
       return res;
     }
 
@@ -41,13 +47,11 @@ export function patchEditAction() {
     MessageActions,
     'editMessage',
     BdApi.Utils.debounce(function (ctx, [channel_id, message_id, message], original) {
-      console.log('loggy');
       if (isProxiedMessage(MessageStore.getMessage(channel_id, message_id))) {
         let { content } = message;
         let channel = ChannelStore.getChannel(channel_id);
         let guild_id = channel.guild_id;
         let str = 'pk;e https://discord.com/channels/' + guild_id + '/' + channel_id + '/' + message_id + ' ' + content;
-        console.log(channel_id);
         MessageActions.sendMessage(
           channel_id,
           {
