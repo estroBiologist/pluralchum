@@ -1,6 +1,6 @@
 /**
  * @name Pluralchum
- * @version 2.7.4
+ * @version 2.8.0
  * @description PluralKit integration for BetterDiscord. Inexplicably Homestuck-themed.
  * @author Ash Taylor
  *
