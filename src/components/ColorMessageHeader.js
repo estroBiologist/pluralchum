@@ -48,7 +48,7 @@ function getUsername(useServerNames, author, profile) {
 
 function NameSegment({ colour, name }) {
   return (
-    <span className='c19a557985eb7793-username pk-name-segment' style={{ color: colour }}>
+    <span className='username_c19a55 pk-name-segment' style={{ color: colour }}>
       {name}
     </span>
   );
@@ -95,7 +95,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let doSysTag = memberTag && memberTag.length > 0;
 
   return [
-    <span className='c19a557985eb7793-username pk-name' onClick={onClickUsername}>
+    <span className='username_c19a55 pk-name' onClick={onClickUsername}>
       <NameSegment colour={memberColour} name={username} />
       {doSysTag ? ' ' : null}
       {doSysTag ? <NameSegment colour={tagColour} name={memberTag} /> : null}

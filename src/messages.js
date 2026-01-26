@@ -1,9 +1,9 @@
 const MessageContent = BdApi.Webpack.getModule(m => {
   let s = m?.type?.toString();
-  return s && s.includes('messageContent') && s.includes('SEND_FAILED');
+  return s && s.includes('MessageContent') && s.includes('SEND_FAILED');
 });
 const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('message', 'clanTagChiplet'),
+  BdApi.Webpack.Filters.byStrings('includeConvenienceGlow', 'shouldUnderlineOnHover'),
 );
 const [Message, blocker] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('.cozy', '.hasReply', '.hasThread', '.isSystemMessage'),
@@ -31,10 +31,10 @@ export function patchMessageContent(settings, profileMap, enabled) {
 
 export function patchMessageHeader(settings, profileMap, enabled) {
   BdApi.Patcher.instead(pluginName, MessageHeader, messageHeader, function (ctx, [props], f) {
-    // Props can sometimes be undefined.
     if (!props) {
       return;
     }
+
     return (
       <MessageHeaderProxy
         settingsCell={settings}
