@@ -5,9 +5,7 @@ const MessageContent = BdApi.Webpack.getModule(m => {
 const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('includeConvenienceGlow', 'shouldUnderlineOnHover'),
 );
-const [Message, blocker] = BdApi.Webpack.getWithKey(
-  BdApi.Webpack.Filters.byStrings('.cozy', '.hasReply', '.hasThread', '.isSystemMessage'),
-);
+const [Message, message] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('zalgo', 'childrenRepliedMessage'));
 const React = BdApi.React;
 
 import { MapCell, pluginName } from './utility.js';
@@ -52,16 +50,17 @@ export function patchMessageHeader(settings, profileMap, enabled) {
 export function patchMessage(profileMap, enabled) {
   let unblockedMap = new MapCell({});
 
-  BdApi.Patcher.instead(pluginName, Message, blocker, function (ctx, [props], f) {
+  BdApi.Patcher.instead(pluginName, Message, message, function (ctx, [props], f) {
+    console.log(props);
+
     return (
       <MessageProxy
         profileMap={profileMap}
         enabledCell={enabled}
         unblockedMap={unblockedMap}
         messageNode={f.call(ctx, props)}
-        message={props.childrenMessageContent?.props?.message}
-        label={props['aria-labelledby']}
-        compact={props?.childrenHeader?.props?.compact}
+        message={props.message}
+        groupId={props.groupId}
       />
     );
   });
