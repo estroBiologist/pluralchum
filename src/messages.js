@@ -51,8 +51,6 @@ export function patchMessage(profileMap, enabled) {
   let unblockedMap = new MapCell({});
 
   BdApi.Patcher.instead(pluginName, Message, message, function (ctx, [props], f) {
-    console.log(props);
-
     return (
       <MessageProxy
         profileMap={profileMap}
