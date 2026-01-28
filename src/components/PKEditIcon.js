@@ -4,8 +4,8 @@ const React = BdApi.React;
 
 export default function PKEditIcon() {
   return (
-    <div className='c1e9c47c23f12ca3-iconContainer'>
-      <PKPencil className='c1e9c47c23f12ca3-icon'></PKPencil>
+    <div className='iconContainer_c1e9c4'>
+      <PKPencil className='icon_c1e9c4'></PKPencil>
     </div>
   );
 }
