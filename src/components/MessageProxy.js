@@ -1,19 +1,34 @@
 import { hookupProfile } from '../profiles';
 import { hookupValueCell } from '../utility';
-import BlockedMessage from './BlockedMessage';
-let isBlocked = BdApi.Webpack.getByKeys('isBlocked').isBlocked;
+import { HiddenMessage, Reason } from './HiddenMessage';
+const RelationshipStore = BdApi.Webpack.Stores.RelationshipStore;
 
 const React = BdApi.React;
 
-function isBlockedProfile(profile) {
-  return profile?.sender && isBlocked(profile.sender);
+function checkHidden(profile) {
+  if (profile?.sender && RelationshipStore.isBlocked(profile.sender)) {
+    return Reason.Blocked;
+  } else if (profile?.sender && RelationshipStore.isIgnored(profile.sender)) {
+    return Reason.Ignored;
+  } else {
+    return null;
+  }
 }
 
 function MessageProxyInner({ profileMap, unblockedMap, messageNode, message, groupId }) {
   let [profile] = hookupProfile(profileMap, message.author);
 
-  if (isBlockedProfile(profile)) {
-    return <BlockedMessage unblockedMap={unblockedMap} message={message} messageNode={messageNode} groupId={groupId} />;
+  let reason = checkHidden(profile);
+  if (reason) {
+    return (
+      <HiddenMessage
+        unblockedMap={unblockedMap}
+        message={message}
+        messageNode={messageNode}
+        groupId={groupId}
+        reason={reason}
+      />
+    );
   } else {
     return messageNode;
   }

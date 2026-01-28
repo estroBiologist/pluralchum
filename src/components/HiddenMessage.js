@@ -1,4 +1,12 @@
+import Blocked from './blocked.svg';
+import Ignored from './ignored.svg';
+
 const React = BdApi.React;
+
+export const Reason = {
+  Blocked: 'BLOCKED',
+  Ignored: 'IGNORED',
+};
 
 export function hookupUnblocked(unblockedMap, groupId) {
   const [unblocked, setUnblocked] = React.useState(unblockedMap.get(groupId) ?? []);
@@ -24,20 +32,19 @@ function getUnblocked(unblockedMap, message, messageNode, groupId) {
   return unblocked.map(({ node }) => node);
 }
 
-function XIcon() {
+function HiddenIcon({ reason }) {
   return (
     <div className='iconContainer__235ca'>
-      <svg aria-hidden='true' role='img' className='blockedIcon__7a70a' width='24' height='24' viewBox='0 0 24 24'>
-        <path
-          fill='currentColor'
-          d='M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z'
-        ></path>
-      </svg>
+      {reason === Reason.Blocked ? (
+        <Blocked aria-hidden='true' role='img' className='blockedIcon__7a70a' />
+      ) : reason === Reason.Ignored ? (
+        <Ignored aria-hidden='true' role='img' className='blockedIcon__7a70a' />
+      ) : null}
     </div>
   );
 }
 
-export default function BlockedMessage({ unblockedMap, message, messageNode, groupId }) {
+export function HiddenMessage({ unblockedMap, message, messageNode, groupId, reason }) {
   const [expanded, setExpanded] = React.useState(false);
   const unblocked = getUnblocked(unblockedMap, message, messageNode, groupId);
 
@@ -50,10 +57,11 @@ export default function BlockedMessage({ unblockedMap, message, messageNode, gro
       <div className='wrapper_c19a55 cozy_c19a55 zalgo_c19a55' role='article'>
         <div className='contents_c19a55'>
           <div className='blockedSystemMessage__7a70a container__235ca cozy__235ca'>
-            <XIcon />
+            <HiddenIcon reason={reason} />
             <div className='content__235ca'>
               <div className='blockedMessageText__7a70a'>
-                {unblocked.length} blocked {unblocked.length === 1 ? 'message' : 'messages'} —{' '}
+                {unblocked.length} {reason === Reason.Blocked ? 'blocked' : 'ignored'}{' '}
+                {unblocked.length === 1 ? 'message' : 'messages'} —{' '}
                 <span
                   className='blockedAction__7a70a'
                   role='button'
