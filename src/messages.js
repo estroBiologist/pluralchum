@@ -1,6 +1,6 @@
 const MessageContent = BdApi.Webpack.getModule(m => {
   let s = m?.type?.toString();
-  return s && s.includes('MessageContent') && s.includes('SEND_FAILED');
+  return s && s.includes('SENDING') && s.includes('SEND_FAILED');
 });
 const [MessageHeader, messageHeader] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('includeConvenienceGlow', 'shouldUnderlineOnHover'),
