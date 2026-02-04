@@ -34,7 +34,7 @@ export class Pluralchum {
     this.patches.push(patchEditMenuItem(this.profileMap));
     patchLastEditableMessage(this.profileMap);
     patchEditAction();
-    // patchBotPopout(this.settings, this.profileMap);
+    patchBotPopout(this.settings, this.profileMap);
 
     checkForUpdates(version);
   }

@@ -9,15 +9,22 @@ const [WebhookPopout, viewWebhookPopout] = BdApi.Webpack.getWithKey(
   ),
 );
 
-const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.combine(BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'currentUser'), BdApi.Webpack.Filters.byRegex('^((?!customStatusPrompt).)*$')));
+const [BotPopout, viewBotPopout] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.combine(
+    BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef', 'currentUser'),
+    BdApi.Webpack.Filters.byRegex('^((?!customStatusPrompt).)*$'),
+  ),
+);
 
 const [Avatar, avatar] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
 );
 
-const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('bannerSrc'));
+const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('displayProfile', 'SHOULD_LOAD'));
 
-const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('usernameRow', 'isVerifiedBot'));
+const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(
+  BdApi.Webpack.Filters.byStrings('pendingDisplayNameStyles', 'isVerifiedBot'),
+);
 
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
@@ -142,6 +149,8 @@ export function patchBotPopout(settings, profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
+    console.log(ret);
+
     if (args.user?.id?.isPK) {
       ret.props.children[0].props.children[1] = <PopoutPKBadge />;
     }
@@ -154,7 +163,7 @@ export function patchBotPopout(settings, profileMap) {
       console.error('[PLURALCHUM] Error while patching the user profile modal!');
       return;
     }
-    const Dispatcher = BdApi.Webpack.getByKeys('dispatch', 'subscribe');
+    const Dispatcher = BdApi.Webpack.Stores.UserStore._dispatcher;
     BdApi.Patcher.instead(pluginName, userProfile, 'openUserProfileModal', (ctx, [args], f) => {
       if (typeof args.userId !== 'string' && args.userId?.isPK) {
         Dispatcher.dispatch({
