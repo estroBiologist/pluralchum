@@ -197,13 +197,15 @@ export function patchBotPopout(settings, profileMap) {
     return f(...args);
   });
 
-  const [PopoutBioPatch, popoutBioPatch] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('viewFullBioDisabled', 'hidePersonalInformation'),
-  );
-  BdApi.Patcher.instead(pluginName, PopoutBioPatch, popoutBioPatch, function (_, [args], f) {
+  const PopoutBioPatch = BdApi.Webpack.getModule(m => {
+    let s = m?.type?.toString();
+    return s && s.includes('viewFullBioDisabled');
+  });
+  BdApi.Patcher.instead(pluginName, PopoutBioPatch, 'type', function (_, [args], f) {
     if (!args?.user?.id?.isPK) {
       return f(args);
     }
+
     return <PopoutBio content={args.bio} />;
   });
 }
