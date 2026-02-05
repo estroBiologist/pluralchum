@@ -149,8 +149,6 @@ export function patchBotPopout(settings, profileMap) {
   });
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
-    console.log(ret);
-
     if (args.user?.id?.isPK) {
       ret.props.children[0].props.children[1] = <PopoutPKBadge />;
     }
@@ -198,53 +196,6 @@ export function patchBotPopout(settings, profileMap) {
       return;
     }
     return f(...args);
-  });
-
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('BOT_INFO', 'MUTUAL_GUILDS', 'BOT_DATA_ACCESS'), {
-    defaultExport: false,
-  }).then(function (ModalTabBar) {
-    if (ModalTabBar === undefined) {
-      console.error('[PLURALCHUM] Error while patching ModalTabBar!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, ModalTabBar, 'Z', (ctx, [args], f) => {
-      if (!args?.id?.isPK) return f(args);
-      const newHeaders = [
-        { section: 'BOT_INFO', text: 'Member Info' },
-        { section: 'BOT_DATA_ACCESS', text: 'System Info' },
-      ];
-      return newHeaders;
-    });
-    console.debug('[PLURALCHUM] patched ModalTabBar');
-  });
-
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('getUserProfile', 'SET_NOTE'), {
-    defaultExport: false,
-  }).then(function (UserProfilePanel) {
-    if (UserProfilePanel === undefined) {
-      console.error('[PLURALCHUM] Error while patching UserProfilePanel!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, UserProfilePanel, 'Z', (ctx, [args], f) => {
-      if (!args?.user?.id?.isPK) return f(args);
-
-      return <DataPanelBio content={args.user.id.userProfile.bio} />;
-    });
-  });
-
-  //this will also probably eventually break -- is there a better way to grab this module?
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('getUserProfile', 'application', 'helpCenterUrl'), {
-    defaultExport: false,
-  }).then(function (BotDataPanel) {
-    if (BotDataPanel === undefined) {
-      console.error('[PLURALCHUM] Error while patching BotDataPanel!');
-      return;
-    }
-    BdApi.Patcher.instead(pluginName, BotDataPanel, 'Z', (ctx, [args], f) => {
-      if (!args?.user?.id?.isPK) return f(args);
-
-      return <DataPanelBio content={args.user.id.userProfile.system_bio} />;
-    });
   });
 
   const [PopoutBioPatch, popoutBioPatch] = BdApi.Webpack.getWithKey(
