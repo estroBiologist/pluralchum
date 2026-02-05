@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Ash Taylor
+Copyright (c) 2026 Ash Taylor and Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
