@@ -32,7 +32,6 @@ const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot'
 const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
 import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
-import DataPanelBio from './components/DataPanelBio.js';
 import PopoutBio from './components/PopoutBio.js';
 
 function isValidHttpUrl(string) {
