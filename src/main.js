@@ -7,7 +7,7 @@ import { settingsPanel } from './settingsPanel.js';
 import { ValueCell, pluginName } from './utility.js';
 import { checkForUpdates, upgradeCache } from './update.js';
 import { patchBotPopout } from './popout.js';
-import { patchUserProfileModal } from './userProfileModal.js';
+import { patchBotUserProfileModal, patchUserProfileMessageButton } from './userProfileModal.js';
 
 const version = '2.9.0';
 
@@ -36,7 +36,8 @@ export class Pluralchum {
     patchLastEditableMessage(this.profileMap);
     patchEditAction();
     patchBotPopout(this.settings, this.profileMap);
-    patchUserProfileModal();
+    patchBotUserProfileModal();
+    patchUserProfileMessageButton();
 
     checkForUpdates(version);
   }

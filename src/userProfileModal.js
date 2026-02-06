@@ -2,9 +2,11 @@ import UserModalBio from './components/UserModalBio.js';
 import UserModalInner from './components/UserModalInner.js';
 import { pluginName } from './utility.js';
 
+const MessageActions = BdApi.Webpack.getByKeys('openPrivateChannel');
+
 const React = BdApi.React;
 
-async function patchBotUserProfileModal() {
+export async function patchBotUserProfileModal() {
   await BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('PRESS_SECTION', 'hidePersonalInformation'));
 
   const [BotUserProfileModalInner, botUserProfileModalInner] = BdApi.Webpack.getWithKey(
@@ -31,6 +33,16 @@ async function patchBotUserProfileModal() {
   });
 }
 
-export function patchUserProfileModal() {
-  patchBotUserProfileModal();
+export function patchUserProfileMessageButton() {
+  BdApi.Patcher.instead(pluginName, MessageActions, 'openPrivateChannel', function (ctx, [{ recipientIds }], f) {
+    if (recipientIds?.isPK) {
+      if (recipientIds?.userProfile?.sender) {
+        console.log(recipientIds.userProfile.sender);
+        return f({ recipientIds: recipientIds.userProfile.sender });
+      }
+      return;
+    }
+
+    return f({ recipientIds });
+  });
 }

@@ -112,6 +112,7 @@ export function patchBotPopout(settings, profileMap) {
       userId: args.user.id,
       guildId: args.guildId,
       pronouns: profile.pronouns,
+      sender: profile.sender,
     };
 
     if (profile.color) {
@@ -186,15 +187,6 @@ export function patchBotPopout(settings, profileMap) {
       if (args.user?.id?.isPK) return;
       return f(args);
     });
-  });
-
-  //this could potentially be changed to message the system user?
-  const MessageButton = BdApi.Webpack.getByKeys('openPrivateChannel');
-  BdApi.Patcher.instead(pluginName, MessageButton, 'openPrivateChannel', function (ctx, args, f) {
-    if (args[0]?.isPK) {
-      return;
-    }
-    return f(...args);
   });
 
   const PopoutBioPatch = BdApi.Webpack.getModule(m => {
