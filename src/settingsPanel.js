@@ -156,8 +156,7 @@ function accessibilityPanel(settings) {
 function cachePanel(profileMap) {
   let resetCacheBtn = (
     <button
-      className='_201d5e8a3c09670a-button _201d5e8a3c09670a-lookFilled _201d5e8a3c09670a-colorBrand _201d5e8a3c09670a-sizeSmall _201d5e8a3c09670a-grow'
-      style={{ textAlign: 'center', width: '100%' }}
+      className='pk-cache-button bd-button bd-button-filled bd-button-color-red bd-button-medium bd-button-grow'
       onClick={() => profileMap.clear()}
     >
       Delete Cache
@@ -174,8 +173,6 @@ function cachePanel(profileMap) {
       {
         type: 'custom',
         id: 'logo',
-        name: '',
-        note: '',
         value: null,
         children: resetCacheBtn,
       },

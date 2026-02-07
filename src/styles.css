@@ -22,3 +22,7 @@
   display: inline-block;
   width: 0px;
 }
+
+div:has(.pk-cache-button) {
+  justify-content: center;
+}
