@@ -28,6 +28,10 @@ const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(
 
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
+const GuildMemberStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('GuildMemberStore'));
+const GuildMemberRequesterStore = BdApi.Webpack.getModule(
+  BdApi.Webpack.Filters.byStoreName('GuildMemberRequesterStore'),
+);
 const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
 const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
 import { getUserHash, ProfileStatus } from './profiles.js';
@@ -60,6 +64,18 @@ export function patchBotPopout(settings, profileMap) {
       return userId.userProfile;
     } else {
       return f(userId, guildId);
+    }
+  });
+
+  BdApi.Patcher.instead(pluginName, GuildMemberStore, 'getMember', function (ctx, [guildId, userId], f) {
+    if (userId && typeof userId !== 'string' && userId.user) {
+      let sender = f.call(ctx, guildId, userId.userProfile.sender);
+      if (!sender) {
+        GuildMemberRequesterStore.requestMember(guildId, userId.userProfile.sender);
+      }
+      return { ...sender, avatarDecoration: null };
+    } else {
+      return f(guildId, userId);
     }
   });
 
