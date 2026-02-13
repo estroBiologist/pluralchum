@@ -9,7 +9,7 @@ import { checkForUpdates, upgradeCache } from './update.js';
 import { patchBotPopout } from './popout.js';
 import { patchBotUserProfileModal, patchUserProfileMessageButton } from './userProfileModal.js';
 
-const version = '2.10.0';
+const version = '2.10.1';
 
 export class Pluralchum {
   patches = [];
