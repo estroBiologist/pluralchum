@@ -26,6 +26,8 @@ const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(
   BdApi.Webpack.Filters.byStrings('pendingDisplayNameStyles', 'isVerifiedBot'),
 );
 
+const [Role, role] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('allowEditing', 'overflowCount'));
+
 const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
 const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
 const GuildMemberStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('GuildMemberStore'));
@@ -177,6 +179,12 @@ export function patchBotPopout(settings, profileMap) {
     }
 
     return ret;
+  });
+
+  BdApi.Patcher.before(pluginName, Role, role, function (ctx, args) {
+    if (args[0].userId?.isPK) {
+      args[0].allowEditing = false;
+    }
   });
 
   BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys('openUserProfileModal')).then(function (userProfile) {
