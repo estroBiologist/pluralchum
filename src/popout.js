@@ -73,7 +73,14 @@ export function patchBotPopout(settings, profileMap) {
       if (!sender) {
         GuildMemberRequesterStore.requestMember(guildId, userId.userProfile.sender);
       }
-      return { ...sender, avatarDecoration: null };
+      return {
+        guildId: sender.guildId,
+        highestRoleId: sender.highestRoleId,
+        isPending: sender.isPending,
+        joinedAt: sender.joinedAt,
+        roles: sender.roles,
+        userId: sender.userId,
+      };
     } else {
       return f(guildId, userId);
     }
