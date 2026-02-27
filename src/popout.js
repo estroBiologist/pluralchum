@@ -176,7 +176,12 @@ export function patchBotPopout(settings, profileMap) {
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
     if (args.user?.id?.isPK) {
-      ret.props.children[0].props.children[0].props.children.props.children[2] = <PopoutPKBadge />;
+      let name = ret.props.children[0].props.children[0];
+      if (Array.isArray(name.props.children)) {
+        name.props.children[2] = <PopoutPKBadge />;
+      } else {
+        name.props.children.props.children[2] = <PopoutPKBadge />;
+      }
     }
 
     return ret;
