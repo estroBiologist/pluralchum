@@ -74,6 +74,7 @@ export function patchBotPopout(settings, profileMap) {
       let sender = f.call(ctx, guildId, userId.userProfile.sender);
       if (!sender) {
         GuildMemberRequesterStore.requestMember(guildId, userId.userProfile.sender);
+        return null;
       }
       return {
         guildId: sender.guildId,
