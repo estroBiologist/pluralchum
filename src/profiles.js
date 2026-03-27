@@ -97,11 +97,13 @@ function hashCode(text) {
   return hash;
 }
 
-export function getUserHash(author) {
+export function getUserHash(message) {
+  let author = message.author;
   let username = author.username;
+  let app_id = message.application_id;
   if (Object.hasOwn(author, 'username_real')) username = author.username_real;
 
-  return hashCode(username + author.avatar);
+  return hashCode(username + author.avatar + app_id);
 }
 
 function shouldUpdate(profile) {
@@ -114,7 +116,7 @@ export async function updateProfile(message, profileMap) {
   let username = message.author.username;
   if (Object.hasOwn(message.author, 'username_real')) username = message.author.username_real;
 
-  let userHash = getUserHash(message.author);
+  let userHash = getUserHash(message);
 
   let profile = profileMap.get(userHash);
 
@@ -128,8 +130,8 @@ export async function updateProfile(message, profileMap) {
   }
 }
 
-export function hookupProfile(profileMap, author) {
-  let userHash = getUserHash(author);
+export function hookupProfile(profileMap, message) {
+  let userHash = getUserHash(message);
   const [profile, setProfile] = React.useState(profileMap.get(userHash));
   React.useEffect(function () {
     return profileMap.addListener(function (key, value) {

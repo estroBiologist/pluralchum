@@ -15,7 +15,7 @@ function isEditable(profileMap, message) {
   if (message.author?.id === currentUserId) {
     return true;
   }
-  const sender = profileMap.get(getUserHash(message.author))?.sender;
+  const sender = profileMap.get(getUserHash(message))?.sender;
   return isProxiedMessage(message) && sender === currentUserId;
 }
 

@@ -125,7 +125,7 @@ export function patchBotPopout(settings, profileMap) {
       return f(args);
     }
 
-    let userHash = getUserHash(message.author);
+    let userHash = getUserHash(message);
     let profile = profileMap.get(userHash);
 
     if (!profile || profile?.status === ProfileStatus.NotPK) {

@@ -15,7 +15,7 @@ export default function MessageHeaderProxy({
   onClickUsername,
 }) {
   let [settings] = hookupValueCell(settingsCell);
-  let [profile] = hookupProfile(profileMap, message.author);
+  let [profile] = hookupProfile(profileMap, message);
   let [enabled] = hookupValueCell(enabledCell);
 
   if (!enabled || !isProxiedMessage(message)) {
@@ -24,7 +24,7 @@ export default function MessageHeaderProxy({
 
   updateProfile(message, profileMap);
 
-  let userHash = getUserHash(message.author);
+  let userHash = getUserHash(message);
 
   if (profile && (profile.status === ProfileStatus.Done || profile.status === ProfileStatus.Updating)) {
     return (
