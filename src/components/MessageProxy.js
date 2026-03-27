@@ -16,7 +16,7 @@ function checkHidden(profile) {
 }
 
 function MessageProxyInner({ profileMap, unblockedMap, messageNode, message, groupId }) {
-  let [profile] = hookupProfile(profileMap, message.author);
+  let [profile] = hookupProfile(profileMap, message);
 
   let reason = checkHidden(profile);
   if (reason) {

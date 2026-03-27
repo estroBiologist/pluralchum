@@ -19,7 +19,7 @@ function shouldColor(settings, profile) {
 
 export default function MessageContentProxy({ settingsCell, profileMap, enabledCell, messageContent, message }) {
   let [settings] = hookupValueCell(settingsCell);
-  let [profile] = hookupProfile(profileMap, message.author);
+  let [profile] = hookupProfile(profileMap, message);
   let [enabled] = hookupValueCell(enabledCell);
 
   if (!enabled || !isProxiedMessage(message)) {
