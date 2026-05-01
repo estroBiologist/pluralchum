@@ -70,18 +70,19 @@ export function patchBotPopout(settings, profileMap) {
     }
   });
 
-  const [Avatar, avatar] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'),
-  );
-
-  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [args], ret) {
-    let user = args?.userId?.user;
-    if (user) {
-      ret.avatarSrc = user.avatar;
-      ret.avatarPlaceholder = user.avatar;
-    }
-    return ret;
-  });
+  BdApi.Webpack.waitForModule(
+    BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'), 
+    { defaultExport: false }
+  ).then(function (Avatars) {
+    BdApi.Patcher.after(pluginName, Avatars, 'A', function (_, [args], ret) {
+      let user = args?.userId?.user;
+      if (user) {
+        ret.avatarSrc = user.avatar;
+        ret.avatarPlaceholder = user.avatar;
+      }
+      return ret;
+    });
+  });  
 
   const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('displayProfile', 'SHOULD_LOAD'));
 
