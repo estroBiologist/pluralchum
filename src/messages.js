@@ -43,9 +43,7 @@ export function patchMessageHeader(settings, profileMap, enabled) {
           guildId={props.channel.guild_id}
           onClickUsername={props.onClick}
         />
-      ); BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('zalgo', 'childrenRepliedMessage'), {
-    defaultExport: false
-  })
+      );
     });
   })
 }
