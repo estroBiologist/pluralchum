@@ -11,7 +11,7 @@ import { patchBotUserProfileModal, patchUserProfileMessageButton } from './userP
 
 const version = '2.10.3';
 
-export class Pluralchum {
+export default class Pluralchum {
   patches = [];
 
   start() {
