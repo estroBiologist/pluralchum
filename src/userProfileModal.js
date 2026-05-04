@@ -4,8 +4,6 @@ import { pluginName } from './utility.js';
 
 const MessageActions = BdApi.Webpack.getByKeys('openPrivateChannel');
 
-const React = BdApi.React;
-
 export async function patchBotUserProfileModal() {
   await BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('PRESS_SECTION', 'hidePersonalInformation'));
 

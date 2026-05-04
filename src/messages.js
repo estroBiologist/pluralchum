@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 import { MapCell, pluginName } from './utility.js';
 import MessageContentProxy from './components/MessageContentProxy.js';
 import MessageHeaderProxy from './components/MessageHeaderProxy.js';

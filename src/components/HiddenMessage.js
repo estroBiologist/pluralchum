@@ -1,14 +1,12 @@
 import Blocked from './blocked.svg';
 import Ignored from './ignored.svg';
 
-const React = BdApi.React;
-
 export const Reason = {
   Blocked: 'BLOCKED',
   Ignored: 'IGNORED',
 };
 
-export function hookupUnblocked(unblockedMap, groupId) {
+export function useUnblocked(unblockedMap, groupId) {
   const [unblocked, setUnblocked] = React.useState(unblockedMap.get(groupId) ?? []);
 
   unblockedMap.addListener(function (key, value) {
@@ -21,7 +19,7 @@ export function hookupUnblocked(unblockedMap, groupId) {
 }
 
 function getUnblocked(unblockedMap, message, messageNode, groupId) {
-  const [unblocked] = hookupUnblocked(unblockedMap, groupId);
+  const [unblocked] = useUnblocked(unblockedMap, groupId);
 
   if (!unblocked.find(({ id }) => id === message.id)) {
     unblocked.push({ id: message.id, node: messageNode, timestamp: message.timestamp });

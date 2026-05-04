@@ -1,7 +1,5 @@
 import Bio from './Bio';
 
-const React = BdApi.React;
-
 const markupClass = BdApi.Webpack.getByKeys('markup')?.markup;
 const textClass = BdApi.Webpack.getByKeys('text-sm/normal')['text-sm/normal'];
 const scrollerBaseClasses = BdApi.Webpack.getByKeys('scrollerBase', 'disableScrollAnchor');

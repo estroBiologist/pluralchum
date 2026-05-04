@@ -1,6 +1,5 @@
 const Webpack = BdApi.Webpack;
 const GuildMemberStore = Webpack.getStore('GuildMemberStore');
-const React = BdApi.React;
 
 import { fix } from '@ariagivens/discord-unicode-fix-js';
 import { acceptableContrast } from '../contrast.js';
@@ -95,12 +94,12 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let doSysTag = memberTag && memberTag.length > 0;
 
   return [
-    <span className='username_c19a55 pk-name' onClick={onClickUsername}>
-      <NameSegment colour={memberColour} name={username} />
+    <span className='username_c19a55 pk-name' onClick={onClickUsername} key='PKName'>
+      <NameSegment colour={memberColour} name={username} key='NameSegment' />
       {doSysTag ? ' ' : null}
       {doSysTag ? <NameSegment colour={tagColour} name={memberTag} /> : null}
     </span>,
-    <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />,
+    <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} key='HeaderPKBadge' />,
   ];
 }
 
@@ -122,7 +121,9 @@ export default function ColorMessageHeader({
         createHeaderChildren(message, guildId, settings, profileMap, profile, userHash, onClickUsername),
         // Triggering the popout with correct position is hard, so we just leave the original
         // header here (but hide it using CSS) so the popout can take its position.
-        <div className='pk-hidden'>{messageHeader.props.children}</div>,
+        <div className='pk-hidden' key='HiddenMessageHeader'>
+          {messageHeader.props.children}
+        </div>,
       ],
     },
   };

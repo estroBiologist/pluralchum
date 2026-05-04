@@ -5,7 +5,7 @@ export async function showUpdateNotice(url) {
   let button = document.createElement('button');
   button.label = 'Check it out!';
   button.onClick = function () {
-    require('electron').shell.openExternal(url);
+    window.open(url);
   };
   BdApi.UI.showNotice('Pluralchum has a new update!', { type: 'info', buttons: [button] });
 }

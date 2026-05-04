@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 export class ValueCell {
   #val;
   #listeners = [];
@@ -102,11 +100,14 @@ export class MapCell {
   }
 }
 
-export function hookupValueCell(cell) {
+export function useValueCell(cell) {
   const [value, setValue] = React.useState(cell.get());
-  React.useEffect(function () {
-    return cell.addListener(setValue);
-  });
+  React.useEffect(
+    function () {
+      return cell.addListener(setValue);
+    },
+    [cell, value],
+  );
 
   return [value, setValue];
 }

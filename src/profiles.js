@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 import { sleep, isProxiedMessage } from './utility';
 
 export const ProfileStatus = {

@@ -1,9 +1,7 @@
 import { hookupProfile } from '../profiles';
-import { hookupValueCell } from '../utility';
+import { useValueCell } from '../utility';
 import { HiddenMessage, Reason } from './HiddenMessage';
 const RelationshipStore = BdApi.Webpack.Stores.RelationshipStore;
-
-const React = BdApi.React;
 
 function checkHidden(profile) {
   if (profile?.sender && RelationshipStore.isBlocked(profile.sender)) {
@@ -35,7 +33,7 @@ function MessageProxyInner({ profileMap, unblockedMap, messageNode, message, gro
 }
 
 export default function MessageProxy({ profileMap, enabledCell, unblockedMap, messageNode, message, groupId }) {
-  let [enabled] = hookupValueCell(enabledCell);
+  let [enabled] = useValueCell(enabledCell);
 
   if (enabled && message) {
     return (

@@ -1,4 +1,3 @@
-const React = BdApi.React;
 import { ColourPreference } from './data.js';
 import logo_png from '../images/logo.png';
 
@@ -73,7 +72,7 @@ function tagColourPref(settings) {
   };
 }
 
-function useServerNames(settings) {
+function doServerNames(settings) {
   return {
     type: 'switch',
     id: 'useServerNames',
@@ -90,7 +89,7 @@ function preferencesPanel(settings) {
     name: 'Preferences',
     collapsible: true,
     shown: false,
-    settings: [doColourText(settings), useServerNames(settings), memberColourPref(settings), tagColourPref(settings)],
+    settings: [doColourText(settings), doServerNames(settings), memberColourPref(settings), tagColourPref(settings)],
   };
 }
 

@@ -1,5 +1,4 @@
-const React = BdApi.React;
-import { ThreeDots } from 'svg-loaders-react';
+import { ThreeDots } from './ThreeDots.js';
 import { ProfileStatus } from '../profiles.js';
 
 export default function PopoutPKBadge({ profileMap, userHash, profile }) {

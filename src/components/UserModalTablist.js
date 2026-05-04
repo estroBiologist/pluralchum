@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 const tabBarClasses = BdApi.Webpack.getByKeys('container', 'tabBar', 'tabBarItem');
 const otherTabBarClasses = BdApi.Webpack.getByKeys('top', 'item', 'selected', 'themed');
 const classes = {
@@ -31,7 +29,13 @@ export default function UserModalTablist({ sections, selectedItem, setSelectedIt
   return (
     <div className={`${classes.tabBar} ${classes.top}`} role='tablist'>
       {sections.map(obj => (
-        <Tab id={obj.section} text={obj.text} selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+        <Tab
+          id={obj.section}
+          text={obj.text}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          key={obj.section}
+        />
       ))}
     </div>
   );

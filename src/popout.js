@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 import { pluginName, waitForAllModules as waitForModulesBulkKeyed } from './utility.js';
 import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
@@ -181,7 +179,10 @@ export async function patchBotPopout(settings, profileMap) {
 
   BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
     if (args.user?.id?.isPK) {
-      ret.props.children[0].props.trailing = [<PopoutPKBadge />, ret.props.children[0].props.trailing];
+      ret.props.children[0].props.trailing = [
+        <PopoutPKBadge key='PopoutPKBadge' />,
+        ret.props.children[0].props.trailing,
+      ];
     }
 
     return ret;

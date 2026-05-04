@@ -1,4 +1,3 @@
-const React = BdApi.React;
 import { pluginName } from './utility';
 
 function headsUp(onConfirm, onCancel) {

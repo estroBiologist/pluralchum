@@ -1,4 +1,3 @@
-const React = BdApi.React;
 const Webpack = BdApi.Webpack;
 const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage');
 const MessageStore = Webpack.getStore('MessageStore');

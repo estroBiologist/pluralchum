@@ -24,7 +24,7 @@ export default function Bio({ content }) {
     let customParser = parserHelper.reactParserFor(newRules);
     const finalOutput = customParser(content);
     return finalOutput;
-  } catch (error) {
+  } catch (_) {
     console.warn('[PLURALCHUM] error while generating bio, falling back to default function!');
     try {
       const defaultParse = parseBio.parseBioReact(content);

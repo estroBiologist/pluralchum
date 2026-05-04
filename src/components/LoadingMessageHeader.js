@@ -1,5 +1,3 @@
-const React = BdApi.React;
-
 import HeaderPKBadge from './HeaderPKBadge.js';
 
 export default function LoadingMessageHeader({ messageHeader, profile, profileMap, userHash }) {
@@ -9,7 +7,7 @@ export default function LoadingMessageHeader({ messageHeader, profile, profileMa
       ...messageHeader.props,
       children: [
         messageHeader.props.children[4],
-        <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} />,
+        <HeaderPKBadge profileMap={profileMap} userHash={userHash} profile={profile} key='HeaderPKBadge' />,
       ],
     },
   };
