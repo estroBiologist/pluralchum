@@ -5,12 +5,13 @@ import MessageContentProxy from './components/MessageContentProxy.js';
 import MessageHeaderProxy from './components/MessageHeaderProxy.js';
 import MessageProxy from './components/MessageProxy.js';
 
-export function patchMessageContent(settings, profileMap, enabled) {
-  BdApi.Webpack.waitForModule(m => {
+export async function patchMessageContent(settings, profileMap, enabled) {
+  const MessageContent = await BdApi.Webpack.waitForModule(m => {
     let s = m?.type?.toString();
     return s && s.includes('SENDING') && s.includes('SEND_FAILED');
-  }).then(function (MessageContent) {
-    BdApi.Patcher.instead(pluginName, MessageContent, 'type', function (ctx, [props], f) {
+  });
+
+  BdApi.Patcher.instead(pluginName, MessageContent, 'type', function (ctx, [props], f) {
     return (
       <MessageContentProxy
         settingsCell={settings}
@@ -21,40 +22,45 @@ export function patchMessageContent(settings, profileMap, enabled) {
       />
     );
   });
-})
 }
 
-export function patchMessageHeader(settings, profileMap, enabled) {
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('includeConvenienceGlow', 'shouldUnderlineOnHover'), {
-    defaultExport: false
-  }).then(function (MessageHeader) {
-    BdApi.Patcher.instead(pluginName, MessageHeader, 'A', function (ctx, [props], f) {
-      if (!props) {
-        return;
-      }
+export async function patchMessageHeader(settings, profileMap, enabled) {
+  const MessageHeader = await BdApi.Webpack.waitForModule(
+    BdApi.Webpack.Filters.byStrings('includeConvenienceGlow', 'shouldUnderlineOnHover'),
+    {
+      defaultExport: false,
+    },
+  );
 
-      return (
-        <MessageHeaderProxy
-          settingsCell={settings}
-          profileMap={profileMap}
-          enabledCell={enabled}
-          messageHeader={f(props)}
-          message={props.message}
-          guildId={props.channel.guild_id}
-          onClickUsername={props.onClick}
-        />
-      );
-    });
-  })
+  BdApi.Patcher.instead(pluginName, MessageHeader, 'A', function (ctx, [props], f) {
+    if (!props) {
+      return;
+    }
+
+    return (
+      <MessageHeaderProxy
+        settingsCell={settings}
+        profileMap={profileMap}
+        enabledCell={enabled}
+        messageHeader={f.call(ctx, props)}
+        message={props.message}
+        guildId={props.channel.guild_id}
+        onClickUsername={props.onClick}
+      />
+    );
+  });
 }
 
-export function patchMessage(profileMap, enabled) {
-  let unblockedMap = new MapCell({});
+export async function patchMessage(profileMap, enabled) {
+  const unblockedMap = new MapCell({});
+  const Message = await BdApi.Webpack.waitForModule(
+    BdApi.Webpack.Filters.byStrings('zalgo', 'childrenRepliedMessage'),
+    {
+      defaultExport: false,
+    },
+  );
 
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('zalgo', 'childrenRepliedMessage'), {
-    defaultExport: false
-  }).then(function (Message) {
-    BdApi.Patcher.instead(pluginName, Message, 'A', function (ctx, [props], f) {
+  BdApi.Patcher.instead(pluginName, Message, 'A', function (ctx, [props], f) {
     return (
       <MessageProxy
         profileMap={profileMap}
@@ -66,4 +72,4 @@ export function patchMessage(profileMap, enabled) {
       />
     );
   });
-})}
+}

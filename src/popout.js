@@ -1,6 +1,6 @@
 const React = BdApi.React;
 
-import { pluginName } from './utility.js';
+import { pluginName, waitForAllModules as waitForModulesBulkKeyed } from './utility.js';
 import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
 import PopoutBio from './components/PopoutBio.js';
@@ -17,8 +17,41 @@ function isValidHttpUrl(string) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
-export function patchBotPopout(settings, profileMap) {
-  const UserProfileStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserProfileStore'));
+function forceLoadBotPopout() {
+  BdApi.Utils.forceLoad(851588);
+}
+
+export async function patchBotPopout(settings, profileMap) {
+  forceLoadBotPopout();
+  const { UserProfileStore, GuildMemberStore, GuildMemberRequesterStore, UserStore, BotPopout } =
+    await waitForModulesBulkKeyed({
+      UserProfileStore: BdApi.Webpack.Filters.byStoreName('UserProfileStore'),
+      GuildMemberStore: BdApi.Webpack.Filters.byStoreName('GuildMemberStore'),
+      GuildMemberRequesterStore: BdApi.Webpack.Filters.byStoreName('GuildMemberRequesterStore'),
+      UserStore: BdApi.Webpack.Filters.byStoreName('UserStore'),
+      BotPopout: BdApi.Webpack.Filters.combine(
+        BdApi.Webpack.Filters.byStrings('messageId', 'openUserProfileModal', 'setPopoutRef'),
+        BdApi.Webpack.Filters.byRegex('^((?!profileEffect).)*$'),
+      ),
+    });
+  const { WebhookPopout } = await waitForModulesBulkKeyed(
+    {
+      WebhookPopout: BdApi.Webpack.Filters.combine(
+        BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef'),
+        BdApi.Webpack.Filters.byRegex('^((?!getGuild).)*$'),
+      ),
+    },
+    { defaultExport: false },
+  );
+  const [Avatar, avatar] = BdApi.Webpack.getWithKey(
+    BdApi.Webpack.Filters.byStrings('PRESS_VIEW_PROFILE', 'avatarProps'),
+  );
+  const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('displayProfile', 'SHOULD_LOAD'));
+  let [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(
+    BdApi.Webpack.Filters.byStrings('pendingDisplayNameStyles', 'onClickName'),
+  );
+  // usernameRow = 'c$';
+
   BdApi.Patcher.instead(pluginName, UserProfileStore, 'getGuildMemberProfile', function (ctx, [userId, guildId], f) {
     if (userId && typeof userId !== 'string' && userId.userProfile) {
       return userId.userProfile;
@@ -34,11 +67,6 @@ export function patchBotPopout(settings, profileMap) {
       return f(userId, guildId);
     }
   });
-
-  const GuildMemberStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('GuildMemberStore'));
-  const GuildMemberRequesterStore = BdApi.Webpack.getModule(
-    BdApi.Webpack.Filters.byStoreName('GuildMemberRequesterStore'),
-  );
 
   BdApi.Patcher.instead(pluginName, GuildMemberStore, 'getMember', function (ctx, [guildId, userId], f) {
     if (userId && typeof userId !== 'string' && userId.user) {
@@ -60,8 +88,6 @@ export function patchBotPopout(settings, profileMap) {
     }
   });
 
-  const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
-
   BdApi.Patcher.instead(pluginName, UserStore, 'getUser', function (ctx, [userId, guildId], f) {
     if (userId && typeof userId !== 'string' && userId.user) {
       return userId.user;
@@ -70,21 +96,12 @@ export function patchBotPopout(settings, profileMap) {
     }
   });
 
-  BdApi.Webpack.waitForModule(
-    BdApi.Webpack.Filters.byStrings('avatarSrc', 'avatarDecorationSrc', 'eventHandlers', 'avatarOverride'), 
-    { defaultExport: false }
-  ).then(function (Avatars) {
-    BdApi.Patcher.after(pluginName, Avatars, 'A', function (_, [args], ret) {
-      let user = args?.userId?.user;
-      if (user) {
-        ret.avatarSrc = user.avatar;
-        ret.avatarPlaceholder = user.avatar;
-      }
-      return ret;
-    });
-  });  
-
-  const [Banner, banner] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('displayProfile', 'SHOULD_LOAD'));
+  BdApi.Patcher.after(pluginName, Avatar, avatar, function (_, [{ user }], ret) {
+    if (user?.id?.isPK) {
+      ret.props.children.props.src = user.id.user.avatarSrc;
+    }
+    return ret;
+  });
 
   BdApi.Patcher.after(pluginName, Banner, banner, function (_, [{ displayProfile }], ret) {
     if (displayProfile && isValidHttpUrl(displayProfile.banner)) {
@@ -98,101 +115,86 @@ export function patchBotPopout(settings, profileMap) {
     return ret;
   });
 
-  BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.combine(
-    BdApi.Webpack.Filters.byStrings('messageId', 'user', 'openUserProfileModal', 'setPopoutRef'),
-    BdApi.Webpack.Filters.byRegex('^((?!getGuild).)*$'),
-  ), { defaultExport: false }
-  ).then(function (WebhookPopout) {
-    BdApi.Patcher.instead(pluginName, WebhookPopout, 'default', function (_, [args], f) {
-      const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
-      let message = MessageStore.getMessage(args.channelId, args.messageId);
+  BdApi.Patcher.instead(pluginName, WebhookPopout, 'default', function (_, [args], f) {
+    const MessageStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('MessageStore'));
+    let message = MessageStore.getMessage(args.channelId, args.messageId);
 
-      if (!message) {
-        return f(args);
-      }
+    if (!message) {
+      return f(args);
+    }
 
-      let userHash = getUserHash(message);
-      let profile = profileMap.get(userHash);
+    let userHash = getUserHash(message);
+    let profile = profileMap.get(userHash);
 
-      if (!profile || profile?.status === ProfileStatus.NotPK) {
-        return f(args);
-      }
+    if (!profile || profile?.status === ProfileStatus.NotPK) {
+      return f(args);
+    }
 
-      let userProfile = {
-        bio: profile.description ?? '',
-        system_bio: profile.system_description ?? '',
-        userId: args.user.id,
-        guildId: args.guildId,
-        pronouns: profile.pronouns,
-        sender: profile.sender,
-      };
+    let userProfile = {
+      bio: profile.description ?? '',
+      system_bio: profile.system_description ?? '',
+      userId: args.user.id,
+      guildId: args.guildId,
+      pronouns: profile.pronouns,
+      sender: profile.sender,
+    };
 
-      if (profile.color) {
-        userProfile.accentColor = Number('0x' + profile.color.substring(1));
-      } else {
-        userProfile.accentColor = Number('0x5b63f4');
-      }
+    if (profile.color) {
+      userProfile.accentColor = Number('0x' + profile.color.substring(1));
+    } else {
+      userProfile.accentColor = Number('0x5b63f4');
+    }
 
-      if (profile.banner) {
-        userProfile.banner = profile.banner;
-      }
+    if (profile.banner) {
+      userProfile.banner = profile.banner;
+    }
 
-      const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
+    const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
 
-      let user = new User({
-        username: profile.system_name ?? profile.system,
-        globalName: profile.name,
-        bot: true,
-        discriminator: profile.system,
-      });
+    let user = new User({
+      username: profile.system_name ?? profile.system,
+      globalName: profile.name,
+      bot: true,
+      discriminator: profile.system,
+    });
 
-      user.id = { userProfile, user, isPK: true };
+    user.id = { userProfile, user, isPK: true };
 
-      if (args.user.avatar) {
-        user.avatar = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
-      } else {
-        //fallback to default avatar
-        user.avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
-      }
+    user.avatar = args.user.avatar;
+    if (args.user.avatar) {
+      user.avatarSrc = 'https://cdn.discordapp.com/avatars/' + args.user.id + '/' + args.user.avatar + '.webp';
+    } else {
+      //fallback to default avatar
+      user.avatarSrc = 'https://cdn.discordapp.com/embed/avatars/0.png';
+    }
 
-      const BotPopout = BdApi.Webpack.getModule(
-        BdApi.Webpack.Filters.combine(
-          BdApi.Webpack.Filters.byStrings('messageId', 'user', 'setPopoutRef', 'currentUser'),
-          BdApi.Webpack.Filters.byRegex('^((?!guild_id).)*$'),
-        ),
-      );
-
-      if (BotPopout) return BotPopout({ ...args, user });
-      else {
-        console.error('[PLURALCHUM] Error, bot popout function is undefined! Falling back to webhook function...');
-        return f({ ...args, user });
-      }
-    })
+    return BotPopout({ ...args, user });
   });
 
-  const [UsernameRow, usernameRow] = BdApi.Webpack.getWithKey(
-    BdApi.Webpack.Filters.byStrings('displayNameStyles', 'isVerifiedBot'),
-  );
-  // BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
-  //   if (args.user?.id?.isPK) {
-  //     let name = ret.props.children[0].props.children[0];
-  //     if (Array.isArray(name.props.children)) {
-  //       name.props.children[2] = <PopoutPKBadge />;
-  //     } else {
-  //       name.props.children.props.children[2] = <PopoutPKBadge />;
-  //     }
-  //   }
+  BdApi.Patcher.before(pluginName, UsernameRow, usernameRow, function (_ctx, [props]) {
+    if (props.user?.id?.isPK && props.user.bot) {
+      const user = Object.create(props.user);
+      user.bot = false;
+      props.user = user;
+    }
+  });
 
-  //   return ret;
-  // });
+  BdApi.Patcher.after(pluginName, UsernameRow, usernameRow, function (ctx, [args], ret) {
+    if (args.user?.id?.isPK) {
+      ret.props.children[0].props.trailing = [<PopoutPKBadge />, ret.props.children[0].props.trailing];
+    }
+
+    return ret;
+  });
 
   const [Role, role] = BdApi.Webpack.getWithKey(BdApi.Webpack.Filters.byStrings('allowEditing', 'canAddRoles'));
-  if (Role)
+  if (Role) {
     BdApi.Patcher.before(pluginName, Role, role, function (ctx, args) {
       if (args[0].userId?.isPK) {
         args[0].allowEditing = false;
       }
     });
+  }
 
   BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byKeys('openUserProfileModal')).then(function (userProfile) {
     if (userProfile === undefined) {
@@ -240,4 +242,3 @@ export function patchBotPopout(settings, profileMap) {
     return <PopoutBio content={args.bio} />;
   });
 }
-
