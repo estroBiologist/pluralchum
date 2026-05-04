@@ -14,11 +14,8 @@
     "lint": "eslint './**/*.js'"
   },
   "devDependencies": {
-    "@babel/core": "^7.22.5",
-    "@babel/preset-react": "^7.22.5",
     "@eslint-react/eslint-plugin": "^5.7.1",
     "@eslint/js": "^10.0.1",
-    "@rollup/plugin-babel": "^7.0.0",
     "@rollup/plugin-image": "^3.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.3",
