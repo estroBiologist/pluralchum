@@ -1,4 +1,4 @@
-import { pluginName, waitForAllModules as waitForModulesBulkKeyed } from './utility.js';
+import { pluginName, waitForModulesBulkKeyed } from './utility.js';
 import { getUserHash, ProfileStatus } from './profiles.js';
 import PopoutPKBadge from './components/PopoutPKBadge.js';
 import PopoutBio from './components/PopoutBio.js';

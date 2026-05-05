@@ -51,7 +51,7 @@ export function HiddenMessage({ unblockedMap, message, messageNode, groupId, rea
   }
 
   return (
-    <div className='groupStart__5126c'>
+    <div className={`groupStart__5126c${expanded ? " expanded__7a70a" : ""}`}>
       <div className='wrapper_c19a55 cozy_c19a55 zalgo_c19a55' role='article'>
         <div className='contents_c19a55'>
           <div className='blockedSystemMessage__7a70a container__235ca cozy__235ca'>
@@ -73,7 +73,7 @@ export function HiddenMessage({ unblockedMap, message, messageNode, groupId, rea
           </div>
         </div>
       </div>
-      {expanded ? unblocked : null}
+      {expanded ? <li id={`chat-messages-${message.channel_id}-${message.id}`} className="messageListItem__5126c" aria-setsize="-1">{unblocked}</li> : null}
     </div>
   );
 }

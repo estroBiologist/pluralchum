@@ -120,20 +120,24 @@ export async function sleep(timeout) {
   return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
-export async function waitForAllModules(filters, options) {
+export async function waitForModulesBulkKeyed(filters, options) {
   const promises = [];
   const modules = {};
   for (const key in filters) {
     const filter = filters[key];
     promises.push(
       BdApi.Webpack.waitForModule(filter, options).then(module => {
-        console.log(`loaded ${key}: ${module}`);
         return (modules[key] = module);
       }),
     );
   }
   await Promise.all(promises);
   return modules;
+}
+
+export async function waitForWithKey(filter, options) {
+  await BdApi.Webpack.waitForModule(filter, options);
+  return BdApi.Webpack.getWithKey(filter, options);
 }
 
 export const pluginName = 'Pluralchum';

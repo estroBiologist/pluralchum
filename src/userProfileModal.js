@@ -1,13 +1,11 @@
 import UserModalBio from './components/UserModalBio.js';
 import UserModalInner from './components/UserModalInner.js';
-import { pluginName } from './utility.js';
+import { pluginName, waitForWithKey } from './utility.js';
 
 const MessageActions = BdApi.Webpack.getByKeys('openPrivateChannel');
 
 export async function patchBotUserProfileModal() {
-  await BdApi.Webpack.waitForModule(BdApi.Webpack.Filters.byStrings('PRESS_SECTION', 'hidePersonalInformation'));
-
-  const [BotUserProfileModalInner, botUserProfileModalInner] = BdApi.Webpack.getWithKey(
+  const [BotUserProfileModalInner, botUserProfileModalInner] = await waitForWithKey(
     BdApi.Webpack.Filters.byStrings('PRESS_SECTION', 'hidePersonalInformation'),
   );
 
@@ -35,7 +33,6 @@ export function patchUserProfileMessageButton() {
   BdApi.Patcher.instead(pluginName, MessageActions, 'openPrivateChannel', function (ctx, [{ recipientIds }], f) {
     if (recipientIds?.isPK) {
       if (recipientIds?.userProfile?.sender) {
-        console.log(recipientIds.userProfile.sender);
         return f({ recipientIds: recipientIds.userProfile.sender });
       }
       return;

@@ -1,4 +1,4 @@
-import { MapCell, pluginName } from './utility.js';
+import { MapCell, pluginName, waitForWithKey } from './utility.js';
 import MessageContentProxy from './components/MessageContentProxy.js';
 import MessageHeaderProxy from './components/MessageHeaderProxy.js';
 import MessageProxy from './components/MessageProxy.js';
@@ -49,24 +49,22 @@ export async function patchMessageHeader(settings, profileMap, enabled) {
   });
 }
 
+const messageIdRegex = /message-content-(?<id>\d+)/;
 export async function patchMessage(profileMap, enabled) {
   const unblockedMap = new MapCell({});
-  const Message = await BdApi.Webpack.waitForModule(
-    BdApi.Webpack.Filters.byStrings('zalgo', 'childrenRepliedMessage'),
-    {
-      defaultExport: false,
-    },
-  );
+  const [Message, msg] = await waitForWithKey(BdApi.Webpack.Filters.byStrings('childrenSystemMessage'));
 
-  BdApi.Patcher.instead(pluginName, Message, 'A', function (ctx, [props], f) {
+  BdApi.Patcher.instead(pluginName, Message, msg, function (ctx, [props], f) {
+    // We need to commit some crimes since the actual component we want to patch is now private :(
+    const messageId = messageIdRegex.exec(props["aria-labelledby"])?.groups?.id ?? false;
+
     return (
       <MessageProxy
         profileMap={profileMap}
         enabledCell={enabled}
         unblockedMap={unblockedMap}
         messageNode={f.call(ctx, props)}
-        message={props.message}
-        groupId={props.groupId}
+        messageId={messageId}
       />
     );
   });
