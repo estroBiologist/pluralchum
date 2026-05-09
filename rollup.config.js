@@ -11,7 +11,9 @@ export default {
   output: {
     file: 'dist/Pluralchum.plugin.js',
     format: 'cjs',
-    banner: fs.readFile('src/header.js', { encoding: 'utf8' }),
+    banner: fs
+      .readFile('src/header.js', { encoding: 'utf8' })
+      .then(header => header.replace('npm_package_version', env.npm_package_version)),
   },
   jsx: {
     mode: 'classic',

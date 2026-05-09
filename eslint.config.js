@@ -27,5 +27,6 @@ export default defineConfig({
     'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
     // We commit many react crimes. Oh well.
     '@eslint-react/rules-of-hooks': ['off'],
+    '@eslint-react/set-state-in-effect': ['off'],
   },
 });

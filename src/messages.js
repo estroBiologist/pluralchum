@@ -56,7 +56,7 @@ export async function patchMessage(profileMap, enabled) {
 
   BdApi.Patcher.instead(pluginName, Message, msg, function (ctx, [props], f) {
     // We need to commit some crimes since the actual component we want to patch is now private :(
-    const messageId = messageIdRegex.exec(props["aria-labelledby"])?.groups?.id ?? false;
+    const messageId = messageIdRegex.exec(props['aria-labelledby'])?.groups?.id ?? false;
 
     return (
       <MessageProxy

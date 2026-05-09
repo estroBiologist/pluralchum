@@ -18,17 +18,19 @@ function isValidHttpUrl(string) {
 function forceLoadBotPopout() {
   async function onNavigationSuccess() {
     const node = document.querySelector('[aria-expanded="false"]:has([aria-label="PluralKit, Online"])');
-    if (!node) { return; }
+    if (!node) {
+      return;
+    }
     const onClick = BdApi.ReactUtils.getInternalInstance(node)?.memoizedProps?.onClick;
     if (onClick) {
       onClick({ shiftKey: false });
       await sleep(20);
       onClick({ shiftKey: false });
-      window.navigation.removeEventListener("navigatesuccess", onNavigationSuccess);
+      window.navigation.removeEventListener('navigatesuccess', onNavigationSuccess);
     }
   }
 
-  window.navigation.addEventListener("navigatesuccess", onNavigationSuccess);
+  window.navigation.addEventListener('navigatesuccess', onNavigationSuccess);
 }
 
 export async function patchBotPopout(settings, profileMap) {
