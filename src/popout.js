@@ -164,7 +164,7 @@ export async function patchBotPopout(settings, profileMap) {
     const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
 
     let user = new User({
-      username: profile.system_name ?? profile.system,
+      username: profile.system_name ?? "\u00AD", // Empty names are rendered as `???`. Use a soft hyphen to hide the system name if none is set.
       globalName: profile.name,
       bot: true,
       discriminator: profile.system,
