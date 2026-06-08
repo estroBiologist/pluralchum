@@ -15,6 +15,11 @@ function isValidHttpUrl(string) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
+const botPopoutFilter = BdApi.Webpack.Filters.combine(
+  BdApi.Webpack.Filters.byStrings('messageId', 'openUserProfileModal', 'setPopoutRef'),
+  BdApi.Webpack.Filters.byRegex('^((?!profileEffect).)*$'),
+);
+
 function forceLoadBotPopout() {
   async function onNavigationSuccess() {
     const node = document.querySelector('[aria-expanded="false"]:has([aria-label="PluralKit, Online"])');
@@ -26,6 +31,7 @@ function forceLoadBotPopout() {
       onClick({ shiftKey: false });
       await sleep(20);
       onClick({ shiftKey: false });
+      await BdApi.Webpack.waitForModule(botPopoutFilter);
       window.navigation.removeEventListener('navigatesuccess', onNavigationSuccess);
     }
   }
@@ -41,10 +47,7 @@ export async function patchBotPopout(settings, profileMap) {
       GuildMemberStore: BdApi.Webpack.Filters.byStoreName('GuildMemberStore'),
       GuildMemberRequesterStore: BdApi.Webpack.Filters.byStoreName('GuildMemberRequesterStore'),
       UserStore: BdApi.Webpack.Filters.byStoreName('UserStore'),
-      BotPopout: BdApi.Webpack.Filters.combine(
-        BdApi.Webpack.Filters.byStrings('messageId', 'openUserProfileModal', 'setPopoutRef'),
-        BdApi.Webpack.Filters.byRegex('^((?!profileEffect).)*$'),
-      ),
+      BotPopout: botPopoutFilter,
     });
   const { WebhookPopout } = await waitForModulesBulkKeyed(
     {
@@ -164,7 +167,7 @@ export async function patchBotPopout(settings, profileMap) {
     const User = BdApi.Webpack.getByPrototypeKeys('addGuildAvatarHash', 'isLocalBot');
 
     let user = new User({
-      username: profile.system_name ?? "\u00AD", // Empty names are rendered as `???`. Use a soft hyphen to hide the system name if none is set.
+      username: profile.system_name ?? '\u00AD', // Empty names are rendered as `???`. Use a soft hyphen to hide the system name if none is set.
       globalName: profile.name,
       bot: true,
       discriminator: profile.system,
