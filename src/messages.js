@@ -55,6 +55,10 @@ export async function patchMessage(profileMap, enabled) {
   const [Message, msg] = await waitForWithKey(BdApi.Webpack.Filters.byStrings('childrenSystemMessage'));
 
   BdApi.Patcher.instead(pluginName, Message, msg, function (ctx, [props], f) {
+    if (!props?.['aria-labelledby']) {
+      return f.call(props);
+    }
+
     // We need to commit some crimes since the actual component we want to patch is now private :(
     const messageId = messageIdRegex.exec(props['aria-labelledby'])?.groups?.id ?? false;
 
