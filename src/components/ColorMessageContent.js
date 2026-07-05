@@ -22,6 +22,6 @@ function colorMarkupElements(originalMessageElements, color) {
 }
 
 export default function ColorMessageContent({ messageContent, color }) {
-  let elements = colorMarkupElements(messageContent.props.children[0], color);
+  let elements = colorMarkupElements(messageContent.props.children[1], color);
   return { ...messageContent, props: { ...messageContent.props, style: { color }, children: [elements] } };
 }

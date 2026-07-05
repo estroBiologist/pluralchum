@@ -31,13 +31,13 @@ export default class Pluralchum {
 
     patchMessageContent(this.settings, this.profileMap, this.enabled);
     patchMessageHeader(this.settings, this.profileMap, this.enabled);
-    patchMessage(this.profileMap, this.enabled);
+    // patchMessage(this.profileMap, this.enabled);
     this.patches.push(patchEditMenuItem(this.profileMap));
     patchLastEditableMessage(this.profileMap);
     patchEditAction();
-    patchBotPopout(this.settings, this.profileMap);
-    patchBotUserProfileModal();
-    patchUserProfileMessageButton();
+    // patchBotPopout(this.settings, this.profileMap);
+    // patchBotUserProfileModal();
+    // patchUserProfileMessageButton();
 
     checkForUpdates(version);
   }
