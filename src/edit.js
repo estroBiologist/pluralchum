@@ -2,13 +2,14 @@ const Webpack = BdApi.Webpack;
 const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage');
 const MessageStore = Webpack.getStore('MessageStore');
 const ChannelStore = Webpack.getStore('ChannelStore');
-const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStoreName('UserStore'));
+const UserStore = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys('oV', 'default'));
 
 import { isProxiedMessage, pluginName } from './utility.js';
 import PKEditIcon from './components/PKEditIcon.js';
 import { getUserHash } from './profiles.js';
 
-const currentUserId = UserStore.getCurrentUser().id;
+
+const currentUserId = UserStore?.default?.getCurrentUser()?.id;
 
 function isEditable(profileMap, message) {
   if (message.author?.id === currentUserId) {
