@@ -98,8 +98,8 @@ export async function patchBotPopout(settings, profileMap) {
         roles: sender.roles,
         userId: sender.userId,
       };
-    } else {
-      return f(guildId, userId);
+    } else if (ctx) {
+      return f.call(ctx, guildId, userId);
     }
   });
 
