@@ -27,8 +27,8 @@ export default function PopoutPKBadge({ profileMap, userHash, profile }) {
   }
 
   return (
-    <span className='botTagCozy_c19a55 botTag_c19a55 botTagRegular__82f07 botTag__82f07 rem__82f07'>
-      <div className='botText__82f07'>
+    <span className='botTag_Iy0c7A botTagRegular_feVUtO botTag_feVUtO px_feVUtO'>
+      <div className='botText_feVUtO'>
         <a style={linkStyle} onClick={onClick}>
           {content}
         </a>
