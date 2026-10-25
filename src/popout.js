@@ -253,10 +253,12 @@ export async function patchBotPopout(settings, profileMap) {
     return s && s.includes('viewFullBioDisabled');
   });
   BdApi.Patcher.instead(pluginName, PopoutBioPatch, 'type', function (_, [args], f) {
-    if (!args?.user?.id?.isPK) {
+    if (!args?.userId?.isPK) {
       return f(args);
     }
 
-    return <PopoutBio content={args.bio} />;
+
+    console.log(args)
+    return <PopoutBio content={args.userBio} />;
   });
 }
