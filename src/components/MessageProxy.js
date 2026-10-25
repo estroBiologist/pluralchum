@@ -5,16 +5,18 @@ const RelationshipStore = BdApi.Webpack.Stores.RelationshipStore;
 
 function lookForMatch(messageId) {
   const node = document.querySelector('[data-list-id="chat-messages"]');
-  const component = BdApi.ReactUtils.getInternalInstance(node)?.memoizedProps?.children?.[1]?.find(
-    m => m.key === messageId,
-  );
-  if (component) {
-    const message = component.props?.message;
-    const groupId = component.props?.groupId;
-    if (message && groupId) {
-      return { message, groupId };
-    } else {
-      return null;
+    if (node) {
+    const component = BdApi.ReactUtils.getInternalInstance(node)?.memoizedProps?.children?.[1]?.find(
+      m => m.key === messageId,
+    );
+    if (component) {
+      const message = component.props?.message;
+      const groupId = component.props?.groupId;
+      if (message && groupId) {
+        return { message, groupId };
+      } else {
+        return null;
+      }
     }
   }
 }
@@ -38,7 +40,7 @@ function useMessage(messageId) {
           }
         });
         const node = document.querySelector('[data-list-id="chat-messages"]');
-        mutationObserver.observe(node, { childList: true });
+        if (node) mutationObserver.observe(node, { childList: true });
       }
       return function () {
         mutationObserver?.disconnect();
