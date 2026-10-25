@@ -1,7 +1,7 @@
 import Bio from './Bio';
 
 const markupClass = BdApi.Webpack.getByKeys('markup')?.markup;
-const textClass = BdApi.Webpack.getByKeys('text-sm/normal')['text-sm/normal'];
+const textClass = BdApi.Webpack.getByKeys('body-sm/normal')?.['body-sm/normal'];
 const thinClass = BdApi.Webpack.getByKeys('scrollerBase', 'thin')?.thin;
 
 export default function PopoutBio({ content }) {

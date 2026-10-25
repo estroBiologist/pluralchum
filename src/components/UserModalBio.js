@@ -1,12 +1,12 @@
 import Bio from './Bio';
 
 const markupClass = BdApi.Webpack.getByKeys('markup')?.markup;
-const textClass = BdApi.Webpack.getByKeys('text-sm/normal')['text-sm/normal'];
+const textClass = BdApi.Webpack.getByKeys('body-sm/normal')?.['body-sm/normal'];
 const scrollerBaseClasses = BdApi.Webpack.getByKeys('scrollerBase', 'disableScrollAnchor');
 const scrollerClasses = BdApi.Webpack.getByKeys('scroller', 'note');
 const classes = {
   markup: markupClass ?? 'markup__75297',
-  text: textClass ?? 'text-sm/normal_cf4812',
+  text: textClass ?? 'body-sm/normal_cf4812',
   thin: scrollerBaseClasses?.thin ?? 'thin_d125d2',
   scroller: scrollerClasses?.scroller ?? 'scroller_fcb628',
   scrollerBase: scrollerBaseClasses?.scrollerBase ?? 'scrollerBase_d125d2',
