@@ -46,7 +46,7 @@ export async function patchBotPopout(settings, profileMap) {
       UserProfileStore: BdApi.Webpack.Filters.byStoreName('UserProfileStore'),
       GuildMemberStore: BdApi.Webpack.Filters.byStoreName('GuildMemberStore'),
       GuildMemberRequesterStore: BdApi.Webpack.Filters.byStoreName('GuildMemberRequesterStore'),
-      UserStore: BdApi.Webpack.Filters.byStoreName('UserStore'),
+      UserStore: BdApi.Webpack.Filters.byKeys('oV', 'default'),
       BotPopout: botPopoutFilter,
     });
   const { WebhookPopout } = await waitForModulesBulkKeyed(
@@ -98,12 +98,12 @@ export async function patchBotPopout(settings, profileMap) {
         roles: sender.roles,
         userId: sender.userId,
       };
-    } else {
-      return f(guildId, userId);
+    } else if (ctx) {
+      return f.call(ctx, guildId, userId);
     }
   });
 
-  BdApi.Patcher.instead(pluginName, UserStore, 'getUser', function (ctx, [userId, guildId], f) {
+  BdApi.Patcher.instead(pluginName, UserStore.default, 'getUser', function (ctx, [userId, guildId], f) {
     if (userId && typeof userId !== 'string' && userId.user) {
       return userId.user;
     } else {
@@ -253,10 +253,12 @@ export async function patchBotPopout(settings, profileMap) {
     return s && s.includes('viewFullBioDisabled');
   });
   BdApi.Patcher.instead(pluginName, PopoutBioPatch, 'type', function (_, [args], f) {
-    if (!args?.user?.id?.isPK) {
+    if (!args?.userId?.isPK) {
       return f(args);
     }
 
-    return <PopoutBio content={args.bio} />;
+
+    console.log(args)
+    return <PopoutBio content={args.userBio} />;
   });
 }

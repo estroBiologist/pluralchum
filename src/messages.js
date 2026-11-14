@@ -55,21 +55,21 @@ export async function patchMessage(profileMap, enabled) {
   const [Message, msg] = await waitForWithKey(BdApi.Webpack.Filters.byStrings('childrenSystemMessage'));
 
   BdApi.Patcher.instead(pluginName, Message, msg, function (ctx, [props], f) {
-    if (!props?.['aria-labelledby']) {
-      return f.call(props);
+    if (props && !props?.['aria-labelledby']) {
+      return f(props);
+    } else if (props) {
+      // We need to commit some crimes since the actual component we want to patch is now private :(
+      const messageId = messageIdRegex.exec(props['aria-labelledby'])?.groups?.id ?? false;
+
+      return (
+        <MessageProxy
+          profileMap={profileMap}
+          enabledCell={enabled}
+          unblockedMap={unblockedMap}
+          messageNode={f.call(ctx, props)}
+          messageId={messageId}
+        />
+      );
     }
-
-    // We need to commit some crimes since the actual component we want to patch is now private :(
-    const messageId = messageIdRegex.exec(props['aria-labelledby'])?.groups?.id ?? false;
-
-    return (
-      <MessageProxy
-        profileMap={profileMap}
-        enabledCell={enabled}
-        unblockedMap={unblockedMap}
-        messageNode={f.call(ctx, props)}
-        messageId={messageId}
-      />
-    );
   });
 }

@@ -94,7 +94,7 @@ function createHeaderChildren(message, guildId, settings, profileMap, profile, u
   let doSysTag = memberTag && memberTag.length > 0;
 
   return [
-    <span className='username_c19a55 pk-name' onClick={onClickUsername} key='PKName'>
+    <span className='username_2i8Bfm pk-name' onClick={onClickUsername} key='PKName'>
       <NameSegment colour={memberColour} name={username} key='NameSegment' />
       {doSysTag ? ' ' : null}
       {doSysTag ? <NameSegment colour={tagColour} name={memberTag} /> : null}
